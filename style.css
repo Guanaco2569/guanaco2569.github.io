@@ -1,6 +1,6 @@
-/*.carousel {
-    width: 100%;
-}*/
+body {
+    background-color: gray;
+}
 
 .carousel-inner > .carousel-item > img {
     width: 640px;
@@ -15,10 +15,6 @@
 .modal-footer {
     display: flex;
     justify-content: center;
-}
-
-body {
-    background-color: blue;
 }
 
   /* The slider itself */
