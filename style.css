@@ -21,7 +21,7 @@
 .slider {
     -webkit-appearance: none;  /* Override default CSS styles */
     appearance: none;
-    height: 25px; /* Specified height */
+    height: 25px;
 }
   
 /* The slider handle (use -webkit- (Chrome, Opera, Safari, Edge) and -moz- (Firefox) to override default look) */
@@ -40,5 +40,5 @@
 }
 
 body {
-    background-color: blue;
+    background-color: gray;
 }
