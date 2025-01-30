@@ -11,3 +11,7 @@
 .carousel-inner {
     background-color: black;
 }
+
+.modal-footer {
+    justify-content: center;
+}
