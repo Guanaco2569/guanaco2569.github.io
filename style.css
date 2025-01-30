@@ -17,28 +17,29 @@
     justify-content: center;
 }
 
-/* The slider itself */
+body {
+    background-color: blue;
+}
+
+  /* The slider itself */
 .slider {
     -webkit-appearance: none;  /* Override default CSS styles */
     appearance: none;
-    height: 25px;
+    width: 90%;
+    left: 5%;
+    position: relative;
 }
   
 /* The slider handle (use -webkit- (Chrome, Opera, Safari, Edge) and -moz- (Firefox) to override default look) */
 .slider::-webkit-slider-thumb {
     -webkit-appearance: none; /* Override default look */
     appearance: none;
-    width: 25px; /* Set a specific slider handle width */
-    height: 25px; /* Slider handle height */
-    cursor: pointer; /* Cursor on hover */
+    transform: scale(1.75);
+    cursor: pointer;
 }
   
 .slider::-moz-range-thumb {
-    width: 25px; /* Set a specific slider handle width */
-    height: 25px; /* Slider handle height */
-    cursor: pointer; /* Cursor on hover */
-}
-
-body {
-    background-color: gray;
+    box-sizing: border-box;
+    transform: scale(1.75);
+    cursor: pointer;
 }
