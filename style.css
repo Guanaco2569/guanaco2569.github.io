@@ -17,7 +17,7 @@ body {
     justify-content: center;
 }
 
-  /* The slider itself */
+/* The slider itself */
 .slider {
     -webkit-appearance: none;  /* Override default CSS styles */
     appearance: none;
@@ -38,4 +38,13 @@ body {
     box-sizing: border-box;
     transform: scale(1.75);
     cursor: pointer;
+}
+
+.delete_btn {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 15px;
+    margin-inline: auto;
+    width: fit-content;
 }
