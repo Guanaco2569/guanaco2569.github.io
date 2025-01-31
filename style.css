@@ -22,7 +22,6 @@ body {
     -webkit-appearance: none;  /* Override default CSS styles */
     appearance: none;
     width: 90%;
-    left: 5%;
     position: relative;
 }
   

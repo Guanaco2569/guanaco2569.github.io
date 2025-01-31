@@ -14,19 +14,51 @@
                 "2.png",
                 "3.png"
             ];
+            let carousel;
+            let nb_slides_spans;
 
             document.addEventListener("DOMContentLoaded", (event) => {
-                document.getElementById("nb_1").innerText = "1/3";
-                document.getElementById("nb_2").innerText = "2/3";
-                document.getElementById("nb_3").innerText = "3/3";
+                nb_slides_spans = document.getElementsByClassName("nb_slides");
+                
+                update_nb_slides_spans();
+                update_img_on_slides();
 
-                document.getElementById("img_1").src = images_list[0];
-                document.getElementById("img_2").src = images_list[1];
-                document.getElementById("img_3").src = images_list[2];
-
-                document.getElementById("item_2").classList.remove("carousel-item");
-                document.getElementById("item_2").classList.add("d-none");
+                carousel = document.getElementById("myCarousel");
+                new bootstrap.Carousel(carousel);
+                
             });
+
+            function update_nb_slides_spans() {
+                for (let i = 0; i < nb_slides_spans.length; i++) {
+                    nb_slides_spans[i].innerText = images_list.length.toString();
+                }
+            };
+
+            function update_img_on_slides() {
+                for (let i = 0; i < images_list.length; i++) {
+                    document.getElementById("img_slide_"+i.toString()).src = images_list[i];
+                }
+            }
+
+            function delete_img(img_nb, slide_nb) {
+                images_list.splice(img_nb, 1);
+                update_nb_slides_spans();
+                update_img_on_slides();
+
+                //if last slide is currently displayed, go to previous one
+                if (document.getElementById("item_"+images_list.length.toString()).classList.contains("active")) {
+                    new bootstrap.Carousel(carousel).prev();
+                }
+
+                //remove last slide
+                document.getElementById("item_"+images_list.length.toString()).classList.remove("carousel-item");
+                document.getElementById("item_"+images_list.length.toString()).classList.add("d-none");
+
+                //if no slide left to display
+                if (images_list.length == 0) {
+                    document.getElementById("no_slide").classList.remove("d-none");
+                }
+            };
         </script>
     </head>
     <body>
@@ -52,40 +84,41 @@
                     </div>
                 
                     <!-- Modal body -->
-                    <div class="modal-body">
-                        <div id="carouselExampleIndicators" class="carousel slide" data-bs-interval="false">
+                    <div class="modal-body text-center">
+                        <div id="myCarousel" class="carousel slide" data-bs-interval="false">
                             <div class="carousel-inner">
-                                <div id="item_1" class="carousel-item active">
-                                    <button type="button" class="btn btn-danger delete_btn">Supprimer <i class="bi bi-trash"></i></button>
-                                    <img id="img_1" src="" class="d-block w-100" alt="Image 1">
+                                <div id="item_0" class="carousel-item active">
+                                    <button data-img_nb="0" data-slide_nb="0" onclick="delete_img(parseInt(this.getAttribute('data-img_nb')), parseInt(this.getAttribute('data-slide_nb')))" type="button" class="btn btn-danger delete_btn">Supprimer <i class="bi bi-trash"></i></button>
+                                    <img id="img_slide_0" src="" class="d-block w-100" alt="Image 1">
                                     <div class="carousel-caption d-block">
-                                        <button type="button" class="btn btn-primary">Sélectionner image <span id="nb_1"></span> <i class="bi bi-check"></i></button>
+                                        <button type="button" class="btn btn-primary">Sélectionner image 1/<span class="nb_slides"></span> <i class="bi bi-check"></i></button>
+                                    </div>
+                                </div>
+                                <div id="item_1" class="carousel-item">
+                                    <button data-img_nb="1" data-slide_nb="1" onclick="delete_img(parseInt(this.getAttribute('data-img_nb')), parseInt(this.getAttribute('data-slide_nb')))" type="button" class="btn btn-danger delete_btn">Supprimer <i class="bi bi-trash"></i></button>
+                                    <img id="img_slide_1" src="" class="d-block w-100" alt="Image 2">
+                                    <div class="carousel-caption d-block">
+                                        <button type="button" class="btn btn-primary">Sélectionner image 2/<span class="nb_slides"></span> <i class="bi bi-check"></i></button>
                                     </div>
                                 </div>
                                 <div id="item_2" class="carousel-item">
-                                    <button type="button" class="btn btn-danger delete_btn">Supprimer <i class="bi bi-trash"></i></button>
-                                    <img id="img_2" src="" class="d-block w-100" alt="Image 2">
+                                    <button data-img_nb="2" data-slide_nb="2" onclick="delete_img(parseInt(this.getAttribute('data-img_nb')), parseInt(this.getAttribute('data-slide_nb')))" type="button" class="btn btn-danger delete_btn">Supprimer <i class="bi bi-trash"></i></button>
+                                    <img id="img_slide_2" src="" class="d-block w-100" alt="Image 3">
                                     <div class="carousel-caption d-block">
-                                        <button type="button" class="btn btn-primary">Sélectionner image <span id="nb_2"></span> <i class="bi bi-check"></i></button>
-                                    </div>
-                                </div>
-                                <div id="item_3" class="carousel-item">
-                                    <button type="button" class="btn btn-danger delete_btn">Supprimer <i class="bi bi-trash"></i></button>
-                                    <img id="img_3" src="" class="d-block w-100" alt="Image 3">
-                                    <div class="carousel-caption d-block">
-                                        <button type="button" class="btn btn-primary">Sélectionner image <span id="nb_3"></span> <i class="bi bi-check"></i></button>
+                                        <button type="button" class="btn btn-primary">Sélectionner image 3/<span class="nb_slides"></span> <i class="bi bi-check"></i></button>
                                     </div>
                                 </div>
                             </div>
-                            <button class="carousel-control-prev" type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide="prev">
+                            <button class="carousel-control-prev" type="button" data-bs-target="#myCarousel" data-bs-slide="prev">
                                 <span class="carousel-control-prev-icon" aria-hidden="true"></span>
                                 <span class="visually-hidden">Previous</span>
                             </button>
-                            <button class="carousel-control-next" type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide="next">
+                            <button class="carousel-control-next" type="button" data-bs-target="#myCarousel" data-bs-slide="next">
                                 <span class="carousel-control-next-icon" aria-hidden="true"></span>
                                 <span class="visually-hidden">Next</span>
                             </button>
                         </div>
+                        <p id="no_slide" class="d-none">Aucune image à afficher.</p>
                         <br>
                         <input type="range" class="form-range slider" id="customRange1">
                     </div>
