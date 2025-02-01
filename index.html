@@ -26,6 +26,7 @@
                 carousel = document.getElementById("myCarousel");
                 new bootstrap.Carousel(carousel);
                 
+                document.getElementById("upload_image").addEventListener("change", handle_file, false);
             });
 
             function update_nb_slides_spans() {
@@ -38,7 +39,7 @@
                 for (let i = 0; i < images_list.length; i++) {
                     document.getElementById("img_slide_"+i.toString()).src = images_list[i];
                 }
-            }
+            };
 
             function delete_img(img_nb, slide_nb) {
                 images_list.splice(img_nb, 1);
@@ -57,6 +58,62 @@
                 //if no slide left to display
                 if (images_list.length == 0) {
                     document.getElementById("no_slide").classList.remove("d-none");
+                }
+            };
+
+            function add_img(img_url) {
+                images_list.push(img_url);
+                console.log(images_list);
+            };
+
+            const username = 'caroubaloshugo';
+            const applicationPassword = 'VXrt 3EdI C3Q5 ONkS bXSw 47Rx';
+            const wordpressApiUrl = 'https://akoboblog.wpcomstaging.com/wp-json/wp/v2/media';
+
+            const UploadFile = (file) => {
+                console.log('start file upload : ', file.name);
+                const formData = new FormData();
+                formData.append('file', file);
+
+                const authHeader = 'Basic ' + btoa(`${username}:${applicationPassword}`);
+
+                const response = fetch(wordpressApiUrl, {
+                    method: 'POST',
+                    credentials: 'omit',
+                    headers: {
+                        'Authorization': authHeader
+                    },
+                    body: formData
+                });
+
+                return response;    
+            };
+
+            const UrlFromUploadResponse = (response) => {
+                if(response)
+                {
+                    if (response.ok)
+                    {
+                        return response.json()
+                        .then((data)=>{return data.source_url})
+                        .catch((err)=>{return ""});
+                    }
+                    response.json().then((err) => {console.err(err.message)});
+                }
+                return "";
+            };
+
+            //PENSER A AJOUTER UN CHECK AFIN DE NE PAS UPLOAD N'IMPORTE QUEL FICHIER (MEME SI CE NE SERA PAS UNE PROTECTION FIABLE COMME ON EST EN FRONT)
+            async function handle_file() {
+                try{
+                    let res = UploadFile(this.files[0]);
+                    res = await res;
+                    let url = UrlFromUploadResponse(res);
+                    url = await url;
+                    add_img(url);
+                }
+                catch(err){
+                    console.error('Error uploading file:', err);
                 }
             };
         </script>
@@ -126,7 +183,9 @@
                     <!-- Modal footer -->
                     <div class="modal-footer">
                         <!--<button type="button" class="btn btn-secondary">Charger image <i class="bi bi-upload"></i></button>-->
-                        <span class="btn btn-secondary btn-file">Charger image <i class="bi bi-upload"></i><input type="file" accept="image/png, image/jpeg"></span>
+                        <span class="btn btn-secondary btn-file">
+                            Charger image <i class="bi bi-upload"></i><input id="upload_image" type="file" accept="image/png, image/jpeg">
+                        </span>
                     </div>
             
                 </div>
