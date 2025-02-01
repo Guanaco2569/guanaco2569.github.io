@@ -9,6 +9,8 @@
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
         <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.3.0/font/bootstrap-icons.css">
         <script>
+            let selected_image = 2;
+            const max_images = 5;
             let images_list = [
                 "https://akoboblog.wpcomstaging.com/wp-content/uploads/forminator/35_e138aa858ace1652c7491741596980bf/uploads/Qzut1u4yYKnL-duck.jpg",
                 "2.png",
@@ -16,17 +18,44 @@
             ];
             let carousel;
             let nb_slides_spans;
+            let delete_buttons;
+            let select_buttons;
+            let upload_span;
 
             document.addEventListener("DOMContentLoaded", (event) => {
                 nb_slides_spans = document.getElementsByClassName("nb_slides");
+                delete_buttons = document.getElementsByClassName("delete_btn");
+                select_buttons = document.getElementsByClassName("select_btn");
+                upload_span = document.getElementById("upload_span");
+                document.getElementById("max_images_warning").innerText = max_images.toString()+" images max. Supprimez-en pour en recharger.";
                 
                 update_nb_slides_spans();
                 update_img_on_slides();
+
+                //hide unused slides
+                for (let i = images_list.length; i < delete_buttons.length; i++) {
+                    document.getElementById("item_"+i.toString()).classList.remove("carousel-item");
+                    document.getElementById("item_"+i.toString()).classList.add("d-none");
+                }
 
                 carousel = document.getElementById("myCarousel");
                 new bootstrap.Carousel(carousel);
                 
                 document.getElementById("upload_image").addEventListener("change", handle_file, false);
+
+                //indicate selected image
+                document.getElementById("select_btn_"+selected_image.toString()).classList.add("d-none");
+                document.getElementById("select_alert_"+selected_image.toString()).classList.remove("d-none");
+
+                //put carousel focus on selected image when modal is hidden
+                document.getElementById("myModal").addEventListener('hidden.bs.modal', event => {
+                    for (let i = 0; i < delete_buttons.length; i++) {
+                        if (document.getElementById("item_"+i.toString()).classList.contains("active")) {
+                            document.getElementById("item_"+i.toString()).classList.remove("active");
+                        }
+                    }
+                    document.getElementById("item_"+selected_image.toString()).classList.add("active");
+                });
             });
 
             function update_nb_slides_spans() {
@@ -41,7 +70,7 @@
                 }
             };
 
-            function delete_img(img_nb, slide_nb) {
+            function delete_img(img_nb) {
                 images_list.splice(img_nb, 1);
                 update_nb_slides_spans();
                 update_img_on_slides();
@@ -52,19 +81,51 @@
                 }
 
                 //remove last slide
+                document.getElementById("img_slide_"+images_list.length.toString()).src = "";
                 document.getElementById("item_"+images_list.length.toString()).classList.remove("carousel-item");
                 document.getElementById("item_"+images_list.length.toString()).classList.add("d-none");
 
-                //if no slide left to display
+                //if no image left to display
                 if (images_list.length == 0) {
                     document.getElementById("no_slide").classList.remove("d-none");
+                }
+                //if max images limit not reached anymore
+                else if (images_list.length == max_images-1) {
+                    upload_span.classList.remove("d-none");
+                    document.getElementById("max_images_warning").classList.add("d-none");
                 }
             };
 
             function add_img(img_url) {
                 images_list.push(img_url);
-                console.log(images_list);
+                update_nb_slides_spans();
+
+                //if 0 to 1 image
+                if (images_list.length == 1) {
+                    document.getElementById("no_slide").classList.add("d-none");
+                }
+                //if max images reached
+                else if (images_list.length == max_images) {
+                    upload_span.classList.add("d-none");
+                    document.getElementById("max_images_warning").classList.remove("d-none");
+                }
+
+                //add slide and go to it
+                document.getElementById("img_slide_"+(images_list.length-1).toString()).src = img_url;
+                document.getElementById("item_"+(images_list.length-1).toString()).classList.remove("d-none");
+                document.getElementById("item_"+(images_list.length-1).toString()).classList.add("carousel-item");
+                new bootstrap.Carousel(carousel).to(images_list.length-1);
             };
+
+            function select_img(img_nb) {
+                document.getElementById("select_btn_"+selected_image.toString()).classList.remove("d-none");
+                document.getElementById("select_alert_"+selected_image.toString()).classList.add("d-none");
+                
+                selected_image = img_nb;
+
+                document.getElementById("select_btn_"+selected_image.toString()).classList.add("d-none");
+                document.getElementById("select_alert_"+selected_image.toString()).classList.remove("d-none");
+            }
 
             const username = 'caroubaloshugo';
             const applicationPassword = 'VXrt 3EdI C3Q5 ONkS bXSw 47Rx';
@@ -105,6 +166,25 @@
 
             //PENSER A AJOUTER UN CHECK AFIN DE NE PAS UPLOAD N'IMPORTE QUEL FICHIER (MEME SI CE NE SERA PAS UNE PROTECTION FIABLE COMME ON EST EN FRONT)
             async function handle_file() {
+
+                //grey slide + show loading icon + disable buttons
+                if (images_list.length > 0) {
+                    document.getElementById("carousel_inner").style.webkitFilter = "brightness(50%)"; /* Safari 6.0 - 9.0 */
+                    document.getElementById("carousel_inner").style.filter = "brightness(50%)";
+
+                    document.getElementById("loading_image_icon").style.visibility = "visible";
+                    
+                    for (let i = 0; i < images_list.length; i++) {
+                        delete_buttons[i].disabled = true;
+                        select_buttons[i].disabled = true;
+                    }
+                }
+                else {
+                    document.getElementById("no_slide").innerHTML = "<span class='spinner-border spinner-border-sm' aria-hidden='true'></span> <span role='status'>Chargement...</span>";
+                }
+                upload_span.classList.add("disabled");
+
+                //upload file
                 try{
                     let res = UploadFile(this.files[0]);
                     res = await res;
@@ -115,6 +195,23 @@
                 catch(err){
                     console.error('Error uploading file:', err);
                 }
+                
+                //ungrey slide + hide loading icon + enable buttons
+                if (images_list.length > 0) {
+                    document.getElementById("carousel_inner").style.webkitFilter = "none"; /* Safari 6.0 - 9.0 */
+                    document.getElementById("carousel_inner").style.filter = "none";
+                    
+                    document.getElementById("loading_image_icon").style.visibility = "hidden";
+
+                    for (let i = 0; i < images_list.length; i++) {
+                        delete_buttons[i].disabled = false;
+                        select_buttons[i].disabled = false;
+                    }
+                }
+                else {
+                    document.getElementById("no_slide").innerHTML = "Aucune image à afficher.";
+                }
+                upload_span.classList.remove("disabled");
             };
         </script>
     </head>
@@ -143,26 +240,45 @@
                     <!-- Modal body -->
                     <div class="modal-body text-center">
                         <div id="myCarousel" class="carousel slide" data-bs-interval="false">
-                            <div class="carousel-inner">
+                            <div id="carousel_inner" class="carousel-inner">
                                 <div id="item_0" class="carousel-item active">
-                                    <button data-img_nb="0" data-slide_nb="0" onclick="delete_img(parseInt(this.getAttribute('data-img_nb')), parseInt(this.getAttribute('data-slide_nb')))" type="button" class="btn btn-danger delete_btn">Supprimer <i class="bi bi-trash"></i></button>
+                                    <button onclick="delete_img(0)" type="button" class="btn btn-danger delete_btn">Supprimer <i class="bi bi-trash"></i></button>
                                     <img id="img_slide_0" src="" class="d-block w-100" alt="Image 1">
                                     <div class="carousel-caption d-block">
-                                        <button type="button" class="btn btn-primary">Sélectionner image 1/<span class="nb_slides"></span> <i class="bi bi-check"></i></button>
+                                        <button onclick="select_img(0)" id="select_btn_0" type="button" class="btn btn-primary select_btn">Sélectionner image 1/<span class="nb_slides"></span></button>
+                                        <div id="select_alert_0" class="alert alert-success d-none" role="alert">Image sélectionnée (1/<span class="nb_slides"></span>) <i class="bi bi-check"></i></div>
                                     </div>
                                 </div>
                                 <div id="item_1" class="carousel-item">
-                                    <button data-img_nb="1" data-slide_nb="1" onclick="delete_img(parseInt(this.getAttribute('data-img_nb')), parseInt(this.getAttribute('data-slide_nb')))" type="button" class="btn btn-danger delete_btn">Supprimer <i class="bi bi-trash"></i></button>
+                                    <button onclick="delete_img(1)" type="button" class="btn btn-danger delete_btn">Supprimer <i class="bi bi-trash"></i></button>
                                     <img id="img_slide_1" src="" class="d-block w-100" alt="Image 2">
                                     <div class="carousel-caption d-block">
-                                        <button type="button" class="btn btn-primary">Sélectionner image 2/<span class="nb_slides"></span> <i class="bi bi-check"></i></button>
+                                        <button onclick="select_img(1)" id="select_btn_1" type="button" class="btn btn-primary select_btn">Sélectionner image 2/<span class="nb_slides"></span></button>
+                                        <div id="select_alert_1" class="alert alert-success d-none" role="alert">Image sélectionnée (2/<span class="nb_slides"></span>) <i class="bi bi-check"></i></div>
                                     </div>
                                 </div>
                                 <div id="item_2" class="carousel-item">
-                                    <button data-img_nb="2" data-slide_nb="2" onclick="delete_img(parseInt(this.getAttribute('data-img_nb')), parseInt(this.getAttribute('data-slide_nb')))" type="button" class="btn btn-danger delete_btn">Supprimer <i class="bi bi-trash"></i></button>
+                                    <button onclick="delete_img(2)" type="button" class="btn btn-danger delete_btn">Supprimer <i class="bi bi-trash"></i></button>
                                     <img id="img_slide_2" src="" class="d-block w-100" alt="Image 3">
                                     <div class="carousel-caption d-block">
-                                        <button type="button" class="btn btn-primary">Sélectionner image 3/<span class="nb_slides"></span> <i class="bi bi-check"></i></button>
+                                        <button onclick="select_img(2)" id="select_btn_2" type="button" class="btn btn-primary select_btn">Sélectionner image 3/<span class="nb_slides"></span></button>
+                                        <div id="select_alert_2" class="alert alert-success d-none" role="alert">Image sélectionnée (3/<span class="nb_slides"></span>) <i class="bi bi-check"></i></div>
+                                    </div>
+                                </div>
+                                <div id="item_3" class="carousel-item">
+                                    <button onclick="delete_img(3)" type="button" class="btn btn-danger delete_btn">Supprimer <i class="bi bi-trash"></i></button>
+                                    <img id="img_slide_3" src="" class="d-block w-100" alt="Image 4">
+                                    <div class="carousel-caption d-block">
+                                        <button onclick="select_img(3)" id="select_btn_3" type="button" class="btn btn-primary select_btn">Sélectionner image 4/<span class="nb_slides"></span></button>
+                                        <div id="select_alert_3" class="alert alert-success d-none" role="alert">Image sélectionnée (4/<span class="nb_slides"></span>) <i class="bi bi-check"></i></div>
+                                    </div>
+                                </div>
+                                <div id="item_4" class="carousel-item">
+                                    <button onclick="delete_img(4)" type="button" class="btn btn-danger delete_btn">Supprimer <i class="bi bi-trash"></i></button>
+                                    <img id="img_slide_4" src="" class="d-block w-100" alt="Image 5">
+                                    <div class="carousel-caption d-block">
+                                        <button onclick="select_img(4)" id="select_btn_4" type="button" class="btn btn-primary select_btn">Sélectionner image 5/<span class="nb_slides"></span></button>
+                                        <div id="select_alert_4" class="alert alert-success d-none" role="alert">Image sélectionnée (5/<span class="nb_slides"></span>) <i class="bi bi-check"></i></div>
                                     </div>
                                 </div>
                             </div>
@@ -174,6 +290,9 @@
                                 <span class="carousel-control-next-icon" aria-hidden="true"></span>
                                 <span class="visually-hidden">Next</span>
                             </button>
+                            <div id="loading_image_icon" class="spinner-border text-light" role="status">
+                                <span class="visually-hidden">Loading...</span>
+                            </div>
                         </div>
                         <p id="no_slide" class="d-none">Aucune image à afficher.</p>
                         <br>
@@ -182,10 +301,10 @@
                 
                     <!-- Modal footer -->
                     <div class="modal-footer">
-                        <!--<button type="button" class="btn btn-secondary">Charger image <i class="bi bi-upload"></i></button>-->
-                        <span class="btn btn-secondary btn-file">
+                        <span id="upload_span" class="btn btn-secondary btn-file">
                             Charger image <i class="bi bi-upload"></i><input id="upload_image" type="file" accept="image/png, image/jpeg">
                         </span>
+                        <p id="max_images_warning" class="small d-none"></p>
                     </div>
             
                 </div>

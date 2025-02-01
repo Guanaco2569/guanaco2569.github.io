@@ -52,6 +52,7 @@ body {
     position: relative;
     overflow: hidden;
 }
+
 .btn-file input[type=file] {
     position: absolute;
     top: 0;
@@ -65,4 +66,27 @@ body {
     outline: none;   
     cursor: inherit;
     display: block;
+}
+
+#loading_image_icon {
+    width: 40px;
+    height: 40px;
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 160px;
+    margin-inline: auto;
+    visibility: hidden;
+}
+
+.alert-success {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    margin-inline: auto;
+    width: fit-content;
+    -webkit-user-select: none; /* Safari */
+    -ms-user-select: none; /* IE 10 and IE 11 */
+    user-select: none; /* Standard syntax */
 }
