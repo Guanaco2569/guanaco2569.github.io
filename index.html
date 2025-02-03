@@ -33,17 +33,19 @@
                 delete_buttons = document.getElementsByClassName("delete_btn");
                 select_buttons = document.getElementsByClassName("select_btn");
                 upload_span = document.getElementById("upload_span");
-                document.getElementById("max_images_warning").innerText = max_images.toString()+" images max. Supprimez-en pour en recharger.";
-                upload_span.classList.add("disabled");
 
-                //initialize upload tooltip
-                document.getElementById("upload_tooltip").setAttribute("data-bs-title", max_images.toString()+" images max. Supprimez-en pour en recharger.");
-                upload_tooltip = new bootstrap.Tooltip(document.getElementById("upload_tooltip"));
-                upload_tooltip.enable();
-                
                 //initialize delete tooltips
                 tooltipTriggerList = document.getElementsByClassName("delete_tooltip");
                 tooltipList = [...tooltipTriggerList].map(tooltipTriggerEl => new bootstrap.Tooltip(tooltipTriggerEl));
+
+                //initialize upload tooltip and prevent upload if max images limit reached
+                document.getElementById("upload_tooltip").setAttribute("data-bs-title", max_images.toString()+" images max. Supprimez-en pour en recharger.");
+                upload_tooltip = new bootstrap.Tooltip(document.getElementById("upload_tooltip"));
+                upload_tooltip.disable();
+                if (images_list.length == max_images) {
+                    upload_tooltip.enable();
+                    upload_span.classList.add("disabled");
+                }
                 
                 update_nb_slides_spans();
                 update_img_on_slides();
@@ -111,8 +113,11 @@
                 }
                 //if max images limit not reached anymore
                 else if (images_list.length == max_images-1) {
-                    upload_span.classList.remove("d-none");
-                    document.getElementById("max_images_warning").classList.add("d-none");
+                    //upload_span.classList.remove("d-none");
+                    //document.getElementById("max_images_warning").classList.add("d-none");
+
+                    upload_tooltip.disable();
+                    upload_span.classList.remove("disabled");
                 }
             };
 
@@ -130,6 +135,7 @@
                     //document.getElementById("max_images_warning").classList.remove("d-none");
 
                     upload_tooltip.enable();
+                    upload_span.classList.add("disabled");
                 }
 
                 //add slide and go to it
@@ -270,7 +276,9 @@
                 else {
                     document.getElementById("no_slide").innerHTML = "Aucune image à afficher.";
                 }
-                upload_span.classList.remove("disabled");
+                if (images_list.length < max_images) {
+                    upload_span.classList.remove("disabled");
+                }
             };
         </script>
     </head>
@@ -371,13 +379,11 @@
                 
                     <!-- Modal footer -->
                     <div class="modal-footer">
-                        <!--<span id="upload_span" class="btn btn-secondary btn-file">-->
                         <span id="upload_tooltip" tabindex="0" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title=".">
                             <span id="upload_span" class="btn btn-secondary btn-file">
                                 Charger image <i class="bi bi-upload"></i><input id="upload_image" type="file" accept="image/png, image/jpeg">
                             </span>
                         </span>
-                        <!--</span>-->
                         <p id="max_images_warning" class="small d-none"></p>
                         <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Fermer</button>
                     </div>
