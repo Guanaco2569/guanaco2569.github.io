@@ -48,7 +48,7 @@
                 document.getElementById("select_alert_"+selected_image.toString()).classList.remove("d-none");
 
                 //put carousel focus on selected image when modal is hidden
-                document.getElementById("myModal").addEventListener('hidden.bs.modal', event => {
+                document.getElementById("myModal").addEventListener('show.bs.modal', event => {
                     for (let i = 0; i < delete_buttons.length; i++) {
                         if (document.getElementById("item_"+i.toString()).classList.contains("active")) {
                             document.getElementById("item_"+i.toString()).classList.remove("active");
@@ -297,8 +297,7 @@
                         <p id="no_slide" class="d-none">Aucune image à afficher.</p>
                         <br>
                         <!--<input type="range" class="form-range slider" id="customRange1">-->
-                        <label for="customRange2" class="form-label">Example range</label>
-                        <input type="range" class="form-range" min="0" max="5" id="customRange2">
+                        <input type="range" class="form-range slider" min="0" max="5" id="customRange1">
                     </div>
                 
                     <!-- Modal footer -->
