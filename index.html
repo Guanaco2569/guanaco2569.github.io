@@ -26,6 +26,7 @@
             let upload_span;
             let tooltipTriggerList;
             let tooltipList;
+            let upload_tooltip;
 
             document.addEventListener("DOMContentLoaded", (event) => {
                 nb_slides_spans = document.getElementsByClassName("nb_slides");
@@ -34,8 +35,13 @@
                 upload_span = document.getElementById("upload_span");
                 document.getElementById("max_images_warning").innerText = max_images.toString()+" images max. Supprimez-en pour en recharger.";
 
-                //initialize tooltips
-                tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]');
+                //initialize upload tooltip
+                document.getElementById("upload_span").setAttribute("data-bs-title", max_images.toString()+" images max. Supprimez-en pour en recharger.");
+                upload_tooltip = new bootstrap.Tooltip(document.getElementById("upload_span"));
+                upload_tooltip.disable();
+                
+                //initialize delete tooltips
+                tooltipTriggerList = document.getElementsByClassName("delete_tooltip");
                 tooltipList = [...tooltipTriggerList].map(tooltipTriggerEl => new bootstrap.Tooltip(tooltipTriggerEl));
                 
                 update_nb_slides_spans();
@@ -362,13 +368,15 @@
                 
                     <!-- Modal footer -->
                     <div class="modal-footer">
-                        <span id="upload_span" class="btn btn-secondary btn-file">
+                        <!--<span id="upload_span" class="btn btn-secondary btn-file">-->
+                        <span id="upload_span" class="btn btn-secondary btn-file upload_tooltip" tabindex="0" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title=".">
                             Charger image <i class="bi bi-upload"></i><input id="upload_image" type="file" accept="image/png, image/jpeg">
                         </span>
+                        <!--</span>-->
                         <p id="max_images_warning" class="small d-none"></p>
                         <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Fermer</button>
                     </div>
-            
+
                 </div>
             </div>
         </div>
