@@ -34,11 +34,12 @@
                 select_buttons = document.getElementsByClassName("select_btn");
                 upload_span = document.getElementById("upload_span");
                 document.getElementById("max_images_warning").innerText = max_images.toString()+" images max. Supprimez-en pour en recharger.";
+                upload_span.classList.add("disabled");
 
                 //initialize upload tooltip
-                document.getElementById("upload_span").setAttribute("data-bs-title", max_images.toString()+" images max. Supprimez-en pour en recharger.");
-                upload_tooltip = new bootstrap.Tooltip(document.getElementById("upload_span"));
-                upload_tooltip.disable();
+                document.getElementById("upload_tooltip").setAttribute("data-bs-title", max_images.toString()+" images max. Supprimez-en pour en recharger.");
+                upload_tooltip = new bootstrap.Tooltip(document.getElementById("upload_tooltip"));
+                upload_tooltip.enable();
                 
                 //initialize delete tooltips
                 tooltipTriggerList = document.getElementsByClassName("delete_tooltip");
@@ -125,8 +126,10 @@
                 }
                 //if max images reached
                 else if (images_list.length == max_images) {
-                    upload_span.classList.add("d-none");
-                    document.getElementById("max_images_warning").classList.remove("d-none");
+                    //upload_span.classList.add("d-none");
+                    //document.getElementById("max_images_warning").classList.remove("d-none");
+
+                    upload_tooltip.enable();
                 }
 
                 //add slide and go to it
@@ -369,8 +372,10 @@
                     <!-- Modal footer -->
                     <div class="modal-footer">
                         <!--<span id="upload_span" class="btn btn-secondary btn-file">-->
-                        <span id="upload_span" class="btn btn-secondary btn-file upload_tooltip" tabindex="0" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title=".">
-                            Charger image <i class="bi bi-upload"></i><input id="upload_image" type="file" accept="image/png, image/jpeg">
+                        <span id="upload_tooltip" tabindex="0" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title=".">
+                            <span id="upload_span" class="btn btn-secondary btn-file">
+                                Charger image <i class="bi bi-upload"></i><input id="upload_image" type="file" accept="image/png, image/jpeg">
+                            </span>
                         </span>
                         <!--</span>-->
                         <p id="max_images_warning" class="small d-none"></p>
