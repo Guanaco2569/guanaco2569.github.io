@@ -10,11 +10,14 @@
         <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.3.0/font/bootstrap-icons.css">
         <script>
             let selected_image = 2;
+            let selected_images_arr = [1, 3];
             const max_images = 5;
             let images_list = [
                 "https://akoboblog.wpcomstaging.com/wp-content/uploads/forminator/35_e138aa858ace1652c7491741596980bf/uploads/Qzut1u4yYKnL-duck.jpg",
                 "2.png",
-                "3.png"
+                "3.png",
+                "1.png",
+                "https://akoboblog.wpcomstaging.com/wp-content/uploads/2025/02/Capture-decran-2024-10-27-194439-61.png"
             ];
             let carousel;
             let nb_slides_spans;
@@ -47,7 +50,7 @@
                 document.getElementById("select_btn_"+selected_image.toString()).classList.add("d-none");
                 document.getElementById("select_alert_"+selected_image.toString()).classList.remove("d-none");
 
-                //put carousel focus on selected image when modal is hidden
+                //put carousel focus on selected image when modal shows
                 document.getElementById("myModal").addEventListener('show.bs.modal', event => {
                     for (let i = 0; i < delete_buttons.length; i++) {
                         if (document.getElementById("item_"+i.toString()).classList.contains("active")) {
@@ -56,6 +59,20 @@
                     }
                     document.getElementById("item_"+selected_image.toString()).classList.add("active");
                 });
+
+                //initialize tooltips
+                const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]');
+                const tooltipList = [...tooltipTriggerList].map(tooltipTriggerEl => new bootstrap.Tooltip(tooltipTriggerEl));
+
+                //disable delete button and add tooltip for selected images
+                for (let i = 0; i < delete_buttons.length; i++) {
+                    if (selected_images_arr.includes(i)) {
+                        delete_buttons[i].disabled = true;
+
+                    }
+                }
+
+                document.getElementById("customRange1").setAttribute("max", 2);
             });
 
             function update_nb_slides_spans() {
@@ -118,13 +135,15 @@
             };
 
             function select_img(img_nb) {
-                document.getElementById("select_btn_"+selected_image.toString()).classList.remove("d-none");
-                document.getElementById("select_alert_"+selected_image.toString()).classList.add("d-none");
-                
-                selected_image = img_nb;
+                if (img_nb >= 0) {
+                    document.getElementById("select_btn_"+selected_image.toString()).classList.remove("d-none");
+                    document.getElementById("select_alert_"+selected_image.toString()).classList.add("d-none");
+                    
+                    selected_image = img_nb;
 
-                document.getElementById("select_btn_"+selected_image.toString()).classList.add("d-none");
-                document.getElementById("select_alert_"+selected_image.toString()).classList.remove("d-none");
+                    document.getElementById("select_btn_"+selected_image.toString()).classList.add("d-none");
+                    document.getElementById("select_alert_"+selected_image.toString()).classList.remove("d-none");
+                }
             }
 
             const username = 'caroubaloshugo';
@@ -204,7 +223,9 @@
                     document.getElementById("loading_image_icon").style.visibility = "hidden";
 
                     for (let i = 0; i < images_list.length; i++) {
-                        delete_buttons[i].disabled = false;
+                        if (!selected_images_arr.includes(i)) {
+                            delete_buttons[i].disabled = false;
+                        }
                         select_buttons[i].disabled = false;
                     }
                 }
@@ -242,7 +263,9 @@
                         <div id="myCarousel" class="carousel slide" data-bs-interval="false">
                             <div id="carousel_inner" class="carousel-inner">
                                 <div id="item_0" class="carousel-item active">
-                                    <button onclick="delete_img(0)" type="button" class="btn btn-danger delete_btn">Supprimer <i class="bi bi-trash"></i></button>
+                                    <span class="delete_tooltip" tabindex="0" data-bs-toggle="tooltip" data-bs-title="Disabled tooltip">
+                                        <button onclick="delete_img(0)" type="button" class="btn btn-danger delete_btn" disabled>Supprimer <i class="bi bi-trash"></i></button>
+                                    </span>
                                     <img id="img_slide_0" src="" class="d-block w-100" alt="Image 1">
                                     <div class="carousel-caption d-block">
                                         <button onclick="select_img(0)" id="select_btn_0" type="button" class="btn btn-primary select_btn">Sélectionner image 1/<span class="nb_slides"></span></button>
