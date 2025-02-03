@@ -9,8 +9,8 @@
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
         <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.3.0/font/bootstrap-icons.css">
         <script>
-            let selected_image = 2;
-            let selected_images_arr = [1, 3];
+            let image_field_id = 0; //each image field of the form has a unique id used as a selector for the array "selected_images"
+            let selected_images = [1, 4, 3, 4]; //array of images that are currently selected for each image field
             const max_images = 5;
             let images_list = [
                 "https://akoboblog.wpcomstaging.com/wp-content/uploads/forminator/35_e138aa858ace1652c7491741596980bf/uploads/Qzut1u4yYKnL-duck.jpg",
@@ -24,6 +24,8 @@
             let delete_buttons;
             let select_buttons;
             let upload_span;
+            let tooltipTriggerList;
+            let tooltipList;
 
             document.addEventListener("DOMContentLoaded", (event) => {
                 nb_slides_spans = document.getElementsByClassName("nb_slides");
@@ -31,9 +33,14 @@
                 select_buttons = document.getElementsByClassName("select_btn");
                 upload_span = document.getElementById("upload_span");
                 document.getElementById("max_images_warning").innerText = max_images.toString()+" images max. Supprimez-en pour en recharger.";
+
+                //initialize tooltips
+                tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]');
+                tooltipList = [...tooltipTriggerList].map(tooltipTriggerEl => new bootstrap.Tooltip(tooltipTriggerEl));
                 
                 update_nb_slides_spans();
                 update_img_on_slides();
+                update_selected_images(max_images);
 
                 //hide unused slides
                 for (let i = images_list.length; i < delete_buttons.length; i++) {
@@ -47,8 +54,8 @@
                 document.getElementById("upload_image").addEventListener("change", handle_file, false);
 
                 //indicate selected image
-                document.getElementById("select_btn_"+selected_image.toString()).classList.add("d-none");
-                document.getElementById("select_alert_"+selected_image.toString()).classList.remove("d-none");
+                document.getElementById("select_btn_"+selected_images[image_field_id].toString()).classList.add("d-none");
+                document.getElementById("select_alert_"+selected_images[image_field_id].toString()).classList.remove("d-none");
 
                 //put carousel focus on selected image when modal shows
                 document.getElementById("myModal").addEventListener('show.bs.modal', event => {
@@ -57,20 +64,8 @@
                             document.getElementById("item_"+i.toString()).classList.remove("active");
                         }
                     }
-                    document.getElementById("item_"+selected_image.toString()).classList.add("active");
+                    document.getElementById("item_"+selected_images[image_field_id].toString()).classList.add("active");
                 });
-
-                //initialize tooltips
-                const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]');
-                const tooltipList = [...tooltipTriggerList].map(tooltipTriggerEl => new bootstrap.Tooltip(tooltipTriggerEl));
-
-                //disable delete button and add tooltip for selected images
-                for (let i = 0; i < delete_buttons.length; i++) {
-                    if (selected_images_arr.includes(i)) {
-                        delete_buttons[i].disabled = true;
-
-                    }
-                }
 
                 document.getElementById("customRange1").setAttribute("max", 2);
             });
@@ -91,6 +86,7 @@
                 images_list.splice(img_nb, 1);
                 update_nb_slides_spans();
                 update_img_on_slides();
+                update_selected_images(img_nb); //update selected images whose ids need to change following image deletion
 
                 //if last slide is currently displayed, go to previous one
                 if (document.getElementById("item_"+images_list.length.toString()).classList.contains("active")) {
@@ -134,15 +130,48 @@
                 new bootstrap.Carousel(carousel).to(images_list.length-1);
             };
 
-            function select_img(img_nb) {
-                if (img_nb >= 0) {
-                    document.getElementById("select_btn_"+selected_image.toString()).classList.remove("d-none");
-                    document.getElementById("select_alert_"+selected_image.toString()).classList.add("d-none");
-                    
-                    selected_image = img_nb;
+            const countOccurrences = (arr, val) => arr.reduce((a, v) => (v === val ? a + 1 : a), 0);
 
-                    document.getElementById("select_btn_"+selected_image.toString()).classList.add("d-none");
-                    document.getElementById("select_alert_"+selected_image.toString()).classList.remove("d-none");
+            function select_img(img_nb) {
+                document.getElementById("select_btn_"+selected_images[image_field_id].toString()).classList.remove("d-none");
+                document.getElementById("select_alert_"+selected_images[image_field_id].toString()).classList.add("d-none");
+                if (countOccurrences(selected_images, selected_images[image_field_id]) == 1) {
+                    delete_buttons[selected_images[image_field_id]].disabled = false;
+                    tooltipList[selected_images[image_field_id]].disable();
+                }
+                
+                selected_images[image_field_id] = img_nb;
+
+                document.getElementById("select_btn_"+selected_images[image_field_id].toString()).classList.add("d-none");
+                document.getElementById("select_alert_"+selected_images[image_field_id].toString()).classList.remove("d-none");
+                delete_buttons[selected_images[image_field_id]].disabled = true;
+                tooltipList[selected_images[image_field_id]].enable();
+            }
+
+            function update_selected_images(deleted_img_nb) {
+                //update ids of selected images that are after deleted image
+                for (let i = 0; i < selected_images.length; i++) {
+                    if (i != image_field_id) {
+                        if (deleted_img_nb < selected_images[i]) {
+                            selected_images[i] = selected_images[i]-1;
+                        }
+                    }
+                }
+                if (deleted_img_nb < selected_images[image_field_id]) {
+                    select_img(selected_images[image_field_id]-1);
+                }
+                
+                for (let i = 0; i < delete_buttons.length; i++) {
+                    //disable delete button and enable tooltip for selected images
+                    if (selected_images.includes(i)) {
+                        delete_buttons[i].disabled = true;
+                        tooltipList[i].enable();
+                    }
+                    //enable delete button and disable tooltip for other images
+                    else {
+                        delete_buttons[i].disabled = false;
+                        tooltipList[i].disable();
+                    }
                 }
             }
 
@@ -223,7 +252,7 @@
                     document.getElementById("loading_image_icon").style.visibility = "hidden";
 
                     for (let i = 0; i < images_list.length; i++) {
-                        if (!selected_images_arr.includes(i)) {
+                        if (!selected_images.includes(i)) {
                             delete_buttons[i].disabled = false;
                         }
                         select_buttons[i].disabled = false;
@@ -263,8 +292,8 @@
                         <div id="myCarousel" class="carousel slide" data-bs-interval="false">
                             <div id="carousel_inner" class="carousel-inner">
                                 <div id="item_0" class="carousel-item active">
-                                    <span class="delete_tooltip" tabindex="0" data-bs-toggle="tooltip" data-bs-title="Disabled tooltip">
-                                        <button onclick="delete_img(0)" type="button" class="btn btn-danger delete_btn" disabled>Supprimer <i class="bi bi-trash"></i></button>
+                                    <span class="delete_tooltip" tabindex="0" data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-title="Suppression impossible : vous utilisez cette image sur votre site.">
+                                        <button onclick="delete_img(0)" type="button" class="btn btn-danger delete_btn">Supprimer <i class="bi bi-trash"></i></button>
                                     </span>
                                     <img id="img_slide_0" src="" class="d-block w-100" alt="Image 1">
                                     <div class="carousel-caption d-block">
@@ -273,7 +302,9 @@
                                     </div>
                                 </div>
                                 <div id="item_1" class="carousel-item">
-                                    <button onclick="delete_img(1)" type="button" class="btn btn-danger delete_btn">Supprimer <i class="bi bi-trash"></i></button>
+                                    <span class="delete_tooltip" tabindex="0" data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-title="Suppression impossible : vous utilisez cette image sur votre site.">
+                                        <button onclick="delete_img(1)" type="button" class="btn btn-danger delete_btn">Supprimer <i class="bi bi-trash"></i></button>
+                                    </span>
                                     <img id="img_slide_1" src="" class="d-block w-100" alt="Image 2">
                                     <div class="carousel-caption d-block">
                                         <button onclick="select_img(1)" id="select_btn_1" type="button" class="btn btn-primary select_btn">Sélectionner image 2/<span class="nb_slides"></span></button>
@@ -281,7 +312,9 @@
                                     </div>
                                 </div>
                                 <div id="item_2" class="carousel-item">
-                                    <button onclick="delete_img(2)" type="button" class="btn btn-danger delete_btn">Supprimer <i class="bi bi-trash"></i></button>
+                                    <span class="delete_tooltip" tabindex="0" data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-title="Suppression impossible : vous utilisez cette image sur votre site.">
+                                        <button onclick="delete_img(2)" type="button" class="btn btn-danger delete_btn">Supprimer <i class="bi bi-trash"></i></button>
+                                    </span>
                                     <img id="img_slide_2" src="" class="d-block w-100" alt="Image 3">
                                     <div class="carousel-caption d-block">
                                         <button onclick="select_img(2)" id="select_btn_2" type="button" class="btn btn-primary select_btn">Sélectionner image 3/<span class="nb_slides"></span></button>
@@ -289,7 +322,9 @@
                                     </div>
                                 </div>
                                 <div id="item_3" class="carousel-item">
-                                    <button onclick="delete_img(3)" type="button" class="btn btn-danger delete_btn">Supprimer <i class="bi bi-trash"></i></button>
+                                    <span class="delete_tooltip" tabindex="0" data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-title="Suppression impossible : vous utilisez cette image sur votre site.">
+                                        <button onclick="delete_img(3)" type="button" class="btn btn-danger delete_btn">Supprimer <i class="bi bi-trash"></i></button>
+                                    </span>
                                     <img id="img_slide_3" src="" class="d-block w-100" alt="Image 4">
                                     <div class="carousel-caption d-block">
                                         <button onclick="select_img(3)" id="select_btn_3" type="button" class="btn btn-primary select_btn">Sélectionner image 4/<span class="nb_slides"></span></button>
@@ -297,7 +332,9 @@
                                     </div>
                                 </div>
                                 <div id="item_4" class="carousel-item">
-                                    <button onclick="delete_img(4)" type="button" class="btn btn-danger delete_btn">Supprimer <i class="bi bi-trash"></i></button>
+                                    <span class="delete_tooltip" tabindex="0" data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-title="Suppression impossible : vous utilisez cette image sur votre site.">
+                                        <button onclick="delete_img(4)" type="button" class="btn btn-danger delete_btn">Supprimer <i class="bi bi-trash"></i></button>
+                                    </span>
                                     <img id="img_slide_4" src="" class="d-block w-100" alt="Image 5">
                                     <div class="carousel-caption d-block">
                                         <button onclick="select_img(4)" id="select_btn_4" type="button" class="btn btn-primary select_btn">Sélectionner image 5/<span class="nb_slides"></span></button>
@@ -329,6 +366,7 @@
                             Charger image <i class="bi bi-upload"></i><input id="upload_image" type="file" accept="image/png, image/jpeg">
                         </span>
                         <p id="max_images_warning" class="small d-none"></p>
+                        <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Fermer</button>
                     </div>
             
                 </div>
