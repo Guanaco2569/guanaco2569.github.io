@@ -27,6 +27,7 @@
             let tooltipTriggerList;
             let tooltipList;
             let upload_tooltip;
+            let range_elt;
 
             document.addEventListener("DOMContentLoaded", (event) => {
                 nb_slides_spans = document.getElementsByClassName("nb_slides");
@@ -66,18 +67,30 @@
                 document.getElementById("select_btn_"+selected_images[image_field_id].toString()).classList.add("d-none");
                 document.getElementById("select_alert_"+selected_images[image_field_id].toString()).classList.remove("d-none");
 
-                //put carousel focus on selected image when modal shows
-                document.getElementById("myModal").addEventListener('show.bs.modal', event => {
-                    for (let i = 0; i < delete_buttons.length; i++) {
-                        if (document.getElementById("item_"+i.toString()).classList.contains("active")) {
-                            document.getElementById("item_"+i.toString()).classList.remove("active");
-                        }
-                    }
-                    document.getElementById("item_"+selected_images[image_field_id].toString()).classList.add("active");
+                //initialize range
+                range_elt = document.getElementById("customRange1");
+                range_elt.setAttribute("max", images_list.length-1);
+
+                //make range listen to carousel
+                carousel.addEventListener('slid.bs.carousel', function () {
+                   range_elt.value = get_active_slide();
+                   console.log("esjkfndjkn");
                 });
 
-                document.getElementById("customRange1").setAttribute("max", 2);
+                //put carousel focus on selected image when modal shows
+                document.getElementById("myModal").addEventListener('show.bs.modal', event => {
+                    new bootstrap.Carousel(carousel).to(selected_images[image_field_id]);
+                    range_elt.value = selected_images[image_field_id];
+                });
             });
+
+            function get_active_slide() {
+                for (let i = 0; i < images_list.length; i++) {
+                    if (document.getElementById("item_"+i.toString()).classList.contains("active")) {
+                        return i;
+                    }
+                }
+            }
 
             function update_nb_slides_spans() {
                 for (let i = 0; i < nb_slides_spans.length; i++) {
@@ -94,6 +107,7 @@
             function delete_img(img_nb) {
                 images_list.splice(img_nb, 1);
                 update_nb_slides_spans();
+                range_elt.setAttribute("max", images_list.length-1);
                 update_img_on_slides();
                 update_selected_images(img_nb); //update selected images whose ids need to change following image deletion
 
@@ -113,9 +127,6 @@
                 }
                 //if max images limit not reached anymore
                 else if (images_list.length == max_images-1) {
-                    //upload_span.classList.remove("d-none");
-                    //document.getElementById("max_images_warning").classList.add("d-none");
-
                     upload_tooltip.disable();
                     upload_span.classList.remove("disabled");
                 }
@@ -124,6 +135,7 @@
             function add_img(img_url) {
                 images_list.push(img_url);
                 update_nb_slides_spans();
+                range_elt.setAttribute("max", images_list.length-1);
 
                 //if 0 to 1 image
                 if (images_list.length == 1) {
@@ -131,9 +143,6 @@
                 }
                 //if max images reached
                 else if (images_list.length == max_images) {
-                    //upload_span.classList.add("d-none");
-                    //document.getElementById("max_images_warning").classList.remove("d-none");
-
                     upload_tooltip.enable();
                     upload_span.classList.add("disabled");
                 }
@@ -359,11 +368,11 @@
                                     </div>
                                 </div>
                             </div>
-                            <button class="carousel-control-prev" type="button" data-bs-target="#myCarousel" data-bs-slide="prev">
+                            <button class="carousel-control-prev" type="button" data-bs-target="#myCarousel" data-bs-slide="prev" disabled>
                                 <span class="carousel-control-prev-icon" aria-hidden="true"></span>
                                 <span class="visually-hidden">Previous</span>
                             </button>
-                            <button class="carousel-control-next" type="button" data-bs-target="#myCarousel" data-bs-slide="next">
+                            <button class="carousel-control-next" type="button" data-bs-target="#myCarousel" data-bs-slide="next" disabled>
                                 <span class="carousel-control-next-icon" aria-hidden="true"></span>
                                 <span class="visually-hidden">Next</span>
                             </button>
@@ -373,8 +382,7 @@
                         </div>
                         <p id="no_slide" class="d-none">Aucune image à afficher.</p>
                         <br>
-                        <!--<input type="range" class="form-range slider" id="customRange1">-->
-                        <input type="range" class="form-range slider" min="0" max="5" id="customRange1">
+                        <input type="range" class="form-range slider" min="0" max="0" id="customRange1">
                     </div>
                 
                     <!-- Modal footer -->
@@ -384,7 +392,6 @@
                                 Charger image <i class="bi bi-upload"></i><input id="upload_image" type="file" accept="image/png, image/jpeg">
                             </span>
                         </span>
-                        <p id="max_images_warning" class="small d-none"></p>
                         <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Fermer</button>
                     </div>
 
