@@ -74,8 +74,7 @@
                 //make range listen to carousel
                 carousel.addEventListener('slid.bs.carousel', function () {
                    range_elt.value = get_active_slide();
-                   console.log("esjkfndjkn");
-                });
+                });     
 
                 //put carousel focus on selected image when modal shows
                 document.getElementById("myModal").addEventListener('show.bs.modal', event => {
@@ -83,6 +82,10 @@
                     range_elt.value = selected_images[image_field_id];
                 });
             });
+
+            function moveCarouselTo(img_nb) {
+                new bootstrap.Carousel(carousel).to(img_nb);
+            }
 
             function get_active_slide() {
                 for (let i = 0; i < images_list.length; i++) {
@@ -250,6 +253,10 @@
                         delete_buttons[i].disabled = true;
                         select_buttons[i].disabled = true;
                     }
+
+                    document.getElementById("carousel-control-prev").disabled = true;
+                    document.getElementById("carousel-control-next").disabled = true;
+                    document.getElementById("customRange1").disabled = true;
                 }
                 else {
                     document.getElementById("no_slide").innerHTML = "<span class='spinner-border spinner-border-sm' aria-hidden='true'></span> <span role='status'>Chargement...</span>";
@@ -281,6 +288,10 @@
                         }
                         select_buttons[i].disabled = false;
                     }
+
+                    document.getElementById("carousel-control-prev").disabled = false;
+                    document.getElementById("carousel-control-next").disabled = false;
+                    document.getElementById("customRange1").disabled = false;
                 }
                 else {
                     document.getElementById("no_slide").innerHTML = "Aucune image à afficher.";
@@ -368,11 +379,11 @@
                                     </div>
                                 </div>
                             </div>
-                            <button class="carousel-control-prev" type="button" data-bs-target="#myCarousel" data-bs-slide="prev" disabled>
+                            <button id="carousel-control-prev" class="carousel-control-prev" type="button" data-bs-target="#myCarousel" data-bs-slide="prev">
                                 <span class="carousel-control-prev-icon" aria-hidden="true"></span>
                                 <span class="visually-hidden">Previous</span>
                             </button>
-                            <button class="carousel-control-next" type="button" data-bs-target="#myCarousel" data-bs-slide="next" disabled>
+                            <button id="carousel-control-next" class="carousel-control-next" type="button" data-bs-target="#myCarousel" data-bs-slide="next">
                                 <span class="carousel-control-next-icon" aria-hidden="true"></span>
                                 <span class="visually-hidden">Next</span>
                             </button>
@@ -382,7 +393,7 @@
                         </div>
                         <p id="no_slide" class="d-none">Aucune image à afficher.</p>
                         <br>
-                        <input type="range" class="form-range slider" min="0" max="0" id="customRange1">
+                        <input type="range" class="form-range slider" min="0" max="0" id="customRange1" onchange="moveCarouselTo(this.value)">
                     </div>
                 
                     <!-- Modal footer -->
