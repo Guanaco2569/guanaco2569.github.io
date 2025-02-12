@@ -39,14 +39,6 @@ body {
     cursor: pointer;
 }
 
-/*.delete_btn {
-    position: absolute;
-    left: 0;
-    right: 0;
-    top: 15px;
-    margin-inline: auto;
-    width: fit-content;
-}*/
 .delete_tooltip {
     position: absolute;
     left: 0;

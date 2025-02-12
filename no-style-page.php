@@ -1,3 +1,5 @@
+<?php /* Template Name: No Style Page */ ?>
+
 <!doctype html>
 <html lang="en">
     <head>
@@ -99,64 +101,7 @@
         </style>
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
         <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.3.0/font/bootstrap-icons.css">
-        <script>
-            /*PARAMETERS:*/
-            let params = {
-                code: "Huguis",
-                site_id: "huguis",
-            
-                akobo_template: 1,
-                nom: "hugo",
-                type_et_localisation: "type et loc",
-                texte_bienvenue: "welcome",
-                esprit: [
-                    {Qual: "Moderne", Desc: "Lorem ipsum dolores", Img: "https://akoboblog.wpcomstaging.com/wp-content/uploads/forminator/35_e138aa858ace1652c7491741596980bf/uploads/Qzut1u4yYKnL-duck.jpg"},
-                    {Qual: "Moderne", Desc: "Lorem ipsum dolores", Img: "https://akoboblog.wpcomstaging.com/wp-content/uploads/forminator/35_e138aa858ace1652c7491741596980bf/uploads/Qzut1u4yYKnL-duck.jpg"},
-                ],
-                caracteristiques: [
-                    "kr0k0dile",
-                    "kr0k0dile",
-                    "kr0k0dile",
-                ],
-                galerie_images: [
-                    "https://akoboblog.wpcomstaging.com/wp-content/uploads/forminator/35_e138aa858ace1652c7491741596980bf/uploads/Qzut1u4yYKnL-duck.jpg",
-                    "https://akoboblog.wpcomstaging.com/wp-content/uploads/forminator/35_e138aa858ace1652c7491741596980bf/uploads/Qzut1u4yYKnL-duck.jpg",
-                    "https://akoboblog.wpcomstaging.com/wp-content/uploads/forminator/35_e138aa858ace1652c7491741596980bf/uploads/Qzut1u4yYKnL-duck.jpg",
-                    "https://akoboblog.wpcomstaging.com/wp-content/uploads/forminator/35_e138aa858ace1652c7491741596980bf/uploads/Qzut1u4yYKnL-duck.jpg",
-                    "https://akoboblog.wpcomstaging.com/wp-content/uploads/forminator/35_e138aa858ace1652c7491741596980bf/uploads/Qzut1u4yYKnL-duck.jpg",
-                    "https://akoboblog.wpcomstaging.com/wp-content/uploads/forminator/35_e138aa858ace1652c7491741596980bf/uploads/Qzut1u4yYKnL-duck.jpg"
-                ],
-                contact_image: "https://akoboblog.wpcomstaging.com/wp-content/uploads/forminator/35_e138aa858ace1652c7491741596980bf/uploads/Qzut1u4yYKnL-duck.jpg",
-                adresse: "6 rue des Acacias",
-                telephone: "06 06 06 06 06",
-                email: "name@gmail.com",
-                accessibilite: false,
-                image_accueil: "https://akoboblog.wpcomstaging.com/wp-content/uploads/forminator/35_e138aa858ace1652c7491741596980bf/uploads/Qzut1u4yYKnL-duck.jpg",   
-                subscribed: true,
-                contact_proprio: ["valeur du numero de tel",
-                            "valeur du mail",
-                            "valeur de l'insta",
-                            "valeur du facebook"],
-                liens_plateformes: [
-                    "valeur de booking.com",
-                    "valeur de airbnb",
-                    "valeur de gites.fr"],
-                nom_de_domaine: "akobo.fr",
-                bibliotheque: [
-                        "https://akoboblog.wpcomstaging.com/wp-content/uploads/forminator/35_e138aa858ace1652c7491741596980bf/uploads/Qzut1u4yYKnL-duck.jpg",
-                        "https://akoboblog.wpcomstaging.com/wp-content/uploads/2025/02/Capture-decran-2024-10-27-194439-61.png"
-                    ],
-            };
-            const baseUrl = "https://akoboblog.wpcomstaging.com/";
-            const wordpressApiUrl = 'https://akoboblog.wpcomstaging.com/wp-json/wp/v2/media';
-            const modifWebhookUrl = 'https://hook.eu2.make.com/xod2x7swcrsg8l54r4ynb56dbnsbwbm4';
-            const unsubWebhookUrl = 'https://hook.eu2.make.com/29krygsmizb9cugiav9b4psqpl5cc83a';
-            const libraryWebhookUrl = 'https://hook.eu2.make.com/d59d8c0uu7ktiyccxrobvfbehgptgf1i';
-            const username = 'caroubaloshugo';
-            const applicationPassword = 'VXrt 3EdI C3Q5 ONkS bXSw 47Rx';
-            
-            console.log(params);
-        </script>
+        <?php the_content(); ?>
         <script>
             let image_field_id = 0; //each image field of the form has a unique id used as a selector for the array "selected_images"
             let selected_images = [1]; //array of images that are currently selected for each image field
@@ -229,33 +174,6 @@
                 document.getElementById("myModal").addEventListener('hide.bs.modal', event => {
                     UploadLibrary(images_list);
                 });
-
-
-                //INITIALIZE FORM
-
-                //website URL
-                document.getElementById("websiteUrl").value = "akoboblog.wordpress.com/la-maison-de-michel-et-de-herve";
-
-                //counter on welcome text input (WARNING : REPLACE 0 BY REAL VALUE IN SECOND LINE)
-                let text_max = 200;
-                document.getElementById("countHelp").innerText = "0 / " + text_max;
-                document.getElementById("welcomeTextSection1").addEventListener("input", (event) => {
-                    let text_length = document.getElementById("welcomeTextSection1").value.length;
-                    let text_remaining = text_max - text_length;
-                    document.getElementById("countHelp").innerText = text_length + " / " + text_max;
-                });
-
-                //switch prm accessibility
-                document.getElementById("switchPrmAccessible").addEventListener("change", (event) => {
-                    if (document.getElementById("switchPrmAccessible").checked) {
-                        document.getElementById("switchPrmAccessibleLabel").innerText = "Oui";
-                    }
-                    else {
-                        document.getElementById("switchPrmAccessibleLabel").innerText = "Non";
-                    }
-                });
-
-                document.getElementById("welcomePictureSection1").src = params.galerie_images[0];
             });
 
             function moveCarouselTo(img_nb) {
@@ -490,79 +408,12 @@
     <body>
         
         <div class="container">
-
-            <div class="mb-3">
-                <h1>Mon site</h1>
-                <input class="form-control" type="text" id="websiteUrl" value="" disabled readonly>
-            </div>
-
-            <div class="card text-bg-light mb-3">
-                <h4 class="card-header">Présentation du logement</h4>
-                <div class="card-body">
-
-                    <div class="mb-3">
-                        <label for="nameSection1" class="form-label">Nom</label>
-                        <input class="form-control" type="text" id="nameSection1" placeholder="ex : Villa Florentine">
-                    </div>
-
-                    <div class="mb-3">
-                        <label for="typeAndLocationSection1" class="form-label">Type de logement et localisation</label>
-                        <input class="form-control" type="text" id="typeAndLocationSection1" placeholder="ex : Villa à Aix-les-Bains">
-                    </div>
-
-                    <div class="mb-3">
-                        <label for="addressSection1" class="form-label">Adresse</label>
-
-                        <div id="addressHelp" class="form-text">N° et rue</div>
-                        <input class="form-control" type="text" id="addressSection1" placeholder="ex : 6 Rue des Acacias" aria-describedby="addressHelp">
-
-                        <div class="row">
-                            <div class="col-md-8">
-                                <div id="cityHelp" class="form-text">Ville</div>
-                                <input class="form-control" type="text" id="citySection1" placeholder="ex : Aix-les-Bains" aria-describedby="cityHelp">
-                            </div>
-                            <div class="col-md-4">
-                                <div id="zipHelp" class="form-text">Code postal</div>
-                                <input class="form-control" type="text" id="zipSection1" placeholder="ex : 73100" aria-describedby="zipHelp">
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="mb-3">
-                        <label for="welcomeTextSection1" class="form-label">Texte de bienvenue</label>
-                        <textarea class="form-control" id="welcomeTextSection1" name="text" maxlength="200" 
-                        placeholder="ex : Nous vous accueillons pour vos séjours à Aix-les-Bains dans cette villa située à proximité de l'Esplanade du Lac." 
-                        rows="4" aria-describedby="countHelp"></textarea>
-                        <div id="countHelp" class="form-text"></div>
-                    </div>
-
-                    <div class="mb-3">
-                        <label for="prmAccessibilitySection1" class="form-label">Établissement accessible aux personnes à mobilité réduite :</label>
-                        <div class="form-check form-switch" id="prmAccessibilitySection1">
-                            <input class="form-check-input" type="checkbox" role="switch" id="switchPrmAccessible">
-                            <label class="form-check-label" for="switchPrmAccessible" id="switchPrmAccessibleLabel">Non</label>
-                        </div>  
-                    </div>
-
-                    <div class="mb-3">
-                        <label for="welcomePictureSection1" class="form-label">Image d'accueil</label>
-                        
-                        <div class="card text-bg-dark">
-                            <img id="welcomePictureSection1" src="" class="card-img" alt="...">
-                            <div class="card-img-overlay">
-                              <h5 class="card-title">Card title</h5>
-                              <p class="card-text">This is a wider card with supporting text below as a natural lead-in to additional content. This content is a little bit longer.</p>
-                              <p class="card-text"><small>Last updated 3 mins ago</small></p>
-                            </div>
-                          </div>
-                    </div>
-
-                    
-
-                </div>
-            </div>
-
-            <!--<button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#myModal">Open modal</button>-->
+            <h1 class="main_title"><?php the_title(); ?></h1>
+            <p>Click on the button to open the modal.</p>
+            
+            <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#myModal">
+              Open modal
+            </button>
         </div>
           
         <!-- The Modal -->
