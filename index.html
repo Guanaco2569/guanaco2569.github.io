@@ -234,7 +234,22 @@
                 //INITIALIZE FORM
 
                 //website URL
-                document.getElementById("websiteUrl").value = "akoboblog.wordpress.com/la-maison-de-michel-et-de-herve";
+                let url_input = document.getElementById("websiteUrl");
+                url_input.value = "akoboblog.wordpress.com/la-maison-de-michel-et-de-herve";
+
+                //copy link button
+                let copy_link_btn = document.getElementById("copy_link_btn");
+                copy_link_btn.addEventListener("click", function() {
+                    url_input.select();
+                    url_input.setSelectionRange(0, 99999);
+                    navigator.clipboard.writeText(url_input.value);
+                });
+
+                //hide copy link tooltip when copy button loses focus
+                let copy_link_tooltip = new bootstrap.Tooltip(copy_link_btn);
+                copy_link_btn.addEventListener("blur", event => {
+                    copy_link_tooltip.hide();
+                });
 
                 //counter on welcome text input (WARNING : REPLACE 0 BY REAL VALUE IN SECOND LINE)
                 let text_max = 200;
@@ -255,7 +270,13 @@
                     }
                 });
 
+                //welcome picture in section 1
                 document.getElementById("welcomePictureSection1").src = params.galerie_images[0];
+
+                document.getElementById("welcomePictureSection1_link").addEventListener("click", (event) => {
+                    event.preventDefault();
+                    //document.getElementById("myModal").modal();
+                });
             });
 
             function moveCarouselTo(img_nb) {
@@ -493,7 +514,12 @@
 
             <div class="mb-3">
                 <h1>Mon site</h1>
-                <input class="form-control" type="text" id="websiteUrl" value="" disabled readonly>
+                
+
+                <div class="input-group mb-3">
+                    <input class="form-control" type="text" id="websiteUrl" value="" aria-describedby="copy_link_btn" disabled readonly>
+                    <button class="btn btn-secondary" type="button" id="copy_link_btn" data-bs-toggle="tooltip" data-bs-title="Lien copié !" data-bs-trigger="click">Copier le lien <i class="bi bi-clipboard" style="position: relative; top: -2px;"></i></button>
+                </div>
             </div>
 
             <div class="card text-bg-light mb-3">
@@ -546,15 +572,13 @@
 
                     <div class="mb-3">
                         <label for="welcomePictureSection1" class="form-label">Image d'accueil</label>
-                        
-                        <div class="card text-bg-dark">
-                            <img id="welcomePictureSection1" src="" class="card-img" alt="...">
-                            <div class="card-img-overlay">
-                              <h5 class="card-title">Card title</h5>
-                              <p class="card-text">This is a wider card with supporting text below as a natural lead-in to additional content. This content is a little bit longer.</p>
-                              <p class="card-text"><small>Last updated 3 mins ago</small></p>
+                        <div class="card text-bg-dark" style="width: 18rem;">
+                            <img id="welcomePictureSection1" src="" class="card-img" alt="..." style="-webkit-filter: brightness(70%); filter: brightness(70%);">
+                            <div class="card-img-overlay d-flex">
+                                <h5 class="card-title align-self-center mx-auto">Sélectionner image</h5>
                             </div>
-                          </div>
+                            <a href="#" id="welcomePictureSection1_link" class="stretched-link" data-bs-toggle="modal" data-bs-target="#myModal" style="opacity: 0; overflow: hidden; height: 0; width: 0; display: block;">Modal</a>
+                        </div>
                     </div>
 
                     
