@@ -171,6 +171,7 @@
             let tooltipList;
             let upload_tooltip;
             let range_elt;
+            let current_section = 1;
 
             document.addEventListener("DOMContentLoaded", (event) => {
                 nb_slides_spans = document.getElementsByClassName("nb_slides");
@@ -249,14 +250,7 @@
                 let copy_link_tooltip = new bootstrap.Tooltip(copy_link_btn);
                 copy_link_btn.addEventListener("blur", event => {
                     copy_link_tooltip.hide();
-                });
-                copy_link_btn.addEventListener("touchleave", event => {
-                    copy_link_tooltip.hide();
-                });
-                copy_link_btn.addEventListener("touchcancel", event => {
-                    copy_link_tooltip.hide();
-                });
-                
+                });                
                 
                 //counter on welcome text input (WARNING : REPLACE 0 BY REAL VALUE IN SECOND LINE)
                 let text_max = 200;
@@ -513,6 +507,14 @@
                     body: JSON.stringify(data)
                 });
             };
+
+            function go_to_section(ev, nb) {
+                ev.preventDefault();
+
+                document.getElementById("link_sect_"+current_section.toString()).classList.remove("active");
+                document.getElementById("link_sect_"+nb.toString()).classList.add("active");
+                current_section = nb;
+            };
         </script>
     </head>
     <body>
@@ -522,14 +524,13 @@
             <div class="mb-3">
                 <h1>Mon site</h1>
                 
-
                 <div class="input-group mb-3">
                     <input class="form-control" type="text" id="websiteUrl" value="" aria-describedby="copy_link_btn" disabled readonly>
                     <button class="btn btn-secondary" type="button" id="copy_link_btn" data-bs-toggle="tooltip" data-bs-title="Lien copié !" data-bs-trigger="click">Copier le lien <i class="bi bi-clipboard" style="position: relative; top: -2px;"></i></button>
                 </div>
             </div>
 
-            <div class="card text-bg-light mb-3">
+            <!--<div class="card text-bg-light mb-3">
                 <h4 class="card-header">Présentation du logement</h4>
                 <div class="card-body">
 
@@ -591,9 +592,92 @@
                     
 
                 </div>
+            </div>-->
+
+            <div class="card text-bg-light mb-3">
+                <div class="card-header">
+                    <ul class="nav nav-pills card-header-pills">
+                        <li class="nav-item">
+                            <a id="link_sect_1" onclick="go_to_section(event, 1)" class="nav-link active" aria-current="true" href="#">Présentation du logement</a>
+                        </li>
+                        <li class="nav-item">
+                            <a id="link_sect_2" onclick="go_to_section(event, 2)" class="nav-link" href="#">Description</a>
+                        </li>
+                        <li class="nav-item">
+                            <a id="link_sect_3" onclick="go_to_section(event, 3)" class="nav-link" href="#">Caractéristiques</a>
+                        </li>
+                        <li class="nav-item">
+                            <a id="link_sect_4" onclick="go_to_section(event, 4)" class="nav-link" href="#">Galerie photos</a>
+                        </li>
+                        <li class="nav-item">
+                            <a id="link_sect_5" onclick="go_to_section(event, 5)" class="nav-link" href="#">Contact propriétaire</a>
+                        </li>
+                        <li class="nav-item">
+                            <a id="link_sect_6" onclick="go_to_section(event, 6)" class="nav-link" href="#">Liens externes</a>
+                        </li>
+                    </ul>
+                </div>
+
+                <div class="card-body">
+
+                    <div class="mb-3">
+                        <label for="nameSection1" class="form-label">Nom</label>
+                        <input class="form-control" type="text" id="nameSection1" placeholder="ex : Villa Florentine">
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="typeAndLocationSection1" class="form-label">Type de logement et localisation</label>
+                        <input class="form-control" type="text" id="typeAndLocationSection1" placeholder="ex : Villa à Aix-les-Bains">
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="addressSection1" class="form-label">Adresse</label>
+
+                        <div id="addressHelp" class="form-text">N° et rue</div>
+                        <input class="form-control" type="text" id="addressSection1" placeholder="ex : 6 Rue des Acacias" aria-describedby="addressHelp">
+
+                        <div class="row">
+                            <div class="col-md-8">
+                                <div id="cityHelp" class="form-text">Ville</div>
+                                <input class="form-control" type="text" id="citySection1" placeholder="ex : Aix-les-Bains" aria-describedby="cityHelp">
+                            </div>
+                            <div class="col-md-4">
+                                <div id="zipHelp" class="form-text">Code postal</div>
+                                <input class="form-control" type="text" id="zipSection1" placeholder="ex : 73100" aria-describedby="zipHelp">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="welcomeTextSection1" class="form-label">Texte de bienvenue</label>
+                        <textarea class="form-control" id="welcomeTextSection1" name="text" maxlength="200" 
+                        placeholder="ex : Nous vous accueillons pour vos séjours à Aix-les-Bains dans cette villa située à proximité de l'Esplanade du Lac." 
+                        rows="4" aria-describedby="countHelp"></textarea>
+                        <div id="countHelp" class="form-text"></div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="prmAccessibilitySection1" class="form-label">Établissement accessible aux personnes à mobilité réduite :</label>
+                        <div class="form-check form-switch" id="prmAccessibilitySection1">
+                            <input class="form-check-input" type="checkbox" role="switch" id="switchPrmAccessible">
+                            <label class="form-check-label" for="switchPrmAccessible" id="switchPrmAccessibleLabel">Non</label>
+                        </div>  
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="welcomePictureSection1" class="form-label">Image d'accueil</label>
+                        <div class="card text-bg-dark" style="width: 18rem;">
+                            <img id="welcomePictureSection1" src="" class="card-img" alt="..." style="-webkit-filter: brightness(70%); filter: brightness(70%);">
+                            <div class="card-img-overlay d-flex">
+                                <h5 class="card-title align-self-center mx-auto">Sélectionner image</h5>
+                            </div>
+                            <a href="#" id="welcomePictureSection1_link" class="stretched-link" data-bs-toggle="modal" data-bs-target="#myModal" style="opacity: 0; overflow: hidden; height: 0; width: 0; display: block;">Modal</a>
+                        </div>
+                    </div>
+                    
+                </div>
             </div>
 
-            <!--<button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#myModal">Open modal</button>-->
         </div>
           
         <!-- The Modal -->
