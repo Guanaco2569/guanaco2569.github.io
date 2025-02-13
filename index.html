@@ -250,7 +250,14 @@
                 copy_link_btn.addEventListener("blur", event => {
                     copy_link_tooltip.hide();
                 });
-
+                copy_link_btn.addEventListener("touchleave", event => {
+                    copy_link_tooltip.hide();
+                });
+                copy_link_btn.addEventListener("touchcancel", event => {
+                    copy_link_tooltip.hide();
+                });
+                
+                
                 //counter on welcome text input (WARNING : REPLACE 0 BY REAL VALUE IN SECOND LINE)
                 let text_max = 200;
                 document.getElementById("countHelp").innerText = "0 / " + text_max;
