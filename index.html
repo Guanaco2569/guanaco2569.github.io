@@ -96,6 +96,15 @@
                 -ms-user-select: none; /* IE 10 and IE 11 */
                 user-select: none; /* Standard syntax */
             }
+
+            .nav-link {
+                color: #000;
+            }
+
+            .nav-link.active {
+                background-color: #d3d4d5 !important;
+                color: #000 !important;
+            }
         </style>
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
         <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.3.0/font/bootstrap-icons.css">
@@ -521,79 +530,29 @@
         
         <div class="container">
 
-            <div class="mb-3">
+            <div class="row">
                 <h1>Mon site</h1>
-                
-                <div class="input-group mb-3">
-                    <input class="form-control" type="text" id="websiteUrl" value="" aria-describedby="copy_link_btn" disabled readonly>
-                    <button class="btn btn-secondary" type="button" id="copy_link_btn" data-bs-toggle="tooltip" data-bs-title="Lien copié !" data-bs-trigger="click">Copier le lien <i class="bi bi-clipboard" style="position: relative; top: -2px;"></i></button>
-                </div>
             </div>
 
-            <!--<div class="card text-bg-light mb-3">
-                <h4 class="card-header">Présentation du logement</h4>
-                <div class="card-body">
-
-                    <div class="mb-3">
-                        <label for="nameSection1" class="form-label">Nom</label>
-                        <input class="form-control" type="text" id="nameSection1" placeholder="ex : Villa Florentine">
+            <div class="row mb-3">
+                <div class="col-sm mb-3">
+                    <div class="input-group">
+                        <input class="form-control" type="text" id="websiteUrl" value="" aria-describedby="copy_link_btn" disabled readonly>
+                        <button class="btn btn-secondary" type="button" id="copy_link_btn" data-bs-toggle="tooltip" data-bs-title="Lien copié !" data-bs-trigger="click">Copier le lien <i class="bi bi-clipboard" style="position: relative; top: -1px;"></i></button>
                     </div>
-
-                    <div class="mb-3">
-                        <label for="typeAndLocationSection1" class="form-label">Type de logement et localisation</label>
-                        <input class="form-control" type="text" id="typeAndLocationSection1" placeholder="ex : Villa à Aix-les-Bains">
-                    </div>
-
-                    <div class="mb-3">
-                        <label for="addressSection1" class="form-label">Adresse</label>
-
-                        <div id="addressHelp" class="form-text">N° et rue</div>
-                        <input class="form-control" type="text" id="addressSection1" placeholder="ex : 6 Rue des Acacias" aria-describedby="addressHelp">
-
-                        <div class="row">
-                            <div class="col-md-8">
-                                <div id="cityHelp" class="form-text">Ville</div>
-                                <input class="form-control" type="text" id="citySection1" placeholder="ex : Aix-les-Bains" aria-describedby="cityHelp">
-                            </div>
-                            <div class="col-md-4">
-                                <div id="zipHelp" class="form-text">Code postal</div>
-                                <input class="form-control" type="text" id="zipSection1" placeholder="ex : 73100" aria-describedby="zipHelp">
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="mb-3">
-                        <label for="welcomeTextSection1" class="form-label">Texte de bienvenue</label>
-                        <textarea class="form-control" id="welcomeTextSection1" name="text" maxlength="200" 
-                        placeholder="ex : Nous vous accueillons pour vos séjours à Aix-les-Bains dans cette villa située à proximité de l'Esplanade du Lac." 
-                        rows="4" aria-describedby="countHelp"></textarea>
-                        <div id="countHelp" class="form-text"></div>
-                    </div>
-
-                    <div class="mb-3">
-                        <label for="prmAccessibilitySection1" class="form-label">Établissement accessible aux personnes à mobilité réduite :</label>
-                        <div class="form-check form-switch" id="prmAccessibilitySection1">
-                            <input class="form-check-input" type="checkbox" role="switch" id="switchPrmAccessible">
-                            <label class="form-check-label" for="switchPrmAccessible" id="switchPrmAccessibleLabel">Non</label>
-                        </div>  
-                    </div>
-
-                    <div class="mb-3">
-                        <label for="welcomePictureSection1" class="form-label">Image d'accueil</label>
-                        <div class="card text-bg-dark" style="width: 18rem;">
-                            <img id="welcomePictureSection1" src="" class="card-img" alt="..." style="-webkit-filter: brightness(70%); filter: brightness(70%);">
-                            <div class="card-img-overlay d-flex">
-                                <h5 class="card-title align-self-center mx-auto">Sélectionner image</h5>
-                            </div>
-                            <a href="#" id="welcomePictureSection1_link" class="stretched-link" data-bs-toggle="modal" data-bs-target="#myModal" style="opacity: 0; overflow: hidden; height: 0; width: 0; display: block;">Modal</a>
-                        </div>
-                    </div>
-
-                    
-
                 </div>
-            </div>-->
-
+                <div class="col-sm">
+                    <div class="float-sm-end">
+                    <button type="button" class="btn btn-secondary">Voir site <i class="bi bi-box-arrow-up-right" style="position: relative; top: -2px;"></i></button>
+                    <button type="button" class="btn btn-primary">Publier <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-floppy" viewBox="0 0 16 16" style="position: relative; top: -1px;">
+                                                                            <path d="M11 2H9v3h2z"/>
+                                                                            <path d="M1.5 0h11.586a1.5 1.5 0 0 1 1.06.44l1.415 1.414A1.5 1.5 0 0 1 16 2.914V14.5a1.5 1.5 0 0 1-1.5 1.5h-13A1.5 1.5 0 0 1 0 14.5v-13A1.5 1.5 0 0 1 1.5 0M1 1.5v13a.5.5 0 0 0 .5.5H2v-4.5A1.5 1.5 0 0 1 3.5 9h9a1.5 1.5 0 0 1 1.5 1.5V15h.5a.5.5 0 0 0 .5-.5V2.914a.5.5 0 0 0-.146-.353l-1.415-1.415A.5.5 0 0 0 13.086 1H13v4.5A1.5 1.5 0 0 1 11.5 7h-7A1.5 1.5 0 0 1 3 5.5V1H1.5a.5.5 0 0 0-.5.5m3 4a.5.5 0 0 0 .5.5h7a.5.5 0 0 0 .5-.5V1H4zM3 15h10v-4.5a.5.5 0 0 0-.5-.5h-9a.5.5 0 0 0-.5.5z"/>
+                                                                          </svg>
+                    </button>
+</div>
+                </div>              
+            </div>
+            
             <div class="card text-bg-light mb-3">
                 <div class="card-header">
                     <ul class="nav nav-pills card-header-pills">
@@ -614,6 +573,9 @@
                         </li>
                         <li class="nav-item">
                             <a id="link_sect_6" onclick="go_to_section(event, 6)" class="nav-link" href="#">Liens externes</a>
+                        </li>
+                        <li class="nav-item">
+                            <a id="link_sect_7" onclick="go_to_section(event, 7)" class="nav-link" href="#">Abonnement</a>
                         </li>
                     </ul>
                 </div>
