@@ -261,13 +261,25 @@
                     copy_link_tooltip.hide();
                 });                
                 
-                //counter on welcome text input (WARNING : REPLACE 0 BY REAL VALUE IN SECOND LINE)
+                //initialize counters (WARNING : REPLACE 0 BY REAL VALUE IN SECOND LINE)
                 let text_max = 200;
-                document.getElementById("countHelp").innerText = "0 / " + text_max;
+                document.getElementById("countHelpSection1").innerText = "0 / " + text_max;
                 document.getElementById("welcomeTextSection1").addEventListener("input", (event) => {
                     let text_length = document.getElementById("welcomeTextSection1").value.length;
                     let text_remaining = text_max - text_length;
-                    document.getElementById("countHelp").innerText = text_length + " / " + text_max;
+                    document.getElementById("countHelpSection1").innerText = text_length + " / " + text_max;
+                });
+                document.getElementById("countHelp1Section2").innerText = "0 / " + text_max;
+                document.getElementById("textQualifier1Section2").addEventListener("input", (event) => {
+                    let text_length = document.getElementById("textQualifier1Section2").value.length;
+                    let text_remaining = text_max - text_length;
+                    document.getElementById("countHelp1Section2").innerText = text_length + " / " + text_max;
+                });
+                document.getElementById("countHelp2Section2").innerText = "0 / " + text_max;
+                document.getElementById("textQualifier2Section2").addEventListener("input", (event) => {
+                    let text_length = document.getElementById("textQualifier2Section2").value.length;
+                    let text_remaining = text_max - text_length;
+                    document.getElementById("countHelp2Section2").innerText = text_length + " / " + text_max;
                 });
 
                 //switch prm accessibility
@@ -280,12 +292,18 @@
                     }
                 });
 
-                //welcome picture in section 1
+                //initialize pictures
                 document.getElementById("welcomePictureSection1").src = params.galerie_images[0];
-
                 document.getElementById("welcomePictureSection1_link").addEventListener("click", (event) => {
                     event.preventDefault();
-                    //document.getElementById("myModal").modal();
+                });
+                document.getElementById("picture1Section2").src = params.galerie_images[0];
+                document.getElementById("picture1Section2_link").addEventListener("click", (event) => {
+                    event.preventDefault();
+                });
+                document.getElementById("picture2Section2").src = params.galerie_images[0];
+                document.getElementById("picture2Section2_link").addEventListener("click", (event) => {
+                    event.preventDefault();
                 });
             });
 
@@ -520,7 +538,9 @@
             function go_to_section(ev, nb) {
                 ev.preventDefault();
 
+                document.getElementById("section"+current_section.toString()).classList.add("d-none");
                 document.getElementById("link_sect_"+current_section.toString()).classList.remove("active");
+                document.getElementById("section"+nb.toString()).classList.remove("d-none");
                 document.getElementById("link_sect_"+nb.toString()).classList.add("active");
                 current_section = nb;
             };
@@ -580,7 +600,8 @@
                     </ul>
                 </div>
 
-                <div class="card-body">
+                <!--Présentation du logement-->
+                <div id="section1" class="card-body">
 
                     <div class="mb-3">
                         <label for="nameSection1" class="form-label">Nom</label>
@@ -614,8 +635,8 @@
                         <label for="welcomeTextSection1" class="form-label">Texte de bienvenue</label>
                         <textarea class="form-control" id="welcomeTextSection1" name="text" maxlength="200" 
                         placeholder="ex : Nous vous accueillons pour vos séjours à Aix-les-Bains dans cette villa située à proximité de l'Esplanade du Lac." 
-                        rows="4" aria-describedby="countHelp"></textarea>
-                        <div id="countHelp" class="form-text"></div>
+                        rows="4" aria-describedby="countHelpSection1"></textarea>
+                        <div id="countHelpSection1" class="form-text"></div>
                     </div>
 
                     <div class="mb-3">
@@ -637,6 +658,71 @@
                         </div>
                     </div>
                     
+                </div>
+
+                <!--Description-->
+                <div id="section2" class="card-body d-none">
+
+                    <div class="mb-3">
+                        <h2>Premier qualificatif</h2>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="qualifier1Section2" class="form-label">Votre logement est :</label>
+                        <input class="form-control" type="text" id="qualifier1Section2" placeholder="ex : Moderne">
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="textQualifier1Section2" class="form-label">Développez avec un court texte</label>
+                        <textarea class="form-control" id="textQualifier1Section2" name="text" maxlength="200" 
+                        placeholder="ex : La Villa Florentine a été entièrement rénovée l'année dernière. Elle possède les équipements les plus récents dans chacune de ses pièces." 
+                        rows="4" aria-describedby="countHelp1Section2"></textarea>
+                        <div id="countHelp1Section2" class="form-text"></div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="picture1Section2" class="form-label">Image d'illustration</label>
+                        <div class="card text-bg-dark" style="width: 18rem;">
+                            <img id="picture1Section2" src="" class="card-img" alt="..." style="-webkit-filter: brightness(70%); filter: brightness(70%);">
+                            <div class="card-img-overlay d-flex">
+                                <h5 class="card-title align-self-center mx-auto">Sélectionner image</h5>
+                            </div>
+                            <a href="#" id="picture1Section2_link" class="stretched-link" data-bs-toggle="modal" data-bs-target="#myModal" style="opacity: 0; overflow: hidden; height: 0; width: 0; display: block;">Modal</a>
+                        </div>
+                    </div>
+
+                    <div class="mt-4">
+                        <hr class="bg-dark border-top border-dark" />
+                    </div>
+
+                    <div class="mb-3">
+                        <h2>Second qualificatif</h2>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="qualifier2Section2" class="form-label">Votre logement est :</label>
+                        <input class="form-control" type="text" id="qualifier2Section2" placeholder="ex : Convivial">
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="textQualifier2Section2" class="form-label">Développez avec un court texte</label>
+                        <textarea class="form-control" id="textQualifier2Section2" name="text" maxlength="200" 
+                        placeholder="ex : La Villa Florentine a été entièrement rénovée l'année dernière. Elle possède les équipements les plus récents dans chacune de ses pièces." 
+                        rows="4" aria-describedby="countHelp2Section2"></textarea>
+                        <div id="countHelp2Section2" class="form-text"></div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="picture2Section2" class="form-label">Image d'illustration</label>
+                        <div class="card text-bg-dark" style="width: 18rem;">
+                            <img id="picture2Section2" src="" class="card-img" alt="..." style="-webkit-filter: brightness(70%); filter: brightness(70%);">
+                            <div class="card-img-overlay d-flex">
+                                <h5 class="card-title align-self-center mx-auto">Sélectionner image</h5>
+                            </div>
+                            <a href="#" id="picture2Section2_link" class="stretched-link" data-bs-toggle="modal" data-bs-target="#myModal" style="opacity: 0; overflow: hidden; height: 0; width: 0; display: block;">Modal</a>
+                        </div>
+                    </div>
+
                 </div>
             </div>
 
