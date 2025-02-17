@@ -97,6 +97,10 @@
                 user-select: none; /* Standard syntax */
             }
 
+            .card-header {
+                background-color: #0d6efd;
+            }
+
             .nav-link {
                 color: #fff;
             }
@@ -308,6 +312,41 @@
                 document.getElementById("picture2Section2").src = params.galerie_images[0];
                 document.getElementById("picture2Section2_link").addEventListener("click", (event) => {
                     event.preventDefault();
+                });
+
+                //dynamic fields in section 3
+
+                // Get the "Add" button and the container for new inputs
+                const rowAdder = document.getElementById('rowAdder');
+                const newinput = document.getElementById('newinput');
+
+                // Add event listener for the "Add" button
+                rowAdder.addEventListener('click', function() {
+                    // Create a new row with input field and delete button
+                    const newRow = document.createElement('div');
+                    newRow.classList.add('row');
+                    newRow.innerHTML = `
+                        <div class="input-group m-3">
+                            <div class="input-group-prepend">
+                                <button class="btn btn-danger deleteRow" type="button">
+                                    <i class="bi bi-trash"></i> Supprimer
+                                </button>
+                            </div>
+                            <input type="text" class="form-control m-input">
+                        </div>
+                    `;
+
+                    // Append the new row to the container
+                    newinput.appendChild(newRow);
+                });
+
+                // Event delegation for the delete buttons using event listener on the body
+                document.body.addEventListener('click', function(event) {
+                    if (event.target && event.target.classList.contains('deleteRow')) {
+                        // Find the row and remove it from the DOM
+                        const rowToDelete = event.target.closest('.row');
+                        rowToDelete.remove();
+                    }
                 });
             });
 
@@ -578,7 +617,7 @@
             </div>
             
             <div class="card text-bg-light mb-3">
-                <div class="card-header" style="background-color: #0d6efd;">
+                <div class="card-header">
                     <ul class="nav nav-pills card-header-pills">
                         <li class="nav-item">
                             <a id="link_sect_1" onclick="go_to_section(event, 1)" class="nav-link active" aria-current="true" href="#">Présentation du logement</a>
@@ -668,7 +707,7 @@
                 <div id="section2" class="card-body d-none">
 
                     <div class="mb-3">
-                        <h2>Premier qualificatif</h2>
+                        <h3>Premier qualificatif</h3>
                     </div>
 
                     <div class="mb-3">
@@ -700,7 +739,7 @@
                     </div>
 
                     <div class="mb-3">
-                        <h2>Second qualificatif</h2>
+                        <h3>Second qualificatif</h3>
                     </div>
 
                     <div class="mb-3">
@@ -725,6 +764,27 @@
                             </div>
                             <a href="#" id="picture2Section2_link" class="stretched-link" data-bs-toggle="modal" data-bs-target="#myModal" style="opacity: 0; overflow: hidden; height: 0; width: 0; display: block;">Modal</a>
                         </div>
+                    </div>
+
+                </div>
+
+                <!--Caractéristiques-->
+                <div id="section3" class="card-body d-none">
+
+                    <div class="col-lg-12">
+                        <div class="input-group row">
+                            <div class="input-group-prepend">
+                                <button class="btn btn-danger deleteRow" type="button">
+                                    <i class="bi bi-trash"></i> Supprimer
+                                </button>
+                            </div>
+                            <input type="text" class="form-control m-input">
+                        </div>
+        
+                        <div id="newinput"></div>
+                        <button id="rowAdder" type="button" class="btn btn-dark">
+                            <span class="bi bi-plus-square-dotted"></span> Ajouter
+                        </button>
                     </div>
 
                 </div>
