@@ -189,12 +189,15 @@
             let upload_tooltip;
             let range_elt;
             let current_section = 1;
+            let nb_fields_value = 0; //TO CHANGE
+            let nb_fields_span;
 
             document.addEventListener("DOMContentLoaded", (event) => {
                 nb_slides_spans = document.getElementsByClassName("nb_slides");
                 delete_buttons = document.getElementsByClassName("delete_btn");
                 select_buttons = document.getElementsByClassName("select_btn");
                 upload_span = document.getElementById("upload_span");
+                nb_fields_span = document.getElementById("nb_fields");
 
                 //initialize delete tooltips
                 tooltipTriggerList = document.getElementsByClassName("delete_tooltip");
@@ -212,6 +215,7 @@
                 update_nb_slides_spans();
                 update_img_on_slides();
                 update_selected_images(max_images);
+                update_nb_fields_span();
 
                 //hide unused slides
                 for (let i = images_list.length; i < delete_buttons.length; i++) {
@@ -300,6 +304,26 @@
                     }
                 });
 
+                //switch email display
+                document.getElementById("switchEmailDisplay").addEventListener("change", (event) => {
+                    if (document.getElementById("switchEmailDisplay").checked) {
+                        document.getElementById("switchEmailDisplayLabel").innerText = "Oui";
+                    }
+                    else {
+                        document.getElementById("switchEmailDisplayLabel").innerText = "Non";
+                    }
+                });
+
+                //switch phone display
+                document.getElementById("switchPhoneDisplay").addEventListener("change", (event) => {
+                    if (document.getElementById("switchPhoneDisplay").checked) {
+                        document.getElementById("switchPhoneDisplayLabel").innerText = "Oui";
+                    }
+                    else {
+                        document.getElementById("switchPhoneDisplayLabel").innerText = "Non";
+                    }
+                });
+
                 //initialize pictures
                 document.getElementById("welcomePictureSection1").src = params.galerie_images[0];
                 document.getElementById("welcomePictureSection1_link").addEventListener("click", (event) => {
@@ -313,40 +337,9 @@
                 document.getElementById("picture2Section2_link").addEventListener("click", (event) => {
                     event.preventDefault();
                 });
-
-                //dynamic fields in section 3
-
-                // Get the "Add" button and the container for new inputs
-                const rowAdder = document.getElementById('rowAdder');
-                const newinput = document.getElementById('newinput');
-
-                // Add event listener for the "Add" button
-                rowAdder.addEventListener('click', function() {
-                    // Create a new row with input field and delete button
-                    const newRow = document.createElement('div');
-                    newRow.classList.add('row');
-                    newRow.innerHTML = `
-                        <div class="input-group m-3">
-                            <div class="input-group-prepend">
-                                <button class="btn btn-danger deleteRow" type="button">
-                                    <i class="bi bi-trash"></i> Supprimer
-                                </button>
-                            </div>
-                            <input type="text" class="form-control m-input">
-                        </div>
-                    `;
-
-                    // Append the new row to the container
-                    newinput.appendChild(newRow);
-                });
-
-                // Event delegation for the delete buttons using event listener on the body
-                document.body.addEventListener('click', function(event) {
-                    if (event.target && event.target.classList.contains('deleteRow')) {
-                        // Find the row and remove it from the DOM
-                        const rowToDelete = event.target.closest('.row');
-                        rowToDelete.remove();
-                    }
+                document.getElementById("contactPictureSection5").src = params.galerie_images[0];
+                document.getElementById("contactPictureSection5_link").addEventListener("click", (event) => {
+                    event.preventDefault();
                 });
             });
 
@@ -372,6 +365,10 @@
                 for (let i = 0; i < images_list.length; i++) {
                     document.getElementById("img_slide_"+i.toString()).src = images_list[i];
                 }
+            };
+
+            function update_nb_fields_span() {
+                nb_fields_span.innerText = nb_fields_value.toString();
             };
 
             function delete_img(img_nb) {
@@ -440,7 +437,7 @@
                 document.getElementById("select_alert_"+selected_images[image_field_id].toString()).classList.remove("d-none");
                 delete_buttons[selected_images[image_field_id]].disabled = true;
                 tooltipList[selected_images[image_field_id]].enable();
-            }
+            };
 
             function update_selected_images(deleted_img_nb) {
                 //update ids of selected images that are after deleted image
@@ -467,7 +464,7 @@
                         tooltipList[i].disable();
                     }
                 }
-            }
+            };
 
             const UploadFile = (file) => {
                 console.log('start file upload : ', file.name);
@@ -587,6 +584,41 @@
                 document.getElementById("link_sect_"+nb.toString()).classList.add("active");
                 current_section = nb;
             };
+
+            function addRow() {
+                if (nb_fields_value < 12) {
+                    // Create a new row with input field and delete button
+                    const newRow = document.createElement('div');
+                    newRow.classList.add('row', 'mb-3');
+                    newRow.innerHTML = `
+                        <div class="col-sm-6">
+                            <div class="input-group">
+                                <input type="text" class="form-control" placeholder="ex : 3 chambres avec lits doubles">
+                                <button onclick="deleteRow(event)" class="btn btn-danger" type="button"><i class="bi bi-trash"></i></button>
+                            </div>
+                        </div>
+                    `;
+
+                    // Append the new row to the container
+                    document.getElementById('newinput').appendChild(newRow);
+
+                    nb_fields_value += 1;
+                    update_nb_fields_span();
+
+                    if (nb_fields_value == 12) {
+                        document.getElementById("add_row_btn").disabled = true;
+                    }
+                }
+            };
+
+            function deleteRow(ev) {
+                // Find the row and remove it from the DOM
+                const rowToDelete = ev.target.closest('.row');
+                rowToDelete.remove();
+                nb_fields_value -= 1;
+                update_nb_fields_span();
+                document.getElementById("add_row_btn").disabled = false;
+            };
         </script>
     </head>
     <body>
@@ -691,7 +723,7 @@
                     </div>
 
                     <div class="mb-3">
-                        <label for="welcomePictureSection1" class="form-label">Image d'accueil</label>
+                        <label for="welcomePictureSection1" class="form-label">Photo d'accueil</label>
                         <div class="card text-bg-dark" style="width: 18rem;">
                             <img id="welcomePictureSection1" src="" class="card-img" alt="..." style="-webkit-filter: brightness(70%); filter: brightness(70%);">
                             <div class="card-img-overlay d-flex">
@@ -707,7 +739,7 @@
                 <div id="section2" class="card-body d-none">
 
                     <div class="mb-3">
-                        <h3>Premier qualificatif</h3>
+                        <h4>Premier qualificatif</h4>
                     </div>
 
                     <div class="mb-3">
@@ -724,7 +756,7 @@
                     </div>
 
                     <div class="mb-3">
-                        <label for="picture1Section2" class="form-label">Image d'illustration</label>
+                        <label for="picture1Section2" class="form-label">Photo d'illustration</label>
                         <div class="card text-bg-dark" style="width: 18rem;">
                             <img id="picture1Section2" src="" class="card-img" alt="..." style="-webkit-filter: brightness(70%); filter: brightness(70%);">
                             <div class="card-img-overlay d-flex">
@@ -739,7 +771,7 @@
                     </div>
 
                     <div class="mb-3">
-                        <h3>Second qualificatif</h3>
+                        <h4>Second qualificatif</h4>
                     </div>
 
                     <div class="mb-3">
@@ -756,7 +788,7 @@
                     </div>
 
                     <div class="mb-3">
-                        <label for="picture2Section2" class="form-label">Image d'illustration</label>
+                        <label for="picture2Section2" class="form-label">Photo d'illustration</label>
                         <div class="card text-bg-dark" style="width: 18rem;">
                             <img id="picture2Section2" src="" class="card-img" alt="..." style="-webkit-filter: brightness(70%); filter: brightness(70%);">
                             <div class="card-img-overlay d-flex">
@@ -771,22 +803,179 @@
                 <!--Caractéristiques-->
                 <div id="section3" class="card-body d-none">
 
-                    <div class="col-lg-12">
-                        <div class="input-group row">
-                            <div class="input-group-prepend">
-                                <button class="btn btn-danger deleteRow" type="button">
-                                    <i class="bi bi-trash"></i> Supprimer
-                                </button>
-                            </div>
-                            <input type="text" class="form-control m-input">
-                        </div>
-        
-                        <div id="newinput"></div>
-                        <button id="rowAdder" type="button" class="btn btn-dark">
-                            <span class="bi bi-plus-square-dotted"></span> Ajouter
-                        </button>
+                    <div class="mb-3">
+                        <p>Indiquez les divers éléments de votre logement (chambres, couchages, WiFi, parking, etc). Maximum 12 éléments.</p>
+                    </div>
+                        
+                    <div id="newinput"></div>
+
+                    <button onclick="addRow()" type="button" id="add_row_btn" class="btn btn-dark">
+                        <span class="bi bi-plus-square" style="position: relative; top: -2px;"></span> Ajouter (<span id="nb_fields"></span>/12)
+                    </button>
+
+                </div>
+
+                <!--Galerie photos-->
+                <div id="section4" class="card-body d-none">
+
+                    <div class="mb-3">
+                        <p>Offrez un aperçu de votre logement avec 6 photos.</p>
                     </div>
 
+                    <div class="card">
+                        <div class="card-body">
+                            <div class="row row-cols-1 row-cols-md-3 g-5 p-4">
+                                <div class="col">
+                                    <div class="card text-bg-dark">
+                                        <img id="" src="https://akoboblog.wpcomstaging.com/wp-content/uploads/forminator/35_e138aa858ace1652c7491741596980bf/uploads/Qzut1u4yYKnL-duck.jpg" class="card-img" alt="..." style="-webkit-filter: brightness(70%); filter: brightness(70%);">
+                                        <div class="card-img-overlay d-flex">
+                                            <h5 class="card-title align-self-center mx-auto">Sélectionner image</h5>
+                                        </div>
+                                        <a href="#" id="" class="stretched-link" data-bs-toggle="modal" data-bs-target="#myModal" style="opacity: 0; overflow: hidden; height: 0; width: 0; display: block;">Modal</a>
+                                    </div>
+                                </div>
+                                <div class="col">
+                                    <div class="card text-bg-dark">
+                                        <img id="" src="https://akoboblog.wpcomstaging.com/wp-content/uploads/forminator/35_e138aa858ace1652c7491741596980bf/uploads/Qzut1u4yYKnL-duck.jpg" class="card-img" alt="..." style="-webkit-filter: brightness(70%); filter: brightness(70%);">
+                                        <div class="card-img-overlay d-flex">
+                                            <h5 class="card-title align-self-center mx-auto">Sélectionner image</h5>
+                                        </div>
+                                        <a href="#" id="" class="stretched-link" data-bs-toggle="modal" data-bs-target="#myModal" style="opacity: 0; overflow: hidden; height: 0; width: 0; display: block;">Modal</a>
+                                    </div>
+                                </div>
+                                <div class="col">
+                                    <div class="card text-bg-dark">
+                                        <img id="" src="https://akoboblog.wpcomstaging.com/wp-content/uploads/forminator/35_e138aa858ace1652c7491741596980bf/uploads/Qzut1u4yYKnL-duck.jpg" class="card-img" alt="..." style="-webkit-filter: brightness(70%); filter: brightness(70%);">
+                                        <div class="card-img-overlay d-flex">
+                                            <h5 class="card-title align-self-center mx-auto">Sélectionner image</h5>
+                                        </div>
+                                        <a href="#" id="" class="stretched-link" data-bs-toggle="modal" data-bs-target="#myModal" style="opacity: 0; overflow: hidden; height: 0; width: 0; display: block;">Modal</a>
+                                    </div>
+                                </div>
+                                <div class="col">
+                                    <div class="card text-bg-dark">
+                                        <img id="" src="https://akoboblog.wpcomstaging.com/wp-content/uploads/forminator/35_e138aa858ace1652c7491741596980bf/uploads/Qzut1u4yYKnL-duck.jpg" class="card-img" alt="..." style="-webkit-filter: brightness(70%); filter: brightness(70%);">
+                                        <div class="card-img-overlay d-flex">
+                                            <h5 class="card-title align-self-center mx-auto">Sélectionner image</h5>
+                                        </div>
+                                        <a href="#" id="" class="stretched-link" data-bs-toggle="modal" data-bs-target="#myModal" style="opacity: 0; overflow: hidden; height: 0; width: 0; display: block;">Modal</a>
+                                    </div>
+                                </div>
+                                <div class="col">
+                                    <div class="card text-bg-dark">
+                                        <img id="" src="https://akoboblog.wpcomstaging.com/wp-content/uploads/forminator/35_e138aa858ace1652c7491741596980bf/uploads/Qzut1u4yYKnL-duck.jpg" class="card-img" alt="..." style="-webkit-filter: brightness(70%); filter: brightness(70%);">
+                                        <div class="card-img-overlay d-flex">
+                                            <h5 class="card-title align-self-center mx-auto">Sélectionner image</h5>
+                                        </div>
+                                        <a href="#" id="" class="stretched-link" data-bs-toggle="modal" data-bs-target="#myModal" style="opacity: 0; overflow: hidden; height: 0; width: 0; display: block;">Modal</a>
+                                    </div>
+                                </div>
+                                <div class="col">
+                                    <div class="card text-bg-dark">
+                                        <img id="" src="https://akoboblog.wpcomstaging.com/wp-content/uploads/forminator/35_e138aa858ace1652c7491741596980bf/uploads/Qzut1u4yYKnL-duck.jpg" class="card-img" alt="..." style="-webkit-filter: brightness(70%); filter: brightness(70%);">
+                                        <div class="card-img-overlay d-flex">
+                                            <h5 class="card-title align-self-center mx-auto">Sélectionner image</h5>
+                                        </div>
+                                        <a href="#" id="" class="stretched-link" data-bs-toggle="modal" data-bs-target="#myModal" style="opacity: 0; overflow: hidden; height: 0; width: 0; display: block;">Modal</a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
+                <!--Contact propriétaire-->
+                <div id="section5" class="card-body d-none">
+
+                    <div class="mb-3">
+                        <label for="emailSection5" class="form-label">E-mail</label>
+                        <input class="form-control" type="text" id="emailSection5" placeholder="ex : villa-florentine@mail.com">
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="emailDisplaySection5" class="form-label">Faire figurer l'e-mail sur le site :</label>
+                        <div class="form-check form-switch" id="emailDisplaySection5">
+                            <input class="form-check-input" type="checkbox" role="switch" id="switchEmailDisplay">
+                            <label class="form-check-label" for="switchEmailDisplay" id="switchEmailDisplayLabel">Non</label>
+                        </div>  
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="phoneSection5" class="form-label">Téléphone</label>
+                        <input class="form-control" type="text" id="phoneSection5" placeholder="ex : +33 (0)6 09 09 09 09">
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="phoneDisplaySection5" class="form-label">Faire figurer le numéro sur le site :</label>
+                        <div class="form-check form-switch" id="phoneDisplaySection5">
+                            <input class="form-check-input" type="checkbox" role="switch" id="switchPhoneDisplay">
+                            <label class="form-check-label" for="switchPhoneDisplay" id="switchPhoneDisplayLabel">Non</label>
+                        </div>  
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="contactPictureSection5" class="form-label">Photo de la section "Nous contacter"</label>
+                        <div class="card text-bg-dark" style="width: 18rem;">
+                            <img id="contactPictureSection5" src="" class="card-img" alt="..." style="-webkit-filter: brightness(70%); filter: brightness(70%);">
+                            <div class="card-img-overlay d-flex">
+                                <h5 class="card-title align-self-center mx-auto">Sélectionner image</h5>
+                            </div>
+                            <a href="#" id="contactPictureSection5_link" class="stretched-link" data-bs-toggle="modal" data-bs-target="#myModal" style="opacity: 0; overflow: hidden; height: 0; width: 0; display: block;">Modal</a>
+                        </div>
+                    </div>
+                    
+                </div>
+
+                <!--Liens externes-->
+                <div id="section6" class="card-body d-none">
+
+                    <div class="mb-3">
+                        <p>Indiquez les divers liens que vous souhaitez partager sur votre site.</p>
+                    </div>
+
+                    <div class="mb-3">
+                        <h4>Réseaux sociaux</h4>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="instaSection6" class="form-label">Instagram</label>
+                        <input class="form-control" type="text" id="instaSection6" placeholder="ex : instagram.com/villa.florentine">
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="fbSection6" class="form-label">Facebook</label>
+                        <input class="form-control" type="text" id="fbSection6" placeholder="ex : facebook.com/villa.florentine">
+                    </div>
+
+                    <div class="mt-4">
+                        <hr class="bg-dark border-top border-dark" />
+                    </div>
+
+                    <div class="mb-3">
+                        <h4>Plateformes de location</h4>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="bookingSection6" class="form-label">Booking.com</label>
+                        <input class="form-control" type="text" id="bookingSection6" placeholder="ex : booking.com/hotel/fr/villa.florentine">
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="airbnbSection6" class="form-label">Airbnb</label>
+                        <input class="form-control" type="text" id="airbnbSection6" placeholder="ex : airbnb.fr/rooms/553408749542273496">
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="gitesfrSection6" class="form-label">Gites.fr</label>
+                        <input class="form-control" type="text" id="gitesfrSection6" placeholder="ex : gites.fr/gi94796">
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="chambreshotesSection6" class="form-label">Chambres-hotes.fr</label>
+                        <input class="form-control" type="text" id="chambreshotesSection6" placeholder="ex : chambres-hotes.fr/ch96485">
+                    </div>
+                    
                 </div>
             </div>
 
