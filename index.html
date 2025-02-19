@@ -153,9 +153,9 @@
                 galerie_images: [
                     "https://akoboblog.wpcomstaging.com/wp-content/uploads/forminator/35_e138aa858ace1652c7491741596980bf/uploads/Qzut1u4yYKnL-duck.jpg",
                     "https://akoboblog.wpcomstaging.com/wp-content/uploads/forminator/35_e138aa858ace1652c7491741596980bf/uploads/Qzut1u4yYKnL-duck.jpg",
+                    "https://akoboblog.wpcomstaging.com/wp-content/uploads/2025/02/Capture-decran-2024-10-27-194439-61.png",
                     "https://akoboblog.wpcomstaging.com/wp-content/uploads/forminator/35_e138aa858ace1652c7491741596980bf/uploads/Qzut1u4yYKnL-duck.jpg",
-                    "https://akoboblog.wpcomstaging.com/wp-content/uploads/forminator/35_e138aa858ace1652c7491741596980bf/uploads/Qzut1u4yYKnL-duck.jpg",
-                    "https://akoboblog.wpcomstaging.com/wp-content/uploads/forminator/35_e138aa858ace1652c7491741596980bf/uploads/Qzut1u4yYKnL-duck.jpg",
+                    "https://akoboblog.wpcomstaging.com/wp-content/uploads/2025/02/Capture-decran-2024-10-27-194439-61.png",
                     "https://akoboblog.wpcomstaging.com/wp-content/uploads/forminator/35_e138aa858ace1652c7491741596980bf/uploads/Qzut1u4yYKnL-duck.jpg"
                 ],
                 contact_image: "https://akoboblog.wpcomstaging.com/wp-content/uploads/forminator/35_e138aa858ace1652c7491741596980bf/uploads/Qzut1u4yYKnL-duck.jpg",
@@ -163,7 +163,7 @@
                 telephone: "06 06 06 06 06",
                 email: "name@gmail.com",
                 accessibilite: false,
-                image_accueil: "https://akoboblog.wpcomstaging.com/wp-content/uploads/forminator/35_e138aa858ace1652c7491741596980bf/uploads/Qzut1u4yYKnL-duck.jpg",   
+                image_accueil: "https://akoboblog.wpcomstaging.com/wp-content/uploads/2025/02/Capture-decran-2024-10-27-194439-61.png",   
                 subscribed: true,
                 contact_proprio: ["valeur du numero de tel",
                             "valeur du mail",
@@ -175,9 +175,9 @@
                     "valeur de gites.fr"],
                 nom_de_domaine: "akobo.fr",
                 bibliotheque: [
-                        "https://akoboblog.wpcomstaging.com/wp-content/uploads/forminator/35_e138aa858ace1652c7491741596980bf/uploads/Qzut1u4yYKnL-duck.jpg",
-                        "https://akoboblog.wpcomstaging.com/wp-content/uploads/2025/02/Capture-decran-2024-10-27-194439-61.png"
-                    ],
+                    "https://akoboblog.wpcomstaging.com/wp-content/uploads/forminator/35_e138aa858ace1652c7491741596980bf/uploads/Qzut1u4yYKnL-duck.jpg",
+                    "https://akoboblog.wpcomstaging.com/wp-content/uploads/2025/02/Capture-decran-2024-10-27-194439-61.png"
+                ],
             };
             const baseUrl = "https://akoboblog.wpcomstaging.com/";
             const wordpressApiUrl = 'https://akoboblog.wpcomstaging.com/wp-json/wp/v2/media';
@@ -190,8 +190,19 @@
             console.log(params);
         </script>
         <script>
-            let image_field_id = 0; //each image field of the form has a unique id used as a selector for the array "selected_images"
-            let selected_images = [1]; //array of images that are currently selected for each image field
+            let current_img_field_id = 0; //each image field of the form has a unique id used as a selector for the array "selected_images"
+            let selected_images = [
+                params.image_accueil,
+                params.esprit[0].Img,
+                params.esprit[1].Img,
+                params.galerie_images[0],
+                params.galerie_images[1],
+                params.galerie_images[2],
+                params.galerie_images[3],
+                params.galerie_images[4],
+                params.galerie_images[5],
+                params.contact_image
+            ].map((x) => params.bibliotheque.findIndex((elt) => elt == x)); //array of images ids that are currently selected for each image field
             const max_images = 5;
             let images_list = params.bibliotheque;
             let carousel;
@@ -206,6 +217,18 @@
             let current_section = 1;
             let nb_fields_value = 0; //TO CHANGE
             let nb_fields_span;
+            const img_field_id_to_html_id = [ //array that associates image field id to its HTML element id
+                "welcomePictureSection1",
+                "picture1Section2",
+                "picture2Section2",
+                "picture1Section4",
+                "picture2Section4",
+                "picture3Section4",
+                "picture4Section4",
+                "picture5Section4",
+                "picture6Section4",
+                "contactPictureSection5"
+            ];
 
             document.addEventListener("DOMContentLoaded", (event) => {
                 nb_slides_spans = document.getElementsByClassName("nb_slides");
@@ -243,10 +266,6 @@
                 
                 document.getElementById("upload_image").addEventListener("change", handle_file, false);
 
-                //indicate selected image
-                document.getElementById("select_btn_"+selected_images[image_field_id].toString()).classList.add("d-none");
-                document.getElementById("select_alert_"+selected_images[image_field_id].toString()).classList.remove("d-none");
-
                 //initialize range
                 range_elt = document.getElementById("customRange1");
                 range_elt.setAttribute("max", images_list.length-1);
@@ -254,17 +273,16 @@
                 //make range listen to carousel
                 carousel.addEventListener('slid.bs.carousel', function () {
                    range_elt.value = get_active_slide();
-                });     
-
-                //put carousel focus on selected image when modal shows
-                document.getElementById("myModal").addEventListener('show.bs.modal', event => {
-                    new bootstrap.Carousel(carousel).to(selected_images[image_field_id]);
-                    range_elt.value = selected_images[image_field_id];
                 });
 
-                //save images list when modal is closed
-                document.getElementById("myModal").addEventListener('hide.bs.modal', event => {
+                //when modal is closed
+                document.getElementById("myModal").addEventListener('hidden.bs.modal', event => {
+                    //save images list
                     UploadLibrary(images_list);
+
+                    //remove selected image indication
+                    document.getElementById("select_btn_"+selected_images[current_img_field_id].toString()).classList.remove("d-none");
+                    document.getElementById("select_alert_"+selected_images[current_img_field_id].toString()).classList.add("d-none");
                 });
 
 
@@ -341,21 +359,32 @@
                 });
 
                 //initialize pictures
-                document.getElementById("welcomePictureSection1").src = params.galerie_images[0];
-                document.getElementById("welcomePictureSection1_link").addEventListener("click", (event) => {
-                    event.preventDefault();
+                document.getElementById("welcomePictureSection1").src = images_list[selected_images[0]];
+                document.getElementById("welcomePictureSection1_link").addEventListener("click", (ev) => {
+                    ev.preventDefault();
+                    set_up_modal_before_opening(0);
                 });
-                document.getElementById("picture1Section2").src = params.galerie_images[0];
-                document.getElementById("picture1Section2_link").addEventListener("click", (event) => {
-                    event.preventDefault();
+                document.getElementById("picture1Section2").src = images_list[selected_images[1]];
+                document.getElementById("picture1Section2_link").addEventListener("click", (ev) => {
+                    ev.preventDefault();
+                    set_up_modal_before_opening(1);
                 });
-                document.getElementById("picture2Section2").src = params.galerie_images[0];
-                document.getElementById("picture2Section2_link").addEventListener("click", (event) => {
-                    event.preventDefault();
+                document.getElementById("picture2Section2").src = images_list[selected_images[2]];
+                document.getElementById("picture2Section2_link").addEventListener("click", (ev) => {
+                    ev.preventDefault();
+                    set_up_modal_before_opening(2);
                 });
-                document.getElementById("contactPictureSection5").src = params.galerie_images[0];
-                document.getElementById("contactPictureSection5_link").addEventListener("click", (event) => {
-                    event.preventDefault();
+                for (let i = 0; i < params.galerie_images.length; i++) {
+                    document.getElementById("picture"+(i+1).toString()+"Section4").src = images_list[selected_images[i+3]];
+                    document.getElementById("picture"+(i+1).toString()+"Section4_link").addEventListener("click", (ev) => {
+                        ev.preventDefault();
+                        set_up_modal_before_opening(i+3);
+                    });
+                }
+                document.getElementById("contactPictureSection5").src = images_list[selected_images[9]];
+                document.getElementById("contactPictureSection5_link").addEventListener("click", (ev) => {
+                    ev.preventDefault();
+                    set_up_modal_before_opening(9);
                 });
             });
 
@@ -440,32 +469,37 @@
             const countOccurrences = (arr, val) => arr.reduce((a, v) => (v === val ? a + 1 : a), 0);
 
             function select_img(img_nb) {
-                document.getElementById("select_btn_"+selected_images[image_field_id].toString()).classList.remove("d-none");
-                document.getElementById("select_alert_"+selected_images[image_field_id].toString()).classList.add("d-none");
-                if (countOccurrences(selected_images, selected_images[image_field_id]) == 1) {
-                    delete_buttons[selected_images[image_field_id]].disabled = false;
-                    tooltipList[selected_images[image_field_id]].disable();
+                //show select button on previous selected image and enable delete button if necessary
+                document.getElementById("select_btn_"+selected_images[current_img_field_id].toString()).classList.remove("d-none");
+                document.getElementById("select_alert_"+selected_images[current_img_field_id].toString()).classList.add("d-none");
+                if (countOccurrences(selected_images, selected_images[current_img_field_id]) == 1) {
+                    delete_buttons[selected_images[current_img_field_id]].disabled = false;
+                    tooltipList[selected_images[current_img_field_id]].disable();
                 }
                 
-                selected_images[image_field_id] = img_nb;
+                selected_images[current_img_field_id] = img_nb;
 
-                document.getElementById("select_btn_"+selected_images[image_field_id].toString()).classList.add("d-none");
-                document.getElementById("select_alert_"+selected_images[image_field_id].toString()).classList.remove("d-none");
-                delete_buttons[selected_images[image_field_id]].disabled = true;
-                tooltipList[selected_images[image_field_id]].enable();
+                //remove select button on new selected image and disable delete button
+                document.getElementById("select_btn_"+selected_images[current_img_field_id].toString()).classList.add("d-none");
+                document.getElementById("select_alert_"+selected_images[current_img_field_id].toString()).classList.remove("d-none");
+                delete_buttons[selected_images[current_img_field_id]].disabled = true;
+                tooltipList[selected_images[current_img_field_id]].enable();
+
+                //apply new image thumbnail
+                document.getElementById(img_field_id_to_html_id[current_img_field_id]).src = images_list[img_nb];
             };
 
             function update_selected_images(deleted_img_nb) {
                 //update ids of selected images that are after deleted image
                 for (let i = 0; i < selected_images.length; i++) {
-                    if (i != image_field_id) {
+                    if (i != current_img_field_id) {
                         if (deleted_img_nb < selected_images[i]) {
                             selected_images[i] = selected_images[i]-1;
                         }
                     }
                 }
-                if (deleted_img_nb < selected_images[image_field_id]) {
-                    select_img(selected_images[image_field_id]-1);
+                if (deleted_img_nb < selected_images[current_img_field_id]) {
+                    select_img(selected_images[current_img_field_id]-1);
                 }
                 
                 for (let i = 0; i < delete_buttons.length; i++) {
@@ -480,6 +514,18 @@
                         tooltipList[i].disable();
                     }
                 }
+            };
+
+            function set_up_modal_before_opening(img_field_id) {
+                current_img_field_id = img_field_id;
+                
+                //indicate selected image
+                document.getElementById("select_btn_"+selected_images[current_img_field_id].toString()).classList.add("d-none");
+                document.getElementById("select_alert_"+selected_images[current_img_field_id].toString()).classList.remove("d-none");
+
+                //put carousel focus on selected image
+                new bootstrap.Carousel(carousel).to(selected_images[current_img_field_id]);
+                range_elt.value = selected_images[current_img_field_id];
             };
 
             const UploadFile = (file) => {
@@ -640,22 +686,6 @@
     <body>
         
         <div class="container">
-            <!--<div class="row">
-                <div class="col-auto">
-                    <img src="logo3.svg" style="height: 70%; top: 10%; position: relative;">
-                </div>
-                <div class="col g-0">
-                    <h1>Mon site <svg style="position: relative; top: -2px;" width="32" height="32" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg">
-                        <g transform="matrix(0.12851406,0,0,0.12812962,-0.06425703,-0.01027692)">
-                          <path
-                             style="fill:#0d6efd;"
-                             d="M 44.225313,248.9311 C 26.075466,246.57282 8.6035971,231.25612 2.7154611,212.54153 0.50484204,205.51539 0.5,205.32406 0.5,125 0.5,44.675938 0.50484204,44.48461 2.7154611,37.458475 8.7609441,18.243774 25.905799,3.51422 45.130828,1.0184198 c 9.636009,-1.25095009 150.102332,-1.25095009 159.738342,0 C 224.0942,3.51422 241.23906,18.243774 247.28454,37.458475 249.49516,44.48461 249.5,44.675938 249.5,125 c 0,80.32406 -0.005,80.51539 -2.21546,87.54153 -6.04548,19.2147 -23.19034,33.94425 -42.41537,36.44005 -8.92002,1.158 -151.688391,1.11313 -160.643857,-0.0505 z M 206.6446,138.28345 c 10.59648,-5.66705 10.36056,-20.57227 -0.41036,-25.92699 C 202.74182,110.62022 199.16505,110.5 151,110.5 c -51.263932,0 -51.518998,0.0102 -55.644603,2.21655 -2.875407,1.53779 -4.789336,3.5484 -6.25,6.56573 -2.618642,5.40939 -2.62596,7.01093 -0.05629,12.31916 2.307712,4.7671 5.178779,7.00502 10.684297,8.32812 2.071626,0.49785 26.041596,0.82987 53.266596,0.73782 49.04124,-0.16583 49.53841,-0.18792 53.6446,-2.38393 z m 0,-68.000004 C 217.24108,64.616399 217.00516,49.711184 206.23424,44.356462 202.89612,42.696931 199.84803,42.5 177.5,42.5 c -23.90093,0 -25.18221,0.09745 -29.1446,2.216554 -2.87541,1.537782 -4.78934,3.548395 -6.25,6.565725 -2.61864,5.409392 -2.62596,7.010933 -0.0563,12.319163 4.07944,8.427002 7.74743,9.316398 37.45089,9.080905 21.64724,-0.171622 23.24377,-0.312715 27.1446,-2.398901 z m 0,137.000004 c 10.59648,-5.66705 10.36056,-20.57227 -0.41036,-25.92699 C 202.74182,179.62022 199.16505,179.5 151,179.5 c -51.26393,0 -105.519,0.0102 -109.6446,2.21655 -2.87541,1.53779 -4.789339,3.5484 -6.250003,6.56573 -2.618642,5.40939 -2.62596,7.01093 -0.05629,12.31916 2.307712,4.7671 5.178783,7.00502 10.684293,8.32812 2.07163,0.49785 80.0416,0.82987 107.2666,0.73782 49.04124,-0.16583 49.53841,-0.18792 53.6446,-2.38393 z"
-                             id="path2" />
-                        </g>
-                    </svg>
-                    </h1>
-                </div>
-            </div>-->
 
             <div class="row my-3">
                 <div class="col">
@@ -774,10 +804,10 @@
 
                     <div class="mb-3">
                         <label for="welcomePictureSection1" class="form-label">Photo d'accueil</label>
-                        <div class="card text-bg-dark" style="width: 18rem;">
-                            <img id="welcomePictureSection1" src="" class="card-img" alt="..." style="-webkit-filter: brightness(70%); filter: brightness(70%);">
+                        <div class="card" style="width: 18rem; height: 12rem;">
+                            <img id="welcomePictureSection1" src="" class="card-img" alt="..." style="-webkit-filter: brightness(70%); filter: brightness(70%); width: 18rem; height: 12rem; object-fit: contain;">
                             <div class="card-img-overlay d-flex">
-                                <h5 class="card-title align-self-center mx-auto">Sélectionner image</h5>
+                                <h5 class="card-title text-white align-self-center mx-auto">Sélectionner image</h5>
                             </div>
                             <a href="#" id="welcomePictureSection1_link" class="stretched-link" data-bs-toggle="modal" data-bs-target="#myModal" style="opacity: 0; overflow: hidden; height: 0; width: 0; display: block;">Modal</a>
                         </div>
@@ -807,10 +837,10 @@
 
                     <div class="mb-3">
                         <label for="picture1Section2" class="form-label">Photo d'illustration</label>
-                        <div class="card text-bg-dark" style="width: 18rem;">
-                            <img id="picture1Section2" src="" class="card-img" alt="..." style="-webkit-filter: brightness(70%); filter: brightness(70%);">
+                        <div class="card" style="width: 18rem; height: 12rem;">
+                            <img id="picture1Section2" src="" class="card-img" alt="..." style="-webkit-filter: brightness(70%); filter: brightness(70%); width: 18rem; height: 12rem; object-fit: contain;">
                             <div class="card-img-overlay d-flex">
-                                <h5 class="card-title align-self-center mx-auto">Sélectionner image</h5>
+                                <h5 class="card-title text-white align-self-center mx-auto">Sélectionner image</h5>
                             </div>
                             <a href="#" id="picture1Section2_link" class="stretched-link" data-bs-toggle="modal" data-bs-target="#myModal" style="opacity: 0; overflow: hidden; height: 0; width: 0; display: block;">Modal</a>
                         </div>
@@ -832,17 +862,17 @@
                     <div class="mb-3">
                         <label for="textQualifier2Section2" class="form-label">Développez avec un court texte</label>
                         <textarea class="form-control" id="textQualifier2Section2" name="text" maxlength="200" 
-                        placeholder="ex : La Villa Florentine a été entièrement rénovée l'année dernière. Elle possède les équipements les plus récents dans chacune de ses pièces." 
+                        placeholder="ex : La Villa Florentine offre des espaces ouverts et lumineux, créant ainsi une atmosphère chaleureuse et propice aux moments de partage." 
                         rows="4" aria-describedby="countHelp2Section2"></textarea>
                         <div id="countHelp2Section2" class="form-text"></div>
                     </div>
 
                     <div class="mb-3">
                         <label for="picture2Section2" class="form-label">Photo d'illustration</label>
-                        <div class="card text-bg-dark" style="width: 18rem;">
-                            <img id="picture2Section2" src="" class="card-img" alt="..." style="-webkit-filter: brightness(70%); filter: brightness(70%);">
+                        <div class="card" style="width: 18rem; height: 12rem;">
+                            <img id="picture2Section2" src="" class="card-img" alt="..." style="-webkit-filter: brightness(70%); filter: brightness(70%); width: 18rem; height: 12rem; object-fit: contain;">
                             <div class="card-img-overlay d-flex">
-                                <h5 class="card-title align-self-center mx-auto">Sélectionner image</h5>
+                                <h5 class="card-title text-white align-self-center mx-auto">Sélectionner image</h5>
                             </div>
                             <a href="#" id="picture2Section2_link" class="stretched-link" data-bs-toggle="modal" data-bs-target="#myModal" style="opacity: 0; overflow: hidden; height: 0; width: 0; display: block;">Modal</a>
                         </div>
@@ -876,57 +906,57 @@
                         <div class="card-body">
                             <div class="row row-cols-1 row-cols-md-3 g-5 p-4">
                                 <div class="col">
-                                    <div class="card text-bg-dark">
-                                        <img id="" src="https://akoboblog.wpcomstaging.com/wp-content/uploads/forminator/35_e138aa858ace1652c7491741596980bf/uploads/Qzut1u4yYKnL-duck.jpg" class="card-img" alt="..." style="-webkit-filter: brightness(70%); filter: brightness(70%);">
+                                    <div class="card">
+                                        <img id="picture1Section4" src="" class="card-img" alt="..." style="-webkit-filter: brightness(70%); filter: brightness(70%); aspect-ratio: 1.5 / 1; object-fit: contain;">
                                         <div class="card-img-overlay d-flex">
-                                            <h5 class="card-title align-self-center mx-auto">Sélectionner image</h5>
+                                            <h5 class="card-title text-white align-self-center mx-auto">Sélectionner image</h5>
                                         </div>
-                                        <a href="#" id="" class="stretched-link" data-bs-toggle="modal" data-bs-target="#myModal" style="opacity: 0; overflow: hidden; height: 0; width: 0; display: block;">Modal</a>
+                                        <a href="#" id="picture1Section4_link" class="stretched-link" data-bs-toggle="modal" data-bs-target="#myModal" style="opacity: 0; overflow: hidden; height: 0; width: 0; display: block;">Modal</a>
                                     </div>
                                 </div>
                                 <div class="col">
-                                    <div class="card text-bg-dark">
-                                        <img id="" src="https://akoboblog.wpcomstaging.com/wp-content/uploads/forminator/35_e138aa858ace1652c7491741596980bf/uploads/Qzut1u4yYKnL-duck.jpg" class="card-img" alt="..." style="-webkit-filter: brightness(70%); filter: brightness(70%);">
+                                    <div class="card">
+                                        <img id="picture2Section4" src="" class="card-img" alt="..." style="-webkit-filter: brightness(70%); filter: brightness(70%); aspect-ratio: 1.5 / 1; object-fit: contain;">
                                         <div class="card-img-overlay d-flex">
-                                            <h5 class="card-title align-self-center mx-auto">Sélectionner image</h5>
+                                            <h5 class="card-title text-white align-self-center mx-auto">Sélectionner image</h5>
                                         </div>
-                                        <a href="#" id="" class="stretched-link" data-bs-toggle="modal" data-bs-target="#myModal" style="opacity: 0; overflow: hidden; height: 0; width: 0; display: block;">Modal</a>
+                                        <a href="#" id="picture2Section4_link" class="stretched-link" data-bs-toggle="modal" data-bs-target="#myModal" style="opacity: 0; overflow: hidden; height: 0; width: 0; display: block;">Modal</a>
                                     </div>
                                 </div>
                                 <div class="col">
-                                    <div class="card text-bg-dark">
-                                        <img id="" src="https://akoboblog.wpcomstaging.com/wp-content/uploads/forminator/35_e138aa858ace1652c7491741596980bf/uploads/Qzut1u4yYKnL-duck.jpg" class="card-img" alt="..." style="-webkit-filter: brightness(70%); filter: brightness(70%);">
+                                    <div class="card">
+                                        <img id="picture3Section4" src="" class="card-img" alt="..." style="-webkit-filter: brightness(70%); filter: brightness(70%); aspect-ratio: 1.5 / 1; object-fit: contain;">
                                         <div class="card-img-overlay d-flex">
-                                            <h5 class="card-title align-self-center mx-auto">Sélectionner image</h5>
+                                            <h5 class="card-title text-white align-self-center mx-auto">Sélectionner image</h5>
                                         </div>
-                                        <a href="#" id="" class="stretched-link" data-bs-toggle="modal" data-bs-target="#myModal" style="opacity: 0; overflow: hidden; height: 0; width: 0; display: block;">Modal</a>
+                                        <a href="#" id="picture3Section4_link" class="stretched-link" data-bs-toggle="modal" data-bs-target="#myModal" style="opacity: 0; overflow: hidden; height: 0; width: 0; display: block;">Modal</a>
                                     </div>
                                 </div>
                                 <div class="col">
-                                    <div class="card text-bg-dark">
-                                        <img id="" src="https://akoboblog.wpcomstaging.com/wp-content/uploads/forminator/35_e138aa858ace1652c7491741596980bf/uploads/Qzut1u4yYKnL-duck.jpg" class="card-img" alt="..." style="-webkit-filter: brightness(70%); filter: brightness(70%);">
+                                    <div class="card">
+                                        <img id="picture4Section4" src="" class="card-img" alt="..." style="-webkit-filter: brightness(70%); filter: brightness(70%); aspect-ratio: 1.5 / 1; object-fit: contain;">
                                         <div class="card-img-overlay d-flex">
-                                            <h5 class="card-title align-self-center mx-auto">Sélectionner image</h5>
+                                            <h5 class="card-title text-white align-self-center mx-auto">Sélectionner image</h5>
                                         </div>
-                                        <a href="#" id="" class="stretched-link" data-bs-toggle="modal" data-bs-target="#myModal" style="opacity: 0; overflow: hidden; height: 0; width: 0; display: block;">Modal</a>
+                                        <a href="#" id="picture4Section4_link" class="stretched-link" data-bs-toggle="modal" data-bs-target="#myModal" style="opacity: 0; overflow: hidden; height: 0; width: 0; display: block;">Modal</a>
                                     </div>
                                 </div>
                                 <div class="col">
-                                    <div class="card text-bg-dark">
-                                        <img id="" src="https://akoboblog.wpcomstaging.com/wp-content/uploads/forminator/35_e138aa858ace1652c7491741596980bf/uploads/Qzut1u4yYKnL-duck.jpg" class="card-img" alt="..." style="-webkit-filter: brightness(70%); filter: brightness(70%);">
+                                    <div class="card">
+                                        <img id="picture5Section4" src="" class="card-img" alt="..." style="-webkit-filter: brightness(70%); filter: brightness(70%); aspect-ratio: 1.5 / 1; object-fit: contain;">
                                         <div class="card-img-overlay d-flex">
-                                            <h5 class="card-title align-self-center mx-auto">Sélectionner image</h5>
+                                            <h5 class="card-title text-white align-self-center mx-auto">Sélectionner image</h5>
                                         </div>
-                                        <a href="#" id="" class="stretched-link" data-bs-toggle="modal" data-bs-target="#myModal" style="opacity: 0; overflow: hidden; height: 0; width: 0; display: block;">Modal</a>
+                                        <a href="#" id="picture5Section4_link" class="stretched-link" data-bs-toggle="modal" data-bs-target="#myModal" style="opacity: 0; overflow: hidden; height: 0; width: 0; display: block;">Modal</a>
                                     </div>
                                 </div>
                                 <div class="col">
-                                    <div class="card text-bg-dark">
-                                        <img id="" src="https://akoboblog.wpcomstaging.com/wp-content/uploads/forminator/35_e138aa858ace1652c7491741596980bf/uploads/Qzut1u4yYKnL-duck.jpg" class="card-img" alt="..." style="-webkit-filter: brightness(70%); filter: brightness(70%);">
+                                    <div class="card">
+                                        <img id="picture6Section4" src="" class="card-img" alt="..." style="-webkit-filter: brightness(70%); filter: brightness(70%); aspect-ratio: 1.5 / 1; object-fit: contain;">
                                         <div class="card-img-overlay d-flex">
-                                            <h5 class="card-title align-self-center mx-auto">Sélectionner image</h5>
+                                            <h5 class="card-title text-white align-self-center mx-auto">Sélectionner image</h5>
                                         </div>
-                                        <a href="#" id="" class="stretched-link" data-bs-toggle="modal" data-bs-target="#myModal" style="opacity: 0; overflow: hidden; height: 0; width: 0; display: block;">Modal</a>
+                                        <a href="#" id="picture6Section4_link" class="stretched-link" data-bs-toggle="modal" data-bs-target="#myModal" style="opacity: 0; overflow: hidden; height: 0; width: 0; display: block;">Modal</a>
                                     </div>
                                 </div>
                             </div>
@@ -966,10 +996,10 @@
 
                     <div class="mb-3">
                         <label for="contactPictureSection5" class="form-label">Photo de la section "Nous contacter"</label>
-                        <div class="card text-bg-dark" style="width: 18rem;">
-                            <img id="contactPictureSection5" src="" class="card-img" alt="..." style="-webkit-filter: brightness(70%); filter: brightness(70%);">
+                        <div class="card" style="width: 18rem; height: 12rem;">
+                            <img id="contactPictureSection5" src="" class="card-img" alt="..." style="-webkit-filter: brightness(70%); filter: brightness(70%); width: 18rem; height: 12rem; object-fit: contain;">
                             <div class="card-img-overlay d-flex">
-                                <h5 class="card-title align-self-center mx-auto">Sélectionner image</h5>
+                                <h5 class="card-title text-white align-self-center mx-auto">Sélectionner image</h5>
                             </div>
                             <a href="#" id="contactPictureSection5_link" class="stretched-link" data-bs-toggle="modal" data-bs-target="#myModal" style="opacity: 0; overflow: hidden; height: 0; width: 0; display: block;">Modal</a>
                         </div>
@@ -1118,7 +1148,7 @@
                     <div class="modal-footer">
                         <span id="upload_tooltip" tabindex="0" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title=".">
                             <span id="upload_span" class="btn btn-secondary btn-file">
-                                Charger image <i class="bi bi-upload"></i><input id="upload_image" type="file" accept="image/png, image/jpeg">
+                                Charger image <i class="bi bi-upload"></i><input id="upload_image" type="file" accept="image/png, image/jpeg, image/webp">
                             </span>
                         </span>
                         <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Fermer</button>
