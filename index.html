@@ -138,17 +138,18 @@
                 site_id: "huguis",
             
                 akobo_template: 1,
-                nom: "hugo",
-                type_et_localisation: "type et loc",
+                nom: "La Maison de Michel et de Hervé",
+                type_et_localisation: "Maison dans le Var",
                 texte_bienvenue: "welcome",
                 esprit: [
                     {Qual: "Moderne", Desc: "Lorem ipsum dolores", Img: "https://akoboblog.wpcomstaging.com/wp-content/uploads/forminator/35_e138aa858ace1652c7491741596980bf/uploads/Qzut1u4yYKnL-duck.jpg"},
-                    {Qual: "Moderne", Desc: "Lorem ipsum dolores", Img: "https://akoboblog.wpcomstaging.com/wp-content/uploads/forminator/35_e138aa858ace1652c7491741596980bf/uploads/Qzut1u4yYKnL-duck.jpg"},
+                    {Qual: "Convivial", Desc: "Lorem ipsum dolores", Img: "https://akoboblog.wpcomstaging.com/wp-content/uploads/2025/02/Capture-decran-2024-10-27-194439-61.png"},
                 ],
                 caracteristiques: [
                     "kr0k0dile",
-                    "kr0k0dile",
-                    "kr0k0dile",
+                    "s1ng3",
+                    "f4is4n",
+                    "ahahahah"
                 ],
                 galerie_images: [
                     "https://akoboblog.wpcomstaging.com/wp-content/uploads/forminator/35_e138aa858ace1652c7491741596980bf/uploads/Qzut1u4yYKnL-duck.jpg",
@@ -159,21 +160,29 @@
                     "https://akoboblog.wpcomstaging.com/wp-content/uploads/forminator/35_e138aa858ace1652c7491741596980bf/uploads/Qzut1u4yYKnL-duck.jpg"
                 ],
                 contact_image: "https://akoboblog.wpcomstaging.com/wp-content/uploads/forminator/35_e138aa858ace1652c7491741596980bf/uploads/Qzut1u4yYKnL-duck.jpg",
-                adresse: "6 rue des Acacias",
+                adresse: [
+                    "6 rue des Acacias",
+                    "Grenoble",
+                    "48003"
+                ],
                 telephone: "06 06 06 06 06",
                 email: "name@gmail.com",
-                accessibilite: false,
+                accessibilite: true,
                 image_accueil: "https://akoboblog.wpcomstaging.com/wp-content/uploads/2025/02/Capture-decran-2024-10-27-194439-61.png",   
                 subscribed: true,
-                contact_proprio: ["valeur du numero de tel",
-                            "valeur du mail",
-                            "valeur de l'insta",
-                            "valeur du facebook"],
+                contact_proprio: [
+                    "valeur du numero de tel",
+                    "valeur du mail",
+                    "valeur de l'insta",
+                    "valeur du facebook"
+                ],
                 liens_plateformes: [
                     "valeur de booking.com",
                     "valeur de airbnb",
-                    "valeur de gites.fr"],
-                nom_de_domaine: "akobo.fr",
+                    "valeur de gites.fr",
+                    "valeur de chambreshotes.fr"
+                ],
+                nom_de_domaine: "akoboblog.wordpress.com/lamaisondemichel",
                 bibliotheque: [
                     "https://akoboblog.wpcomstaging.com/wp-content/uploads/forminator/35_e138aa858ace1652c7491741596980bf/uploads/Qzut1u4yYKnL-duck.jpg",
                     "https://akoboblog.wpcomstaging.com/wp-content/uploads/2025/02/Capture-decran-2024-10-27-194439-61.png"
@@ -215,8 +224,10 @@
             let upload_tooltip;
             let range_elt;
             let current_section = 1;
-            let nb_fields_value = 0; //TO CHANGE
+            const max_fields = 12;
+            let nb_fields_value = 0;
             let nb_fields_span;
+            let copy_link_btn;
             const img_field_id_to_html_id = [ //array that associates image field id to its HTML element id
                 "welcomePictureSection1",
                 "picture1Section2",
@@ -236,6 +247,7 @@
                 select_buttons = document.getElementsByClassName("select_btn");
                 upload_span = document.getElementById("upload_span");
                 nb_fields_span = document.getElementById("nb_fields");
+                copy_link_btn = document.getElementById("copy_link_btn");
 
                 //initialize delete tooltips
                 tooltipTriggerList = document.getElementsByClassName("delete_tooltip");
@@ -253,7 +265,6 @@
                 update_nb_slides_spans();
                 update_img_on_slides();
                 update_selected_images(max_images);
-                update_nb_fields_span();
 
                 //hide unused slides
                 for (let i = images_list.length; i < delete_buttons.length; i++) {
@@ -288,17 +299,9 @@
 
                 //INITIALIZE FORM
 
-                //website URL
-                let url_input = document.getElementById("websiteUrl");
-                url_input.value = "https://www.facebook.com/";
-                document.getElementById("view_site_btn").href = url_input.value;
-
-                //copy link button
-                let copy_link_btn = document.getElementById("copy_link_btn");
-                copy_link_btn.addEventListener("click", function() {
-                    url_input.select();
-                    url_input.setSelectionRange(0, 99999);
-                    navigator.clipboard.writeText(url_input.value);
+                //website title
+                document.getElementById("nameSection1").addEventListener("change", (event) => {
+                    document.getElementById("website_title").innerText = document.getElementById("nameSection1").value;
                 });
 
                 //hide copy link tooltip when copy button loses focus
@@ -358,7 +361,12 @@
                     }
                 });
 
-                //initialize pictures
+                init_form_values();
+            });
+
+            function init_form_values() {
+                //PICTURES OF ALL SECTIONS
+
                 document.getElementById("welcomePictureSection1").src = images_list[selected_images[0]];
                 document.getElementById("welcomePictureSection1_link").addEventListener("click", (ev) => {
                     ev.preventDefault();
@@ -386,11 +394,79 @@
                     ev.preventDefault();
                     set_up_modal_before_opening(9);
                 });
-            });
 
-            function moveCarouselTo(img_nb) {
+
+                //SECTION 1
+
+                //website title
+                document.getElementById("website_title").innerText = params.nom;
+
+                //website URL
+                let url_input = document.getElementById("website_url");
+                url_input.value = params.nom_de_domaine;
+                document.getElementById("view_site_btn").href = url_input.value;
+
+                //copy link button
+                copy_link_btn.addEventListener("click", function() {
+                    url_input.select();
+                    url_input.setSelectionRange(0, 99999);
+                    navigator.clipboard.writeText(url_input.value);
+                });
+
+                document.getElementById("nameSection1").value = params.nom;
+                document.getElementById("typeAndLocationSection1").value = params.type_et_localisation;
+                document.getElementById("addressSection1").value = params.adresse[0];
+                document.getElementById("citySection1").value = params.adresse[1];
+                document.getElementById("zipSection1").value = params.adresse[2];
+                document.getElementById("welcomeTextSection1").value = params.texte_bienvenue;
+                document.getElementById("switchPrmAccessible").checked = params.accessibilite;
+                if (params.accessibilite) {
+                    document.getElementById("switchPrmAccessibleLabel").innerText = "Oui";
+                }
+
+
+                //SECTION 2
+
+                document.getElementById("qualifier1Section2").value = params.esprit[0].Qual;
+                document.getElementById("textQualifier1Section2").value = params.esprit[0].Desc;
+                document.getElementById("qualifier2Section2").value = params.esprit[1].Qual;
+                document.getElementById("textQualifier2Section2").value = params.esprit[1].Desc;
+
+
+                //SECTION 3
+                
+                for (const elt of params.caracteristiques) {
+                    add_row(elt);
+                }
+
+
+                // SECTION 5
+
+                document.getElementById("emailSection5").value = params.email;
+                document.getElementById("switchEmailDisplay").checked = params.contact_proprio[1].length > 0;
+                if (params.contact_proprio[1].length > 0) {
+                    document.getElementById("switchEmailDisplayLabel").innerText = "Oui";
+                }
+                document.getElementById("phoneSection5").value = params.telephone;
+                document.getElementById("switchPhoneDisplay").checked = params.contact_proprio[0].length > 0;
+                if (params.contact_proprio[0].length > 0) {
+                    document.getElementById("switchPhoneDisplayLabel").innerText = "Oui";
+                }
+
+
+                //SECTION 6
+
+                document.getElementById("instaSection6").value = params.contact_proprio[2];
+                document.getElementById("fbSection6").value = params.contact_proprio[3];
+                document.getElementById("bookingSection6").value = params.liens_plateformes[0];
+                document.getElementById("airbnbSection6").value = params.liens_plateformes[1];
+                document.getElementById("gitesfrSection6").value = params.liens_plateformes[2];
+                document.getElementById("chambreshotesfrSection6").value = params.liens_plateformes[3];
+            };
+
+            function move_carousel_to(img_nb) {
                 new bootstrap.Carousel(carousel).to(img_nb);
-            }
+            };
 
             function get_active_slide() {
                 for (let i = 0; i < images_list.length; i++) {
@@ -398,7 +474,7 @@
                         return i;
                     }
                 }
-            }
+            };
 
             function update_nb_slides_spans() {
                 for (let i = 0; i < nb_slides_spans.length; i++) {
@@ -410,10 +486,6 @@
                 for (let i = 0; i < images_list.length; i++) {
                     document.getElementById("img_slide_"+i.toString()).src = images_list[i];
                 }
-            };
-
-            function update_nb_fields_span() {
-                nb_fields_span.innerText = nb_fields_value.toString();
             };
 
             function delete_img(img_nb) {
@@ -647,16 +719,16 @@
                 current_section = nb;
             };
 
-            function addRow() {
-                if (nb_fields_value < 12) {
+            function add_row(val) {
+                if (nb_fields_value < max_fields) {
                     // Create a new row with input field and delete button
                     const newRow = document.createElement('div');
                     newRow.classList.add('row', 'mb-3');
                     newRow.innerHTML = `
                         <div class="col-sm-6">
                             <div class="input-group">
-                                <input type="text" class="form-control" placeholder="ex : 3 chambres avec lits doubles">
-                                <button onclick="deleteRow(event)" class="btn btn-danger" type="button"><i class="bi bi-trash"></i></button>
+                                <input type="text" class="form-control" value="`+val+`" placeholder="ex : 3 chambres avec lits doubles">
+                                <button onclick="delete_row(event)" class="btn btn-danger" type="button"><i class="bi bi-trash"></i></button>
                             </div>
                         </div>
                     `;
@@ -665,22 +737,24 @@
                     document.getElementById('newinput').appendChild(newRow);
 
                     nb_fields_value += 1;
-                    update_nb_fields_span();
+                    nb_fields_span.innerText = nb_fields_value.toString();
 
-                    if (nb_fields_value == 12) {
+                    if (nb_fields_value == max_fields) {
                         document.getElementById("add_row_btn").disabled = true;
                     }
                 }
             };
 
-            function deleteRow(ev) {
+            function delete_row(ev) {
                 // Find the row and remove it from the DOM
                 const rowToDelete = ev.target.closest('.row');
                 rowToDelete.remove();
                 nb_fields_value -= 1;
-                update_nb_fields_span();
+                nb_fields_span.innerText = nb_fields_value.toString();
                 document.getElementById("add_row_btn").disabled = false;
             };
+
+            
         </script>
     </head>
     <body>
@@ -706,13 +780,13 @@
             </div>
 
             <div class="row">
-                <h4>La Maison de Michel et de Hervé - Les amis de la confrérie</h4>
+                <h4 id="website_title"></h4>
             </div>
 
             <div class="row mb-3">
                 <div class="col-sm mb-4">
                     <div class="input-group">
-                        <input class="form-control" type="text" id="websiteUrl" value="" aria-describedby="copy_link_btn" disabled readonly>
+                        <input class="form-control" type="text" id="website_url" value="" aria-describedby="copy_link_btn" disabled readonly>
                         <button class="btn btn-secondary" type="button" id="copy_link_btn" data-bs-toggle="tooltip" data-bs-title="Lien copié !" data-bs-trigger="click">Copier le lien <i class="bi bi-clipboard" style="position: relative; top: -1px;"></i></button>
                     </div>
                 </div>
@@ -755,7 +829,8 @@
                     </ul>
                 </div>
 
-                <!--Présentation du logement-->
+                <form>
+                <!--Section 1 : Présentation du logement-->
                 <div id="section1" class="card-body">
 
                     <div class="mb-3">
@@ -815,7 +890,7 @@
                     
                 </div>
 
-                <!--Description-->
+                <!--Section 2 : Description-->
                 <div id="section2" class="card-body d-none">
 
                     <div class="mb-3">
@@ -880,7 +955,7 @@
 
                 </div>
 
-                <!--Caractéristiques-->
+                <!--Section 3 : Caractéristiques-->
                 <div id="section3" class="card-body d-none">
 
                     <div class="mb-3">
@@ -889,13 +964,13 @@
                         
                     <div id="newinput"></div>
 
-                    <button onclick="addRow()" type="button" id="add_row_btn" class="btn btn-dark">
+                    <button onclick="add_row('')" type="button" id="add_row_btn" class="btn btn-dark">
                         <span class="bi bi-plus-square" style="position: relative; top: -2px;"></span> Ajouter (<span id="nb_fields"></span>/12)
                     </button>
 
                 </div>
 
-                <!--Galerie photos-->
+                <!--Section 4 : Galerie photos-->
                 <div id="section4" class="card-body d-none">
 
                     <div class="mb-3">
@@ -965,7 +1040,7 @@
 
                 </div>
 
-                <!--Contact propriétaire-->
+                <!--Section 5 : Contact propriétaire-->
                 <div id="section5" class="card-body d-none">
 
                     <div class="mb-3">
@@ -1007,7 +1082,7 @@
                     
                 </div>
 
-                <!--Liens externes-->
+                <!--Section 6 : Liens externes-->
                 <div id="section6" class="card-body d-none">
 
                     <div class="mb-3">
@@ -1052,11 +1127,13 @@
                     </div>
 
                     <div class="mb-3">
-                        <label for="chambreshotesSection6" class="form-label">Chambres-hotes.fr</label>
-                        <input class="form-control" type="text" id="chambreshotesSection6" placeholder="ex : chambres-hotes.fr/ch96485">
+                        <label for="chambreshotesfrSection6" class="form-label">Chambres-hotes.fr</label>
+                        <input class="form-control" type="text" id="chambreshotesfrSection6" placeholder="ex : chambres-hotes.fr/ch96485">
                     </div>
                     
                 </div>
+                <button type="submit" class="btn btn-primary">Submit</button>
+                </form>
             </div>
 
         </div>
@@ -1141,7 +1218,7 @@
                         </div>
                         <p id="no_slide" class="d-none">Aucune image à afficher.</p>
                         <br>
-                        <input type="range" class="form-range slider" min="0" max="0" id="customRange1" onchange="moveCarouselTo(this.value)">
+                        <input type="range" class="form-range slider" min="0" max="0" id="customRange1" onchange="move_carousel_to(this.value)">
                     </div>
                 
                     <!-- Modal footer -->
