@@ -361,6 +361,23 @@
                     }
                 });
 
+                //example starter JavaScript for disabling form submissions if there are invalid fields
+                (() => {
+                'use strict'
+
+                const form = document.querySelector('.needs-validation');
+                
+                form.addEventListener('submit', event => {
+                    if (!form.checkValidity()) {
+                        event.preventDefault()
+                        event.stopPropagation()
+                    }
+
+                    form.classList.add('was-validated')
+                }, false)
+                
+                })()
+
                 init_form_values();
             });
 
@@ -829,7 +846,7 @@
                     </ul>
                 </div>
 
-                <form>
+                <form class="needs-validation" novalidate>
                 <!--Section 1 : Présentation du logement-->
                 <div id="section1" class="card-body">
 
@@ -899,7 +916,7 @@
 
                     <div class="mb-3">
                         <label for="qualifier1Section2" class="form-label">Votre logement est :</label>
-                        <input class="form-control" type="text" id="qualifier1Section2" placeholder="ex : Moderne">
+                        <input class="form-control" type="text" id="qualifier1Section2" placeholder="ex : Moderne" required>                    
                     </div>
 
                     <div class="mb-3">
@@ -907,7 +924,12 @@
                         <textarea class="form-control" id="textQualifier1Section2" name="text" maxlength="200" 
                         placeholder="ex : La Villa Florentine a été entièrement rénovée l'année dernière. Elle possède les équipements les plus récents dans chacune de ses pièces." 
                         rows="4" aria-describedby="countHelp1Section2"></textarea>
+                        <div class="invalid-tooltip">
+                            Please choose a username.
+                          </div>
                         <div id="countHelp1Section2" class="form-text"></div>
+                        
+                    
                     </div>
 
                     <div class="mb-3">
@@ -938,7 +960,7 @@
                         <label for="textQualifier2Section2" class="form-label">Développez avec un court texte</label>
                         <textarea class="form-control" id="textQualifier2Section2" name="text" maxlength="200" 
                         placeholder="ex : La Villa Florentine offre des espaces ouverts et lumineux, créant ainsi une atmosphère chaleureuse et propice aux moments de partage." 
-                        rows="4" aria-describedby="countHelp2Section2"></textarea>
+                        rows="4" aria-describedby="countHelp2Section2" required></textarea>
                         <div id="countHelp2Section2" class="form-text"></div>
                     </div>
 
