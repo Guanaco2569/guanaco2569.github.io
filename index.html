@@ -371,14 +371,31 @@
                     event.preventDefault();
                     event.stopPropagation();
 
+                    //hide any validation CSS style from previous form submit
+                    document.querySelectorAll(".was-validated").forEach(elt => {
+                        elt.classList.remove("was-validated");
+                    });
+
                     if (form.checkValidity()) {
                         console.log("form correct");
                     }
                     else {
-                        console.log(document.querySelectorAll(':invalid'));
+                        //show validation CSS style only on invalid fields
+                        for (let i = 1; i < document.querySelectorAll(':invalid').length; i++) {
+                            document.querySelectorAll(':invalid')[i].parentElement.classList.add('was-validated');
+                        }
+                        
+                        //go to first section with invalid field
+                        go_to_section(parseInt(document.querySelectorAll(':invalid')[1].getAttribute("data-section")));
+
+                        
                     }
 
-                    form.classList.add('was-validated')
+                    //form.classList.add('was-validated');
+                    /*document.getElementById("section1").classList.add('was-validated');
+                    document.getElementById("section2").classList.add('was-validated');
+                    document.getElementById("section3").classList.add('was-validated');
+                    document.getElementById("section5").classList.add('was-validated');*/
                 }, false)
                 
                 })()
@@ -731,9 +748,11 @@
                 });
             };
 
-            function go_to_section(ev, nb) {
-                ev.preventDefault();
-
+            function go_to_section(nb, ev=-1) {
+                if (ev != -1) {
+                    ev.preventDefault();
+                }
+                
                 document.getElementById("section"+current_section.toString()).classList.add("d-none");
                 document.getElementById("link_sect_"+current_section.toString()).classList.remove("active");
                 document.getElementById("section"+nb.toString()).classList.remove("d-none");
@@ -749,7 +768,7 @@
                     newRow.innerHTML = `
                         <div class="col-sm-6">
                             <div class="input-group">
-                                <input type="text" class="form-control" value="`+val+`" placeholder="ex : 3 chambres avec lits doubles">
+                                <input type="text" class="form-control" value="`+val+`" placeholder="ex : 3 chambres avec lits doubles" data-section="3" required>
                                 <button onclick="delete_row(event)" class="btn btn-danger" type="button"><i class="bi bi-trash"></i></button>
                             </div>
                         </div>
@@ -828,25 +847,25 @@
                 <div class="card-header">
                     <ul class="nav nav-pills card-header-pills">
                         <li class="nav-item">
-                            <a id="link_sect_1" onclick="go_to_section(event, 1)" class="nav-link active" aria-current="true" href="#">Présentation du logement</a>
+                            <a id="link_sect_1" onclick="go_to_section(1, event)" class="nav-link active" aria-current="true" href="#">Présentation du logement</a>
                         </li>
                         <li class="nav-item">
-                            <a id="link_sect_2" onclick="go_to_section(event, 2)" class="nav-link" href="#">Description</a>
+                            <a id="link_sect_2" onclick="go_to_section(2, event)" class="nav-link" href="#">Description</a>
                         </li>
                         <li class="nav-item">
-                            <a id="link_sect_3" onclick="go_to_section(event, 3)" class="nav-link" href="#">Caractéristiques</a>
+                            <a id="link_sect_3" onclick="go_to_section(3, event)" class="nav-link" href="#">Caractéristiques</a>
                         </li>
                         <li class="nav-item">
-                            <a id="link_sect_4" onclick="go_to_section(event, 4)" class="nav-link" href="#">Galerie photos</a>
+                            <a id="link_sect_4" onclick="go_to_section(4, event)" class="nav-link" href="#">Galerie photos</a>
                         </li>
                         <li class="nav-item">
-                            <a id="link_sect_5" onclick="go_to_section(event, 5)" class="nav-link" href="#">Contact propriétaire</a>
+                            <a id="link_sect_5" onclick="go_to_section(5, event)" class="nav-link" href="#">Contact propriétaire</a>
                         </li>
                         <li class="nav-item">
-                            <a id="link_sect_6" onclick="go_to_section(event, 6)" class="nav-link" href="#">Liens externes</a>
+                            <a id="link_sect_6" onclick="go_to_section(6, event)" class="nav-link" href="#">Liens externes</a>
                         </li>
                         <li class="nav-item">
-                            <a id="link_sect_7" onclick="go_to_section(event, 7)" class="nav-link" href="#">Abonnement</a>
+                            <a id="link_sect_7" onclick="go_to_section(7, event)" class="nav-link" href="#">Abonnement</a>
                         </li>
                     </ul>
                 </div>
@@ -857,28 +876,28 @@
 
                         <div class="mb-3">
                             <label for="nameSection1" class="form-label">Nom</label>
-                            <input class="form-control" type="text" id="nameSection1" placeholder="ex : Villa Florentine">
+                            <input class="form-control" type="text" id="nameSection1" placeholder="ex : Villa Florentine" data-section="1" required>
                         </div>
 
                         <div class="mb-3">
                             <label for="typeAndLocationSection1" class="form-label">Type de logement et localisation</label>
-                            <input class="form-control" type="text" id="typeAndLocationSection1" placeholder="ex : Villa à Aix-les-Bains">
+                            <input class="form-control" type="text" id="typeAndLocationSection1" placeholder="ex : Villa à Aix-les-Bains" data-section="1" required>
                         </div>
 
                         <div class="mb-3">
                             <label for="addressSection1" class="form-label">Adresse</label>
 
                             <div id="addressHelp" class="form-text">N° et rue</div>
-                            <input class="form-control" type="text" id="addressSection1" placeholder="ex : 6 Rue des Acacias" aria-describedby="addressHelp">
+                            <input class="form-control" type="text" id="addressSection1" placeholder="ex : 6 Rue des Acacias" aria-describedby="addressHelp" data-section="1" required>
 
                             <div class="row">
                                 <div class="col-md-8">
                                     <div id="cityHelp" class="form-text">Ville</div>
-                                    <input class="form-control" type="text" id="citySection1" placeholder="ex : Aix-les-Bains" aria-describedby="cityHelp">
+                                    <input class="form-control" type="text" id="citySection1" placeholder="ex : Aix-les-Bains" aria-describedby="cityHelp" data-section="1" required>
                                 </div>
                                 <div class="col-md-4">
                                     <div id="zipHelp" class="form-text">Code postal</div>
-                                    <input class="form-control" type="text" id="zipSection1" placeholder="ex : 73100" aria-describedby="zipHelp">
+                                    <input class="form-control" type="text" id="zipSection1" placeholder="ex : 73100" aria-describedby="zipHelp" data-section="1" required>
                                 </div>
                             </div>
                         </div>
@@ -887,7 +906,7 @@
                             <label for="welcomeTextSection1" class="form-label">Texte de bienvenue</label>
                             <textarea class="form-control" id="welcomeTextSection1" name="text" maxlength="200" 
                             placeholder="ex : Nous vous accueillons pour vos séjours à Aix-les-Bains dans cette villa située à proximité de l'Esplanade du Lac." 
-                            rows="4" aria-describedby="countHelpSection1"></textarea>
+                            rows="4" aria-describedby="countHelpSection1" data-section="1" required></textarea>
                             <div id="countHelpSection1" class="form-text"></div>
                         </div>
 
@@ -921,20 +940,15 @@
 
                         <div class="mb-3">
                             <label for="qualifier1Section2" class="form-label">Votre logement est :</label>
-                            <input class="form-control" type="text" id="qualifier1Section2" placeholder="ex : Moderne" required>                    
+                            <input class="form-control" type="text" id="qualifier1Section2" placeholder="ex : Moderne" data-section="2" required>              
                         </div>
 
                         <div class="mb-3">
                             <label for="textQualifier1Section2" class="form-label">Développez avec un court texte</label>
                             <textarea class="form-control" id="textQualifier1Section2" name="text" maxlength="200" 
                             placeholder="ex : La Villa Florentine a été entièrement rénovée l'année dernière. Elle possède les équipements les plus récents dans chacune de ses pièces." 
-                            rows="4" aria-describedby="countHelp1Section2"></textarea>
-                            <div class="invalid-tooltip">
-                                Please choose a username.
-                            </div>
+                            rows="4" aria-describedby="countHelp1Section2" data-section="2" required></textarea>
                             <div id="countHelp1Section2" class="form-text"></div>
-                            
-                        
                         </div>
 
                         <div class="mb-3">
@@ -958,14 +972,14 @@
 
                         <div class="mb-3">
                             <label for="qualifier2Section2" class="form-label">Votre logement est :</label>
-                            <input class="form-control" type="text" id="qualifier2Section2" placeholder="ex : Convivial">
+                            <input class="form-control" type="text" id="qualifier2Section2" placeholder="ex : Convivial" data-section="2" required>
                         </div>
 
                         <div class="mb-3">
                             <label for="textQualifier2Section2" class="form-label">Développez avec un court texte</label>
                             <textarea class="form-control" id="textQualifier2Section2" name="text" maxlength="200" 
                             placeholder="ex : La Villa Florentine offre des espaces ouverts et lumineux, créant ainsi une atmosphère chaleureuse et propice aux moments de partage." 
-                            rows="4" aria-describedby="countHelp2Section2" required></textarea>
+                            rows="4" aria-describedby="countHelp2Section2" data-section="2" required></textarea>
                             <div id="countHelp2Section2" class="form-text"></div>
                         </div>
 
@@ -1072,7 +1086,7 @@
 
                         <div class="mb-3">
                             <label for="emailSection5" class="form-label">E-mail</label>
-                            <input class="form-control" type="text" id="emailSection5" placeholder="ex : villa-florentine@mail.com">
+                            <input class="form-control" type="text" id="emailSection5" placeholder="ex : villa-florentine@mail.com" data-section="5" required>
                         </div>
 
                         <div class="mb-3">
@@ -1085,7 +1099,7 @@
 
                         <div class="mb-3">
                             <label for="phoneSection5" class="form-label">Téléphone</label>
-                            <input class="form-control" type="text" id="phoneSection5" placeholder="ex : +33 (0)6 09 09 09 09">
+                            <input class="form-control" type="text" id="phoneSection5" placeholder="ex : +33 (0)6 09 09 09 09" data-section="5" required>
                         </div>
 
                         <div class="mb-3">
