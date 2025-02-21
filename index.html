@@ -368,9 +368,14 @@
                 const form = document.querySelector('.needs-validation');
                 
                 form.addEventListener('submit', event => {
-                    if (!form.checkValidity()) {
-                        event.preventDefault()
-                        event.stopPropagation()
+                    event.preventDefault();
+                    event.stopPropagation();
+
+                    if (form.checkValidity()) {
+                        console.log("form correct");
+                    }
+                    else {
+                        console.log(document.querySelectorAll(':invalid'));
                     }
 
                     form.classList.add('was-validated')
@@ -847,314 +852,314 @@
                 </div>
 
                 <form class="needs-validation" novalidate>
-                <!--Section 1 : Présentation du logement-->
-                <div id="section1" class="card-body">
+                    <!--Section 1 : Présentation du logement-->
+                    <div id="section1" class="card-body">
 
-                    <div class="mb-3">
-                        <label for="nameSection1" class="form-label">Nom</label>
-                        <input class="form-control" type="text" id="nameSection1" placeholder="ex : Villa Florentine">
-                    </div>
+                        <div class="mb-3">
+                            <label for="nameSection1" class="form-label">Nom</label>
+                            <input class="form-control" type="text" id="nameSection1" placeholder="ex : Villa Florentine">
+                        </div>
 
-                    <div class="mb-3">
-                        <label for="typeAndLocationSection1" class="form-label">Type de logement et localisation</label>
-                        <input class="form-control" type="text" id="typeAndLocationSection1" placeholder="ex : Villa à Aix-les-Bains">
-                    </div>
+                        <div class="mb-3">
+                            <label for="typeAndLocationSection1" class="form-label">Type de logement et localisation</label>
+                            <input class="form-control" type="text" id="typeAndLocationSection1" placeholder="ex : Villa à Aix-les-Bains">
+                        </div>
 
-                    <div class="mb-3">
-                        <label for="addressSection1" class="form-label">Adresse</label>
+                        <div class="mb-3">
+                            <label for="addressSection1" class="form-label">Adresse</label>
 
-                        <div id="addressHelp" class="form-text">N° et rue</div>
-                        <input class="form-control" type="text" id="addressSection1" placeholder="ex : 6 Rue des Acacias" aria-describedby="addressHelp">
+                            <div id="addressHelp" class="form-text">N° et rue</div>
+                            <input class="form-control" type="text" id="addressSection1" placeholder="ex : 6 Rue des Acacias" aria-describedby="addressHelp">
 
-                        <div class="row">
-                            <div class="col-md-8">
-                                <div id="cityHelp" class="form-text">Ville</div>
-                                <input class="form-control" type="text" id="citySection1" placeholder="ex : Aix-les-Bains" aria-describedby="cityHelp">
-                            </div>
-                            <div class="col-md-4">
-                                <div id="zipHelp" class="form-text">Code postal</div>
-                                <input class="form-control" type="text" id="zipSection1" placeholder="ex : 73100" aria-describedby="zipHelp">
+                            <div class="row">
+                                <div class="col-md-8">
+                                    <div id="cityHelp" class="form-text">Ville</div>
+                                    <input class="form-control" type="text" id="citySection1" placeholder="ex : Aix-les-Bains" aria-describedby="cityHelp">
+                                </div>
+                                <div class="col-md-4">
+                                    <div id="zipHelp" class="form-text">Code postal</div>
+                                    <input class="form-control" type="text" id="zipSection1" placeholder="ex : 73100" aria-describedby="zipHelp">
+                                </div>
                             </div>
                         </div>
-                    </div>
 
-                    <div class="mb-3">
-                        <label for="welcomeTextSection1" class="form-label">Texte de bienvenue</label>
-                        <textarea class="form-control" id="welcomeTextSection1" name="text" maxlength="200" 
-                        placeholder="ex : Nous vous accueillons pour vos séjours à Aix-les-Bains dans cette villa située à proximité de l'Esplanade du Lac." 
-                        rows="4" aria-describedby="countHelpSection1"></textarea>
-                        <div id="countHelpSection1" class="form-text"></div>
-                    </div>
-
-                    <div class="mb-3">
-                        <label for="prmAccessibilitySection1" class="form-label">Établissement accessible aux personnes à mobilité réduite :</label>
-                        <div class="form-check form-switch" id="prmAccessibilitySection1">
-                            <input class="form-check-input" type="checkbox" role="switch" id="switchPrmAccessible">
-                            <label class="form-check-label" for="switchPrmAccessible" id="switchPrmAccessibleLabel">Non</label>
-                        </div>  
-                    </div>
-
-                    <div class="mb-3">
-                        <label for="welcomePictureSection1" class="form-label">Photo d'accueil</label>
-                        <div class="card" style="width: 18rem; height: 12rem;">
-                            <img id="welcomePictureSection1" src="" class="card-img" alt="..." style="-webkit-filter: brightness(70%); filter: brightness(70%); width: 18rem; height: 12rem; object-fit: contain;">
-                            <div class="card-img-overlay d-flex">
-                                <h5 class="card-title text-white align-self-center mx-auto">Sélectionner image</h5>
-                            </div>
-                            <a href="#" id="welcomePictureSection1_link" class="stretched-link" data-bs-toggle="modal" data-bs-target="#myModal" style="opacity: 0; overflow: hidden; height: 0; width: 0; display: block;">Modal</a>
+                        <div class="mb-3">
+                            <label for="welcomeTextSection1" class="form-label">Texte de bienvenue</label>
+                            <textarea class="form-control" id="welcomeTextSection1" name="text" maxlength="200" 
+                            placeholder="ex : Nous vous accueillons pour vos séjours à Aix-les-Bains dans cette villa située à proximité de l'Esplanade du Lac." 
+                            rows="4" aria-describedby="countHelpSection1"></textarea>
+                            <div id="countHelpSection1" class="form-text"></div>
                         </div>
-                    </div>
-                    
-                </div>
 
-                <!--Section 2 : Description-->
-                <div id="section2" class="card-body d-none">
+                        <div class="mb-3">
+                            <label for="prmAccessibilitySection1" class="form-label">Établissement accessible aux personnes à mobilité réduite :</label>
+                            <div class="form-check form-switch" id="prmAccessibilitySection1">
+                                <input class="form-check-input" type="checkbox" role="switch" id="switchPrmAccessible">
+                                <label class="form-check-label" for="switchPrmAccessible" id="switchPrmAccessibleLabel">Non</label>
+                            </div>  
+                        </div>
 
-                    <div class="mb-3">
-                        <h5>Premier qualificatif</h5>
-                    </div>
-
-                    <div class="mb-3">
-                        <label for="qualifier1Section2" class="form-label">Votre logement est :</label>
-                        <input class="form-control" type="text" id="qualifier1Section2" placeholder="ex : Moderne" required>                    
-                    </div>
-
-                    <div class="mb-3">
-                        <label for="textQualifier1Section2" class="form-label">Développez avec un court texte</label>
-                        <textarea class="form-control" id="textQualifier1Section2" name="text" maxlength="200" 
-                        placeholder="ex : La Villa Florentine a été entièrement rénovée l'année dernière. Elle possède les équipements les plus récents dans chacune de ses pièces." 
-                        rows="4" aria-describedby="countHelp1Section2"></textarea>
-                        <div class="invalid-tooltip">
-                            Please choose a username.
-                          </div>
-                        <div id="countHelp1Section2" class="form-text"></div>
+                        <div class="mb-3">
+                            <label for="welcomePictureSection1" class="form-label">Photo d'accueil</label>
+                            <div class="card" style="width: 18rem; height: 12rem;">
+                                <img id="welcomePictureSection1" src="" class="card-img" alt="..." style="-webkit-filter: brightness(70%); filter: brightness(70%); width: 18rem; height: 12rem; object-fit: contain;">
+                                <div class="card-img-overlay d-flex">
+                                    <h5 class="card-title text-white align-self-center mx-auto">Sélectionner image</h5>
+                                </div>
+                                <a href="#" id="welcomePictureSection1_link" class="stretched-link" data-bs-toggle="modal" data-bs-target="#myModal" style="opacity: 0; overflow: hidden; height: 0; width: 0; display: block;">Modal</a>
+                            </div>
+                        </div>
                         
-                    
                     </div>
 
-                    <div class="mb-3">
-                        <label for="picture1Section2" class="form-label">Photo d'illustration</label>
-                        <div class="card" style="width: 18rem; height: 12rem;">
-                            <img id="picture1Section2" src="" class="card-img" alt="..." style="-webkit-filter: brightness(70%); filter: brightness(70%); width: 18rem; height: 12rem; object-fit: contain;">
-                            <div class="card-img-overlay d-flex">
-                                <h5 class="card-title text-white align-self-center mx-auto">Sélectionner image</h5>
-                            </div>
-                            <a href="#" id="picture1Section2_link" class="stretched-link" data-bs-toggle="modal" data-bs-target="#myModal" style="opacity: 0; overflow: hidden; height: 0; width: 0; display: block;">Modal</a>
+                    <!--Section 2 : Description-->
+                    <div id="section2" class="card-body d-none">
+
+                        <div class="mb-3">
+                            <h5>Premier qualificatif</h5>
                         </div>
-                    </div>
 
-                    <div class="mt-4">
-                        <hr class="bg-dark border-top border-dark" />
-                    </div>
-
-                    <div class="mb-3">
-                        <h5>Second qualificatif</h5>
-                    </div>
-
-                    <div class="mb-3">
-                        <label for="qualifier2Section2" class="form-label">Votre logement est :</label>
-                        <input class="form-control" type="text" id="qualifier2Section2" placeholder="ex : Convivial">
-                    </div>
-
-                    <div class="mb-3">
-                        <label for="textQualifier2Section2" class="form-label">Développez avec un court texte</label>
-                        <textarea class="form-control" id="textQualifier2Section2" name="text" maxlength="200" 
-                        placeholder="ex : La Villa Florentine offre des espaces ouverts et lumineux, créant ainsi une atmosphère chaleureuse et propice aux moments de partage." 
-                        rows="4" aria-describedby="countHelp2Section2" required></textarea>
-                        <div id="countHelp2Section2" class="form-text"></div>
-                    </div>
-
-                    <div class="mb-3">
-                        <label for="picture2Section2" class="form-label">Photo d'illustration</label>
-                        <div class="card" style="width: 18rem; height: 12rem;">
-                            <img id="picture2Section2" src="" class="card-img" alt="..." style="-webkit-filter: brightness(70%); filter: brightness(70%); width: 18rem; height: 12rem; object-fit: contain;">
-                            <div class="card-img-overlay d-flex">
-                                <h5 class="card-title text-white align-self-center mx-auto">Sélectionner image</h5>
-                            </div>
-                            <a href="#" id="picture2Section2_link" class="stretched-link" data-bs-toggle="modal" data-bs-target="#myModal" style="opacity: 0; overflow: hidden; height: 0; width: 0; display: block;">Modal</a>
+                        <div class="mb-3">
+                            <label for="qualifier1Section2" class="form-label">Votre logement est :</label>
+                            <input class="form-control" type="text" id="qualifier1Section2" placeholder="ex : Moderne" required>                    
                         </div>
-                    </div>
 
-                </div>
-
-                <!--Section 3 : Caractéristiques-->
-                <div id="section3" class="card-body d-none">
-
-                    <div class="mb-3">
-                        <p>Indiquez les divers éléments de votre logement (chambres, couchages, WiFi, parking, etc). Maximum 12 éléments.</p>
-                    </div>
+                        <div class="mb-3">
+                            <label for="textQualifier1Section2" class="form-label">Développez avec un court texte</label>
+                            <textarea class="form-control" id="textQualifier1Section2" name="text" maxlength="200" 
+                            placeholder="ex : La Villa Florentine a été entièrement rénovée l'année dernière. Elle possède les équipements les plus récents dans chacune de ses pièces." 
+                            rows="4" aria-describedby="countHelp1Section2"></textarea>
+                            <div class="invalid-tooltip">
+                                Please choose a username.
+                            </div>
+                            <div id="countHelp1Section2" class="form-text"></div>
+                            
                         
-                    <div id="newinput"></div>
+                        </div>
 
-                    <button onclick="add_row('')" type="button" id="add_row_btn" class="btn btn-dark">
-                        <span class="bi bi-plus-square" style="position: relative; top: -2px;"></span> Ajouter (<span id="nb_fields"></span>/12)
-                    </button>
+                        <div class="mb-3">
+                            <label for="picture1Section2" class="form-label">Photo d'illustration</label>
+                            <div class="card" style="width: 18rem; height: 12rem;">
+                                <img id="picture1Section2" src="" class="card-img" alt="..." style="-webkit-filter: brightness(70%); filter: brightness(70%); width: 18rem; height: 12rem; object-fit: contain;">
+                                <div class="card-img-overlay d-flex">
+                                    <h5 class="card-title text-white align-self-center mx-auto">Sélectionner image</h5>
+                                </div>
+                                <a href="#" id="picture1Section2_link" class="stretched-link" data-bs-toggle="modal" data-bs-target="#myModal" style="opacity: 0; overflow: hidden; height: 0; width: 0; display: block;">Modal</a>
+                            </div>
+                        </div>
 
-                </div>
+                        <div class="mt-4">
+                            <hr class="bg-dark border-top border-dark" />
+                        </div>
 
-                <!--Section 4 : Galerie photos-->
-                <div id="section4" class="card-body d-none">
+                        <div class="mb-3">
+                            <h5>Second qualificatif</h5>
+                        </div>
 
-                    <div class="mb-3">
-                        <p>Offrez un aperçu de votre logement avec 6 photos.</p>
+                        <div class="mb-3">
+                            <label for="qualifier2Section2" class="form-label">Votre logement est :</label>
+                            <input class="form-control" type="text" id="qualifier2Section2" placeholder="ex : Convivial">
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="textQualifier2Section2" class="form-label">Développez avec un court texte</label>
+                            <textarea class="form-control" id="textQualifier2Section2" name="text" maxlength="200" 
+                            placeholder="ex : La Villa Florentine offre des espaces ouverts et lumineux, créant ainsi une atmosphère chaleureuse et propice aux moments de partage." 
+                            rows="4" aria-describedby="countHelp2Section2" required></textarea>
+                            <div id="countHelp2Section2" class="form-text"></div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="picture2Section2" class="form-label">Photo d'illustration</label>
+                            <div class="card" style="width: 18rem; height: 12rem;">
+                                <img id="picture2Section2" src="" class="card-img" alt="..." style="-webkit-filter: brightness(70%); filter: brightness(70%); width: 18rem; height: 12rem; object-fit: contain;">
+                                <div class="card-img-overlay d-flex">
+                                    <h5 class="card-title text-white align-self-center mx-auto">Sélectionner image</h5>
+                                </div>
+                                <a href="#" id="picture2Section2_link" class="stretched-link" data-bs-toggle="modal" data-bs-target="#myModal" style="opacity: 0; overflow: hidden; height: 0; width: 0; display: block;">Modal</a>
+                            </div>
+                        </div>
+
                     </div>
 
-                    <div class="card">
-                        <div class="card-body">
-                            <div class="row row-cols-1 row-cols-md-3 g-5 p-4">
-                                <div class="col">
-                                    <div class="card">
-                                        <img id="picture1Section4" src="" class="card-img" alt="..." style="-webkit-filter: brightness(70%); filter: brightness(70%); aspect-ratio: 1.5 / 1; object-fit: contain;">
-                                        <div class="card-img-overlay d-flex">
-                                            <h5 class="card-title text-white align-self-center mx-auto">Sélectionner image</h5>
+                    <!--Section 3 : Caractéristiques-->
+                    <div id="section3" class="card-body d-none">
+
+                        <div class="mb-3">
+                            <p>Indiquez les divers éléments de votre logement (chambres, couchages, WiFi, parking, etc). Maximum 12 éléments.</p>
+                        </div>
+                            
+                        <div id="newinput"></div>
+
+                        <button onclick="add_row('')" type="button" id="add_row_btn" class="btn btn-dark">
+                            <span class="bi bi-plus-square" style="position: relative; top: -2px;"></span> Ajouter (<span id="nb_fields"></span>/12)
+                        </button>
+
+                    </div>
+
+                    <!--Section 4 : Galerie photos-->
+                    <div id="section4" class="card-body d-none">
+
+                        <div class="mb-3">
+                            <p>Offrez un aperçu de votre logement avec 6 photos.</p>
+                        </div>
+
+                        <div class="card">
+                            <div class="card-body">
+                                <div class="row row-cols-1 row-cols-md-3 g-5 p-4">
+                                    <div class="col">
+                                        <div class="card">
+                                            <img id="picture1Section4" src="" class="card-img" alt="..." style="-webkit-filter: brightness(70%); filter: brightness(70%); aspect-ratio: 1.5 / 1; object-fit: contain;">
+                                            <div class="card-img-overlay d-flex">
+                                                <h5 class="card-title text-white align-self-center mx-auto">Sélectionner image</h5>
+                                            </div>
+                                            <a href="#" id="picture1Section4_link" class="stretched-link" data-bs-toggle="modal" data-bs-target="#myModal" style="opacity: 0; overflow: hidden; height: 0; width: 0; display: block;">Modal</a>
                                         </div>
-                                        <a href="#" id="picture1Section4_link" class="stretched-link" data-bs-toggle="modal" data-bs-target="#myModal" style="opacity: 0; overflow: hidden; height: 0; width: 0; display: block;">Modal</a>
                                     </div>
-                                </div>
-                                <div class="col">
-                                    <div class="card">
-                                        <img id="picture2Section4" src="" class="card-img" alt="..." style="-webkit-filter: brightness(70%); filter: brightness(70%); aspect-ratio: 1.5 / 1; object-fit: contain;">
-                                        <div class="card-img-overlay d-flex">
-                                            <h5 class="card-title text-white align-self-center mx-auto">Sélectionner image</h5>
+                                    <div class="col">
+                                        <div class="card">
+                                            <img id="picture2Section4" src="" class="card-img" alt="..." style="-webkit-filter: brightness(70%); filter: brightness(70%); aspect-ratio: 1.5 / 1; object-fit: contain;">
+                                            <div class="card-img-overlay d-flex">
+                                                <h5 class="card-title text-white align-self-center mx-auto">Sélectionner image</h5>
+                                            </div>
+                                            <a href="#" id="picture2Section4_link" class="stretched-link" data-bs-toggle="modal" data-bs-target="#myModal" style="opacity: 0; overflow: hidden; height: 0; width: 0; display: block;">Modal</a>
                                         </div>
-                                        <a href="#" id="picture2Section4_link" class="stretched-link" data-bs-toggle="modal" data-bs-target="#myModal" style="opacity: 0; overflow: hidden; height: 0; width: 0; display: block;">Modal</a>
                                     </div>
-                                </div>
-                                <div class="col">
-                                    <div class="card">
-                                        <img id="picture3Section4" src="" class="card-img" alt="..." style="-webkit-filter: brightness(70%); filter: brightness(70%); aspect-ratio: 1.5 / 1; object-fit: contain;">
-                                        <div class="card-img-overlay d-flex">
-                                            <h5 class="card-title text-white align-self-center mx-auto">Sélectionner image</h5>
+                                    <div class="col">
+                                        <div class="card">
+                                            <img id="picture3Section4" src="" class="card-img" alt="..." style="-webkit-filter: brightness(70%); filter: brightness(70%); aspect-ratio: 1.5 / 1; object-fit: contain;">
+                                            <div class="card-img-overlay d-flex">
+                                                <h5 class="card-title text-white align-self-center mx-auto">Sélectionner image</h5>
+                                            </div>
+                                            <a href="#" id="picture3Section4_link" class="stretched-link" data-bs-toggle="modal" data-bs-target="#myModal" style="opacity: 0; overflow: hidden; height: 0; width: 0; display: block;">Modal</a>
                                         </div>
-                                        <a href="#" id="picture3Section4_link" class="stretched-link" data-bs-toggle="modal" data-bs-target="#myModal" style="opacity: 0; overflow: hidden; height: 0; width: 0; display: block;">Modal</a>
                                     </div>
-                                </div>
-                                <div class="col">
-                                    <div class="card">
-                                        <img id="picture4Section4" src="" class="card-img" alt="..." style="-webkit-filter: brightness(70%); filter: brightness(70%); aspect-ratio: 1.5 / 1; object-fit: contain;">
-                                        <div class="card-img-overlay d-flex">
-                                            <h5 class="card-title text-white align-self-center mx-auto">Sélectionner image</h5>
+                                    <div class="col">
+                                        <div class="card">
+                                            <img id="picture4Section4" src="" class="card-img" alt="..." style="-webkit-filter: brightness(70%); filter: brightness(70%); aspect-ratio: 1.5 / 1; object-fit: contain;">
+                                            <div class="card-img-overlay d-flex">
+                                                <h5 class="card-title text-white align-self-center mx-auto">Sélectionner image</h5>
+                                            </div>
+                                            <a href="#" id="picture4Section4_link" class="stretched-link" data-bs-toggle="modal" data-bs-target="#myModal" style="opacity: 0; overflow: hidden; height: 0; width: 0; display: block;">Modal</a>
                                         </div>
-                                        <a href="#" id="picture4Section4_link" class="stretched-link" data-bs-toggle="modal" data-bs-target="#myModal" style="opacity: 0; overflow: hidden; height: 0; width: 0; display: block;">Modal</a>
                                     </div>
-                                </div>
-                                <div class="col">
-                                    <div class="card">
-                                        <img id="picture5Section4" src="" class="card-img" alt="..." style="-webkit-filter: brightness(70%); filter: brightness(70%); aspect-ratio: 1.5 / 1; object-fit: contain;">
-                                        <div class="card-img-overlay d-flex">
-                                            <h5 class="card-title text-white align-self-center mx-auto">Sélectionner image</h5>
+                                    <div class="col">
+                                        <div class="card">
+                                            <img id="picture5Section4" src="" class="card-img" alt="..." style="-webkit-filter: brightness(70%); filter: brightness(70%); aspect-ratio: 1.5 / 1; object-fit: contain;">
+                                            <div class="card-img-overlay d-flex">
+                                                <h5 class="card-title text-white align-self-center mx-auto">Sélectionner image</h5>
+                                            </div>
+                                            <a href="#" id="picture5Section4_link" class="stretched-link" data-bs-toggle="modal" data-bs-target="#myModal" style="opacity: 0; overflow: hidden; height: 0; width: 0; display: block;">Modal</a>
                                         </div>
-                                        <a href="#" id="picture5Section4_link" class="stretched-link" data-bs-toggle="modal" data-bs-target="#myModal" style="opacity: 0; overflow: hidden; height: 0; width: 0; display: block;">Modal</a>
                                     </div>
-                                </div>
-                                <div class="col">
-                                    <div class="card">
-                                        <img id="picture6Section4" src="" class="card-img" alt="..." style="-webkit-filter: brightness(70%); filter: brightness(70%); aspect-ratio: 1.5 / 1; object-fit: contain;">
-                                        <div class="card-img-overlay d-flex">
-                                            <h5 class="card-title text-white align-self-center mx-auto">Sélectionner image</h5>
+                                    <div class="col">
+                                        <div class="card">
+                                            <img id="picture6Section4" src="" class="card-img" alt="..." style="-webkit-filter: brightness(70%); filter: brightness(70%); aspect-ratio: 1.5 / 1; object-fit: contain;">
+                                            <div class="card-img-overlay d-flex">
+                                                <h5 class="card-title text-white align-self-center mx-auto">Sélectionner image</h5>
+                                            </div>
+                                            <a href="#" id="picture6Section4_link" class="stretched-link" data-bs-toggle="modal" data-bs-target="#myModal" style="opacity: 0; overflow: hidden; height: 0; width: 0; display: block;">Modal</a>
                                         </div>
-                                        <a href="#" id="picture6Section4_link" class="stretched-link" data-bs-toggle="modal" data-bs-target="#myModal" style="opacity: 0; overflow: hidden; height: 0; width: 0; display: block;">Modal</a>
                                     </div>
                                 </div>
                             </div>
                         </div>
+
                     </div>
 
-                </div>
+                    <!--Section 5 : Contact propriétaire-->
+                    <div id="section5" class="card-body d-none">
 
-                <!--Section 5 : Contact propriétaire-->
-                <div id="section5" class="card-body d-none">
-
-                    <div class="mb-3">
-                        <label for="emailSection5" class="form-label">E-mail</label>
-                        <input class="form-control" type="text" id="emailSection5" placeholder="ex : villa-florentine@mail.com">
-                    </div>
-
-                    <div class="mb-3">
-                        <label for="emailDisplaySection5" class="form-label">Faire figurer l'e-mail sur le site :</label>
-                        <div class="form-check form-switch" id="emailDisplaySection5">
-                            <input class="form-check-input" type="checkbox" role="switch" id="switchEmailDisplay">
-                            <label class="form-check-label" for="switchEmailDisplay" id="switchEmailDisplayLabel">Non</label>
-                        </div>  
-                    </div>
-
-                    <div class="mb-3">
-                        <label for="phoneSection5" class="form-label">Téléphone</label>
-                        <input class="form-control" type="text" id="phoneSection5" placeholder="ex : +33 (0)6 09 09 09 09">
-                    </div>
-
-                    <div class="mb-3">
-                        <label for="phoneDisplaySection5" class="form-label">Faire figurer le numéro sur le site :</label>
-                        <div class="form-check form-switch" id="phoneDisplaySection5">
-                            <input class="form-check-input" type="checkbox" role="switch" id="switchPhoneDisplay">
-                            <label class="form-check-label" for="switchPhoneDisplay" id="switchPhoneDisplayLabel">Non</label>
-                        </div>  
-                    </div>
-
-                    <div class="mb-3">
-                        <label for="contactPictureSection5" class="form-label">Photo de la section "Nous contacter"</label>
-                        <div class="card" style="width: 18rem; height: 12rem;">
-                            <img id="contactPictureSection5" src="" class="card-img" alt="..." style="-webkit-filter: brightness(70%); filter: brightness(70%); width: 18rem; height: 12rem; object-fit: contain;">
-                            <div class="card-img-overlay d-flex">
-                                <h5 class="card-title text-white align-self-center mx-auto">Sélectionner image</h5>
-                            </div>
-                            <a href="#" id="contactPictureSection5_link" class="stretched-link" data-bs-toggle="modal" data-bs-target="#myModal" style="opacity: 0; overflow: hidden; height: 0; width: 0; display: block;">Modal</a>
+                        <div class="mb-3">
+                            <label for="emailSection5" class="form-label">E-mail</label>
+                            <input class="form-control" type="text" id="emailSection5" placeholder="ex : villa-florentine@mail.com">
                         </div>
-                    </div>
-                    
-                </div>
 
-                <!--Section 6 : Liens externes-->
-                <div id="section6" class="card-body d-none">
+                        <div class="mb-3">
+                            <label for="emailDisplaySection5" class="form-label">Faire figurer l'e-mail sur le site :</label>
+                            <div class="form-check form-switch" id="emailDisplaySection5">
+                                <input class="form-check-input" type="checkbox" role="switch" id="switchEmailDisplay">
+                                <label class="form-check-label" for="switchEmailDisplay" id="switchEmailDisplayLabel">Non</label>
+                            </div>  
+                        </div>
 
-                    <div class="mb-3">
-                        <p>Indiquez les divers liens que vous souhaitez partager sur votre site.</p>
-                    </div>
+                        <div class="mb-3">
+                            <label for="phoneSection5" class="form-label">Téléphone</label>
+                            <input class="form-control" type="text" id="phoneSection5" placeholder="ex : +33 (0)6 09 09 09 09">
+                        </div>
 
-                    <div class="mb-3">
-                        <h5>Réseaux sociaux</h5>
-                    </div>
+                        <div class="mb-3">
+                            <label for="phoneDisplaySection5" class="form-label">Faire figurer le numéro sur le site :</label>
+                            <div class="form-check form-switch" id="phoneDisplaySection5">
+                                <input class="form-check-input" type="checkbox" role="switch" id="switchPhoneDisplay">
+                                <label class="form-check-label" for="switchPhoneDisplay" id="switchPhoneDisplayLabel">Non</label>
+                            </div>  
+                        </div>
 
-                    <div class="mb-3">
-                        <label for="instaSection6" class="form-label">Instagram</label>
-                        <input class="form-control" type="text" id="instaSection6" placeholder="ex : instagram.com/villa.florentine">
-                    </div>
-
-                    <div class="mb-3">
-                        <label for="fbSection6" class="form-label">Facebook</label>
-                        <input class="form-control" type="text" id="fbSection6" placeholder="ex : facebook.com/villa.florentine">
-                    </div>
-
-                    <div class="mt-4">
-                        <hr class="bg-dark border-top border-dark" />
-                    </div>
-
-                    <div class="mb-3">
-                        <h5>Plateformes de location</h5>
-                    </div>
-
-                    <div class="mb-3">
-                        <label for="bookingSection6" class="form-label">Booking.com</label>
-                        <input class="form-control" type="text" id="bookingSection6" placeholder="ex : booking.com/hotel/fr/villa.florentine">
+                        <div class="mb-3">
+                            <label for="contactPictureSection5" class="form-label">Photo de la section "Nous contacter"</label>
+                            <div class="card" style="width: 18rem; height: 12rem;">
+                                <img id="contactPictureSection5" src="" class="card-img" alt="..." style="-webkit-filter: brightness(70%); filter: brightness(70%); width: 18rem; height: 12rem; object-fit: contain;">
+                                <div class="card-img-overlay d-flex">
+                                    <h5 class="card-title text-white align-self-center mx-auto">Sélectionner image</h5>
+                                </div>
+                                <a href="#" id="contactPictureSection5_link" class="stretched-link" data-bs-toggle="modal" data-bs-target="#myModal" style="opacity: 0; overflow: hidden; height: 0; width: 0; display: block;">Modal</a>
+                            </div>
+                        </div>
+                        
                     </div>
 
-                    <div class="mb-3">
-                        <label for="airbnbSection6" class="form-label">Airbnb</label>
-                        <input class="form-control" type="text" id="airbnbSection6" placeholder="ex : airbnb.fr/rooms/553408749542273496">
-                    </div>
+                    <!--Section 6 : Liens externes-->
+                    <div id="section6" class="card-body d-none">
 
-                    <div class="mb-3">
-                        <label for="gitesfrSection6" class="form-label">Gites.fr</label>
-                        <input class="form-control" type="text" id="gitesfrSection6" placeholder="ex : gites.fr/gi94796">
-                    </div>
+                        <div class="mb-3">
+                            <p>Indiquez les divers liens que vous souhaitez partager sur votre site.</p>
+                        </div>
 
-                    <div class="mb-3">
-                        <label for="chambreshotesfrSection6" class="form-label">Chambres-hotes.fr</label>
-                        <input class="form-control" type="text" id="chambreshotesfrSection6" placeholder="ex : chambres-hotes.fr/ch96485">
+                        <div class="mb-3">
+                            <h5>Réseaux sociaux</h5>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="instaSection6" class="form-label">Instagram</label>
+                            <input class="form-control" type="text" id="instaSection6" placeholder="ex : instagram.com/villa.florentine">
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="fbSection6" class="form-label">Facebook</label>
+                            <input class="form-control" type="text" id="fbSection6" placeholder="ex : facebook.com/villa.florentine">
+                        </div>
+
+                        <div class="mt-4">
+                            <hr class="bg-dark border-top border-dark" />
+                        </div>
+
+                        <div class="mb-3">
+                            <h5>Plateformes de location</h5>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="bookingSection6" class="form-label">Booking.com</label>
+                            <input class="form-control" type="text" id="bookingSection6" placeholder="ex : booking.com/hotel/fr/villa.florentine">
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="airbnbSection6" class="form-label">Airbnb</label>
+                            <input class="form-control" type="text" id="airbnbSection6" placeholder="ex : airbnb.fr/rooms/553408749542273496">
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="gitesfrSection6" class="form-label">Gites.fr</label>
+                            <input class="form-control" type="text" id="gitesfrSection6" placeholder="ex : gites.fr/gi94796">
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="chambreshotesfrSection6" class="form-label">Chambres-hotes.fr</label>
+                            <input class="form-control" type="text" id="chambreshotesfrSection6" placeholder="ex : chambres-hotes.fr/ch96485">
+                        </div>
+                        
                     </div>
-                    
-                </div>
-                <button type="submit" class="btn btn-primary">Submit</button>
+                    <button type="submit" class="btn btn-primary">Submit</button>
                 </form>
             </div>
 
