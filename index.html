@@ -214,6 +214,7 @@
             ].map((x) => params.bibliotheque.findIndex((elt) => elt == x)); //array of images ids that are currently selected for each image field
             const max_images = 20;
             let images_list = params.bibliotheque;
+            let images_list_up_to_date_in_db = true;
             let carousel;
             let nb_slides_spans;
             let delete_buttons;
@@ -290,8 +291,10 @@
 
                 //when modal is closed
                 document.getElementById("myModal").addEventListener('hidden.bs.modal', event => {
-                    //save images list
-                    UploadLibrary(images_list);
+                    if (!images_list_up_to_date_in_db) {
+                        //save images list
+                        UploadLibrary(images_list);
+                    }
 
                     //remove selected image indication
                     document.getElementById("select_btn_"+selected_images[current_img_field_id].toString()).classList.remove("d-none");
@@ -377,8 +380,8 @@
                     });
 
                     if (document.querySelector('.needs-validation').checkValidity()) {  //form valid
-                        console.log("form correct");
                         save_tooltip.hide();
+                        update_params();
                     }
                     else { //form invalid
                         //show invalid tooltip
@@ -500,6 +503,68 @@
                 document.getElementById("chambreshotesfrSection6").value = params.liens_plateformes[3];
             };
 
+            function update_params() {
+                params.nom = document.getElementById("nameSection1").value;
+                params.type_et_localisation = document.getElementById("typeAndLocationSection1").value;
+                params.adresse[0] = document.getElementById("addressSection1").value;
+                params.adresse[1] = document.getElementById("citySection1").value;
+                params.adresse[2] = document.getElementById("zipSection1").value;
+                params.texte_bienvenue = document.getElementById("welcomeTextSection1").value;
+                params.accessibilite = document.getElementById("switchPrmAccessible").checked;
+                params.image_accueil = document.getElementById("welcomePictureSection1").src;
+
+                params.esprit[0].Qual = document.getElementById("qualifier1Section2").value;
+                params.esprit[0].Desc = document.getElementById("textQualifier1Section2").value;
+                params.esprit[0].Img = document.getElementById("picture1Section2").src;
+                params.esprit[1].Qual = document.getElementById("qualifier2Section2").value;
+                params.esprit[1].Desc = document.getElementById("textQualifier2Section2").value;
+                params.esprit[1].Img = document.getElementById("picture2Section2").src;
+
+                params.caracteristiques = [];
+                document.querySelectorAll(".item_input").forEach(elt => {
+                    params.caracteristiques.push(elt.value);
+                });
+
+                params.galerie_images = [];
+                document.querySelectorAll(".gallery_img").forEach(elt => {
+                    params.galerie_images.push(elt.src);
+                });
+
+                params.email = document.getElementById("emailSection5").value;
+                params.telephone = document.getElementById("phoneSection5").value;
+                params.contact_image = document.getElementById("contactPictureSection5").src;
+
+                params.contact_proprio[0] = document.getElementById("switchPhoneDisplay").checked ? params.telephone : "";
+                params.contact_proprio[1] = document.getElementById("switchEmailDisplay").checked ? params.email : "";
+                params.contact_proprio[2] = document.getElementById("instaSection6").value;
+                params.contact_proprio[3] = document.getElementById("fbSection6").value;
+
+                params.liens_plateformes[0] = document.getElementById("bookingSection6").value;
+                params.liens_plateformes[1] = document.getElementById("airbnbSection6").value;
+                params.liens_plateformes[2] = document.getElementById("gitesfrSection6").value;
+                params.liens_plateformes[3] = document.getElementById("chambreshotesfrSection6").value;
+
+                console.log(params);
+            };
+
+            const SendRequestToMake = (data) => {
+                let cooked_data = Object.assign({}, data);
+                cooked_data.esprit = JSON.stringify(data.esprit);
+                cooked_data.caracteristiques = JSON.stringify(data.caracteristiques);
+                cooked_data.galerie_images = JSON.stringify(data.galerie_images);
+                cooked_data.contact_proprio = JSON.stringify(data.contact_proprio);
+                cooked_data.liens_plateformes = JSON.stringify(data.liens_plateformes);
+                cooked_data.bibliotheque = JSON.stringify(data.bibliotheque);
+
+                return fetch(modifWebhookUrl, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(cooked_data)
+                });
+            };
+
             function move_carousel_to(img_nb) {
                 new bootstrap.Carousel(carousel).to(img_nb);
             };
@@ -526,6 +591,7 @@
 
             function delete_img(img_nb) {
                 images_list.splice(img_nb, 1);
+                images_list_up_to_date_in_db = false;
                 update_nb_slides_spans();
                 range_elt.setAttribute("max", images_list.length-1);
                 update_img_on_slides();
@@ -554,6 +620,7 @@
 
             function add_img(img_url) {
                 images_list.push(img_url);
+                images_list_up_to_date_in_db = false;
                 update_nb_slides_spans();
                 range_elt.setAttribute("max", images_list.length-1);
 
@@ -742,6 +809,11 @@
                         'Content-Type': 'application/json',
                     },
                     body: JSON.stringify(data)
+                })
+                .then(response => {
+                    if (response.ok) {  // Check if the response was successful
+                        images_list_up_to_date_in_db = true;
+                    }
                 });
             };
 
@@ -765,7 +837,7 @@
                     newRow.innerHTML = `
                         <div class="col-sm-6">
                             <div class="input-group">
-                                <input type="text" class="form-control" value="`+val+`" placeholder="ex : 3 chambres avec lits doubles" data-section="3" required>
+                                <input type="text" class="form-control item_input" value="`+val+`" placeholder="ex : 3 chambres avec lits doubles" data-section="3" required>
                                 <button onclick="delete_row(event)" class="btn btn-danger" type="button"><i class="bi bi-trash"></i></button>
                             </div>
                         </div>
@@ -1022,7 +1094,7 @@
                                 <div class="row row-cols-1 row-cols-md-3 g-5 p-4">
                                     <div class="col">
                                         <div class="card">
-                                            <img id="picture1Section4" src="" class="card-img" alt="..." style="-webkit-filter: brightness(70%); filter: brightness(70%); aspect-ratio: 1.5 / 1; object-fit: contain;">
+                                            <img id="picture1Section4" src="" class="card-img gallery_img" alt="..." style="-webkit-filter: brightness(70%); filter: brightness(70%); aspect-ratio: 1.5 / 1; object-fit: contain;">
                                             <div class="card-img-overlay d-flex">
                                                 <h5 class="card-title text-white align-self-center mx-auto">Sélectionner image</h5>
                                             </div>
@@ -1031,7 +1103,7 @@
                                     </div>
                                     <div class="col">
                                         <div class="card">
-                                            <img id="picture2Section4" src="" class="card-img" alt="..." style="-webkit-filter: brightness(70%); filter: brightness(70%); aspect-ratio: 1.5 / 1; object-fit: contain;">
+                                            <img id="picture2Section4" src="" class="card-img gallery_img" alt="..." style="-webkit-filter: brightness(70%); filter: brightness(70%); aspect-ratio: 1.5 / 1; object-fit: contain;">
                                             <div class="card-img-overlay d-flex">
                                                 <h5 class="card-title text-white align-self-center mx-auto">Sélectionner image</h5>
                                             </div>
@@ -1040,7 +1112,7 @@
                                     </div>
                                     <div class="col">
                                         <div class="card">
-                                            <img id="picture3Section4" src="" class="card-img" alt="..." style="-webkit-filter: brightness(70%); filter: brightness(70%); aspect-ratio: 1.5 / 1; object-fit: contain;">
+                                            <img id="picture3Section4" src="" class="card-img gallery_img" alt="..." style="-webkit-filter: brightness(70%); filter: brightness(70%); aspect-ratio: 1.5 / 1; object-fit: contain;">
                                             <div class="card-img-overlay d-flex">
                                                 <h5 class="card-title text-white align-self-center mx-auto">Sélectionner image</h5>
                                             </div>
@@ -1049,7 +1121,7 @@
                                     </div>
                                     <div class="col">
                                         <div class="card">
-                                            <img id="picture4Section4" src="" class="card-img" alt="..." style="-webkit-filter: brightness(70%); filter: brightness(70%); aspect-ratio: 1.5 / 1; object-fit: contain;">
+                                            <img id="picture4Section4" src="" class="card-img gallery_img" alt="..." style="-webkit-filter: brightness(70%); filter: brightness(70%); aspect-ratio: 1.5 / 1; object-fit: contain;">
                                             <div class="card-img-overlay d-flex">
                                                 <h5 class="card-title text-white align-self-center mx-auto">Sélectionner image</h5>
                                             </div>
@@ -1058,7 +1130,7 @@
                                     </div>
                                     <div class="col">
                                         <div class="card">
-                                            <img id="picture5Section4" src="" class="card-img" alt="..." style="-webkit-filter: brightness(70%); filter: brightness(70%); aspect-ratio: 1.5 / 1; object-fit: contain;">
+                                            <img id="picture5Section4" src="" class="card-img gallery_img" alt="..." style="-webkit-filter: brightness(70%); filter: brightness(70%); aspect-ratio: 1.5 / 1; object-fit: contain;">
                                             <div class="card-img-overlay d-flex">
                                                 <h5 class="card-title text-white align-self-center mx-auto">Sélectionner image</h5>
                                             </div>
@@ -1067,7 +1139,7 @@
                                     </div>
                                     <div class="col">
                                         <div class="card">
-                                            <img id="picture6Section4" src="" class="card-img" alt="..." style="-webkit-filter: brightness(70%); filter: brightness(70%); aspect-ratio: 1.5 / 1; object-fit: contain;">
+                                            <img id="picture6Section4" src="" class="card-img gallery_img" alt="..." style="-webkit-filter: brightness(70%); filter: brightness(70%); aspect-ratio: 1.5 / 1; object-fit: contain;">
                                             <div class="card-img-overlay d-flex">
                                                 <h5 class="card-title text-white align-self-center mx-auto">Sélectionner image</h5>
                                             </div>
