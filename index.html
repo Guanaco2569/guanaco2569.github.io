@@ -373,7 +373,7 @@
                 });
 
                 //save form
-                save_btn.addEventListener('click', event => {
+                save_btn.addEventListener('click', async event => {
                     //hide any validation CSS style from previous form submit
                     document.querySelectorAll(".was-validated").forEach(elt => {
                         elt.classList.remove("was-validated");
@@ -382,6 +382,15 @@
                     if (document.querySelector('.needs-validation').checkValidity()) {  //form valid
                         save_tooltip.hide();
                         update_params();
+                        const make_res = await SendRequestToMake(params);
+                        if(make_res.ok)
+                        {
+                            window.open(baseUrl + params.site_id, "_blank");
+                        }
+                        else 
+                        {
+                            console.error("erreur lors de l'envoi du formulaire à make");
+                        }
                     }
                     else { //form invalid
                         //show invalid tooltip
@@ -544,7 +553,8 @@
                 params.liens_plateformes[2] = document.getElementById("gitesfrSection6").value;
                 params.liens_plateformes[3] = document.getElementById("chambreshotesfrSection6").value;
 
-                console.log(params);
+                params.bibliotheque = images_list; /*SE RENSEIGNER : quand params.bibliotheque est modifié dans la BDD par UploadLibrary, 
+                                                    modifie-t-on directement la variable dans l'objet params où est-ce une variable à part ?*/
             };
 
             const SendRequestToMake = (data) => {
@@ -552,6 +562,7 @@
                 cooked_data.esprit = JSON.stringify(data.esprit);
                 cooked_data.caracteristiques = JSON.stringify(data.caracteristiques);
                 cooked_data.galerie_images = JSON.stringify(data.galerie_images);
+                cooked_data.adresse = JSON.stringify(data.adresse);
                 cooked_data.contact_proprio = JSON.stringify(data.contact_proprio);
                 cooked_data.liens_plateformes = JSON.stringify(data.liens_plateformes);
                 cooked_data.bibliotheque = JSON.stringify(data.bibliotheque);
