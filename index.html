@@ -230,6 +230,7 @@
             let nb_fields_span;
             let copy_link_btn;
             let save_btn;
+            let published_modal;
             const img_field_id_to_html_id = [ //array that associates image field id to its HTML element id
                 "welcomePictureSection1",
                 "picture1Section2",
@@ -251,6 +252,7 @@
                 nb_fields_span = document.getElementById("nb_fields");
                 copy_link_btn = document.getElementById("copy_link_btn");
                 save_btn = document.getElementById("save_btn");
+                published_modal = new bootstrap.Modal(document.getElementById('published_modal'));
 
                 //initialize delete tooltips
                 tooltipTriggerList = document.getElementsByClassName("delete_tooltip");
@@ -381,6 +383,7 @@
 
                     if (document.querySelector('.needs-validation').checkValidity()) {  //form valid
                         save_tooltip.hide();
+                        published_modal.show();
                         save_btn.disabled = true;
                         const save_btn_width = save_btn.offsetWidth;
                         save_btn.innerHTML = "En cours...";
@@ -393,10 +396,12 @@
                         if(make_res.ok)
                         {
                             //window.open(baseUrl + params.site_id, "_blank");
+                            //published_modal.show();
                         }
                         else 
                         {
                             console.error("erreur lors de l'envoi du formulaire à make");
+                            //afficher tooltip "une erreur est survenue, veuillez réessayer plus tard"
                         }
                     }
                     else { //form invalid
@@ -1267,9 +1272,9 @@
         </div>
           
         <!-- The Modal -->
-        <div class="modal fade" id="myModal">
+        <div class="modal fade" tabindex="-1" id="myModal">
             <div class="modal-dialog modal-dialog-centered">
-                <div class="modal-content">
+                <div class="modal-content shadow">
             
                     <!-- Modal Header -->
                     <div class="modal-header">
@@ -1362,6 +1367,44 @@
                 </div>
             </div>
         </div>
+
+        <div class="modal fade" tabindex="-1" id="published_modal">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content shadow">
+                  <div class="modal-header border-bottom-0">
+                    <h1 class="modal-title fs-5" style="position: absolute; left: 0; right: 0; margin-inline: auto; width: fit-content;">Publié !</h1>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                  </div>
+                  <div class="modal-body py-0">
+                    <p>This is a modal sheet, a variation of the modal that docs itself to the bottom of the viewport like the newer share sheets in iOS.</p>
+                  </div>
+                  <div class="modal-footer flex-column align-items-stretch w-100 gap-2 pb-3 border-top-0">
+                    <button type="button" class="btn btn-lg btn-primary">Save changes</button>
+                    <button type="button" class="btn btn-lg btn-secondary" data-bs-dismiss="modal">Close</button>
+                  </div>
+                </div>
+              </div>
+          </div>
+
+
+          <div class="modal fade" tabindex="-1">
+            <div class="modal-dialog modal-dialog-centered">
+              <div class="modal-content">
+                <div class="modal-header">
+                  <h5 class="modal-title">Publié !</h5>
+                  <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                  <p>Modal body text goes here.</p>
+                </div>
+                <div class="modal-footer">
+                  <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                  <button type="button" class="btn btn-primary">Save changes</button>
+                </div>
+              </div>
+            </div>
+          </div>
+          
 
         <!--<div class="container mt-auto">
             <footer class="py-3 border-top">
