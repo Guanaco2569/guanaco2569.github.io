@@ -339,7 +339,7 @@
 
             function init_form_values() {
                 //PICTURES OF ALL SECTIONS
-
+                
                 document.getElementById("welcomePictureSection1").src = images_list[selected_images[0]];
                 document.getElementById("welcomePictureSection1_link").addEventListener("click", (ev) => {
                     ev.preventDefault();
@@ -464,28 +464,27 @@
                 params.adresse[2] = document.getElementById("zipSection1").value;
                 params.texte_bienvenue = document.getElementById("welcomeTextSection1").value;
                 params.accessibilite = document.getElementById("switchPrmAccessible").checked;
-                params.image_accueil = document.getElementById("welcomePictureSection1").src;
+                params.image_accueil = images_list[selected_images[0]];
 
                 params.esprit[0].Qual = document.getElementById("qualifier1Section2").value;
                 params.esprit[0].Desc = document.getElementById("textQualifier1Section2").value;
-                params.esprit[0].Img = document.getElementById("picture1Section2").src;
+                params.esprit[0].Img = images_list[selected_images[1]];
                 params.esprit[1].Qual = document.getElementById("qualifier2Section2").value;
                 params.esprit[1].Desc = document.getElementById("textQualifier2Section2").value;
-                params.esprit[1].Img = document.getElementById("picture2Section2").src;
+                params.esprit[1].Img = images_list[selected_images[2]];
 
                 params.caracteristiques = [];
                 document.querySelectorAll(".item_input").forEach(elt => {
                     params.caracteristiques.push(elt.value);
                 });
 
-                params.galerie_images = [];
-                document.querySelectorAll(".gallery_img").forEach(elt => {
-                    params.galerie_images.push(elt.src);
-                });
+                for (let i = 0; i < params.galerie_images.length; i++) {
+                    params.galerie_images[i] = images_list[selected_images[i+3]];
+                }
 
                 params.email = document.getElementById("emailSection5").value;
                 params.telephone = document.getElementById("phoneSection5").value;
-                params.contact_image = document.getElementById("contactPictureSection5").src;
+                params.contact_image = images_list[selected_images[9]];
 
                 params.contact_proprio[0] = document.getElementById("switchPhoneDisplay").checked ? params.telephone : "";
                 params.contact_proprio[1] = document.getElementById("switchEmailDisplay").checked ? params.email : "";
