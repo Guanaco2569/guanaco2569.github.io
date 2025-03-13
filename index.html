@@ -992,7 +992,7 @@
                             <a id="link_sect_2" onclick="go_to_section(2, event)" class="nav-link" href="#">Description</a>
                         </li>
                         <li class="nav-item">
-                            <a id="link_sect_3" onclick="go_to_section(3, event)" class="nav-link" href="#">Caractéristiques</a>
+                            <a id="link_sect_3" onclick="go_to_section(3, event)" class="nav-link" href="#">Équipements</a>
                         </li>
                         <li class="nav-item">
                             <a id="link_sect_4" onclick="go_to_section(4, event)" class="nav-link" href="#">Galerie photos</a>
@@ -1079,7 +1079,17 @@
                     <div id="section2" class="card-body d-none">
 
                         <div class="mb-3">
-                            <h5>Premier qualificatif</h5>
+                            <div class="alert alert-primary" role="alert">
+                                <h4 class="alert-heading">Pour valoriser votre logement :</h4>
+                                <ul class="mb-0">
+                                    <li>Choisissez 2 adjectifs qui décrivent le mieux votre logement (ex : calme, spacieux).</li>
+                                    <li>Pour chaque adjectif, développez avec un court texte et illustrez-le par une photo de votre logement.</li>
+                                </ul>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <h5>Premier adjectif</h5>
                         </div>
 
                         <div class="mb-3">
@@ -1088,7 +1098,7 @@
                         </div>
 
                         <div class="mb-3">
-                            <label for="textQualifier1Section2" class="form-label">Développez avec un court texte</label>
+                            <label for="textQualifier1Section2" class="form-label">Développez en 2-3 phrases max. :</label>
                             <textarea class="form-control" id="textQualifier1Section2" name="text" maxlength="200" 
                             placeholder="ex : La Villa Florentine a été entièrement rénovée l'année dernière. Elle possède les équipements les plus récents dans chacune de ses pièces." 
                             rows="4" aria-describedby="countHelp1Section2" data-section="2" required></textarea>
@@ -1111,7 +1121,7 @@
                         </div>
 
                         <div class="mb-3">
-                            <h5>Second qualificatif</h5>
+                            <h5>Second adjectif</h5>
                         </div>
 
                         <div class="mb-3">
@@ -1120,7 +1130,7 @@
                         </div>
 
                         <div class="mb-3">
-                            <label for="textQualifier2Section2" class="form-label">Développez avec un court texte</label>
+                            <label for="textQualifier2Section2" class="form-label">Développez en 2-3 phrases max. :</label>
                             <textarea class="form-control" id="textQualifier2Section2" name="text" maxlength="200" 
                             placeholder="ex : La Villa Florentine offre des espaces ouverts et lumineux, créant ainsi une atmosphère chaleureuse et propice aux moments de partage." 
                             rows="4" aria-describedby="countHelp2Section2" data-section="2" required></textarea>
@@ -1140,11 +1150,11 @@
 
                     </div>
 
-                    <!--Section 3 : Caractéristiques-->
+                    <!--Section 3 : Équipements-->
                     <div id="section3" class="card-body d-none">
 
                         <div class="mb-3">
-                            <p>Indiquez les divers éléments de votre logement (chambres, couchages, WiFi, parking, etc). Maximum 12 éléments.</p>
+                            <p>Indiquez les équipements de votre logement (WiFi, parking, clim, etc). Maximum 12 éléments.</p>
                         </div>
                             
                         <div id="newinput"></div>
@@ -1334,7 +1344,7 @@
                     <div id="section7" class="card-body d-none">
 
                         <div class="mb-3">
-                            <p>Choisissez le thème visuel que vous souhaitez appliquer à votre site.</p>
+                            <p>Choisissez le thème visuel que vous souhaitez activer sur votre site.</p>
                             <!--<span class="badge text-bg-primary fs-6">Thème actuel : <strong id="current_theme"></strong></span>-->
                             <p>Thème actif : <strong id="current_theme"></strong></p>
                         </div>
