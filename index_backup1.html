@@ -248,9 +248,8 @@
             const themes_names_and_images = [
                 ["Fluffy", "https://akobo.fr/wp-content/uploads/2025/03/template1.png"],
                 ["Baron", "https://akobo.fr/wp-content/uploads/2025/03/template2.png"],
-                ["Personnalisé", "https://akobo.fr/wp-content/uploads/2025/03/custom.png"]
+                ["Personnalisé", "https://akobo.fr/wp-content/uploads/2025/03/custom_theme.png"]
             ];
-            let theme_modal;
 
             document.addEventListener("DOMContentLoaded", (event) => {
                 nb_slides_spans = document.getElementsByClassName("nb_slides");
@@ -261,7 +260,6 @@
                 copy_link_btn = document.getElementById("copy_link_btn");
                 save_btn = document.getElementById("save_btn");
                 published_modal = new bootstrap.Modal(document.getElementById('published_modal'));
-                theme_modal = new bootstrap.Modal(document.getElementById('themeModal'));
 
                 //initialize delete tooltips
                 tooltipTriggerList = document.getElementsByClassName("delete_tooltip");
@@ -893,23 +891,14 @@
                 document.getElementById("add_row_btn").disabled = false;
             };
 
-            function select_theme(theme_nb, ev=-1) {
-                if (ev != -1) {
-                    ev.preventDefault();
-                    
-                    if (theme_nb == current_theme) {
-                        set_up_theme_modal_before_opening(theme_nb);
-                        theme_modal.show();
-                    }
-                }
-
+            function select_theme(theme_nb) {
                 document.getElementById("thumbnail_theme_"+current_theme.toString()).classList.remove("border", "border-primary", "border-3", "rounded-3");
-                document.querySelector("#col_theme_"+current_theme.toString()+" > span").classList.add("d-none");
-                document.querySelector("#col_theme_"+current_theme.toString()+" > button").classList.remove("d-none");
+                document.querySelector("#thumbnail_theme_"+current_theme.toString()+" .fs-5").classList.remove("d-none");
+                document.querySelector("#thumbnail_theme_"+current_theme.toString()+" .fs-6").classList.add("d-none");
                 current_theme = theme_nb;
                 document.getElementById("thumbnail_theme_"+current_theme.toString()).classList.add("border", "border-primary", "border-3", "rounded-3");
-                document.querySelector("#col_theme_"+current_theme.toString()+" > span").classList.remove("d-none");
-                document.querySelector("#col_theme_"+current_theme.toString()+" > button").classList.add("d-none");
+                document.querySelector("#thumbnail_theme_"+current_theme.toString()+" .fs-5").classList.add("d-none");
+                document.querySelector("#thumbnail_theme_"+current_theme.toString()+" .fs-6").classList.remove("d-none");
                 document.getElementById("current_theme").textContent = themes_names_and_images[theme_nb][0];
             };
 
@@ -1347,38 +1336,57 @@
                         </div>
                         
                         <div class="row row-cols-1 row-cols-md-4 g-5 p-4">
-                            <div id="col_theme_0" class="col">
+                            <div class="col">
                                 <div id="thumbnail_theme_0" class="card rounded-bottom-0">
                                     <div class="card-body py-2">
                                         <span class="card-title fs-5 my-0">Fluffy</span>
                                     </div>
                                     <img id="picture1Section7" src="https://akobo.fr/wp-content/uploads/2025/03/template1.png" class="card-img-bottom border-top gallery_img" alt="..." style="aspect-ratio: 1.7 / 1; object-fit: cover; object-position: top;">
-                                    <a onclick="select_theme(0, event)" href="#" id="picture1Section7_link" class="stretched-link" style="opacity: 0; overflow: hidden; height: 0; width: 0; display: block;">Modal</a>
+                                    <!--<div class="card-img-overlay d-flex">
+                                        <h5 class="card-title text-white align-self-center mx-auto">Voir plus <i class="bi bi-zoom-in"></i></h5>
+                                    </div>-->
+                                    <a onclick="set_up_theme_modal_before_opening(0)" href="#" id="picture1Section7_link" class="stretched-link" data-bs-toggle="modal" data-bs-target="#themeModal" style="opacity: 0; overflow: hidden; height: 0; width: 0; display: block;">Modal</a>
                                 </div>
-                                <span class="badge text-bg-primary card-title fs-6 my-0 w-100 rounded-top-0 d-none">Thème actif <i class="bi bi-check"></i></span>
-                                <button onclick="set_up_theme_modal_before_opening(0)" type="button" class="btn btn-dark btn-sm w-100 rounded-top-0" data-bs-toggle="modal" data-bs-target="#themeModal">Voir plus <i class="bi bi-zoom-in"></i></button>
+                                <!--<span class="badge text-bg-primary card-title fs-6 my-0 w-100 rounded-top-0">Thème actif <i class="bi bi-check"></i></span>-->
+                                <button type="button" class="btn btn-dark btn-sm w-100 rounded-top-0">Voir plus <i class="bi bi-zoom-in"></i></button>
+
+                                <!--<div id="thumbnail_theme_0" class="card">
+                                    <img id="picture1Section7" src="https://akobo.fr/wp-content/uploads/2025/03/template1.png" class="card-img gallery_img rounded-bottom-0" alt="..." style="-webkit-filter: brightness(70%); filter: brightness(70%); aspect-ratio: 1.5 / 1; object-fit: cover; object-position: top;">
+                                    <div class="card-img-overlay d-flex">
+                                        <h5 class="card-title text-white align-self-center mx-auto">Voir plus <i class="bi bi-zoom-in"></i></h5>
+                                    </div>
+                                    <a onclick="set_up_theme_modal_before_opening(0)" href="#" id="picture1Section7_link" class="stretched-link" data-bs-toggle="modal" data-bs-target="#themeModal" style="opacity: 0; overflow: hidden; height: 0; width: 0; display: block;">Modal</a>
+                                    <div class="card-body text-center py-2">
+                                        <span class="card-title fs-5 my-0">Fluffy</span>
+                                        <span class="badge text-bg-primary card-title fs-6 my-0 d-none">Fluffy <i class="bi bi-check"></i></span>
+                                    </div>                                    
+                                </div>-->
                             </div>
-                            <div id="col_theme_1" class="col">
-                                <div id="thumbnail_theme_1" class="card rounded-bottom-0">
-                                    <div class="card-body py-2">
+                            <div class="col">
+                                <div id="thumbnail_theme_1" class="card">
+                                    <img id="picture2Section7" src="https://akobo.fr/wp-content/uploads/2025/03/template2.png" class="card-img gallery_img rounded-bottom-0" alt="..." style="-webkit-filter: brightness(70%); filter: brightness(70%); aspect-ratio: 1.5 / 1; object-fit: cover; object-position: top;">
+                                    <div class="card-img-overlay d-flex">
+                                        <h5 class="card-title text-white align-self-center mx-auto">Voir plus <i class="bi bi-zoom-in"></i></h5>
+                                    </div>
+                                    <a onclick="set_up_theme_modal_before_opening(1)" href="#" id="picture2Section7_link" class="stretched-link" data-bs-toggle="modal" data-bs-target="#themeModal" style="opacity: 0; overflow: hidden; height: 0; width: 0; display: block;">Modal</a>
+                                    <div class="card-body text-center py-2">
                                         <span class="card-title fs-5 my-0">Baron</span>
-                                    </div>
-                                    <img id="picture2Section7" src="https://akobo.fr/wp-content/uploads/2025/03/template2.png" class="card-img-bottom border-top gallery_img" alt="..." style="aspect-ratio: 1.7 / 1; object-fit: cover; object-position: top;">
-                                    <a onclick="select_theme(1, event)" href="#" id="picture2Section7_link" class="stretched-link" style="opacity: 0; overflow: hidden; height: 0; width: 0; display: block;">Modal</a>
+                                        <span class="badge text-bg-primary card-title fs-6 my-0 d-none">Thème actif <i class="bi bi-check"></i></span>
+                                    </div>                                    
                                 </div>
-                                <span class="badge text-bg-primary card-title fs-6 my-0 w-100 rounded-top-0 d-none">Thème actif <i class="bi bi-check"></i></span>
-                                <button onclick="set_up_theme_modal_before_opening(1)" type="button" class="btn btn-dark btn-sm w-100 rounded-top-0" data-bs-toggle="modal" data-bs-target="#themeModal">Voir plus <i class="bi bi-zoom-in"></i></button>
                             </div>
-                            <div id="col_theme_2" class="col">
-                                <div id="thumbnail_theme_2" class="card rounded-bottom-0">
-                                    <div class="card-body py-2">
-                                        <span class="card-title fs-5 my-0">Personnalisé</span>
+                            <div class="col">
+                                <div id="thumbnail_theme_2" class="card">
+                                    <img id="picture3Section7" src="https://akobo.fr/wp-content/uploads/2025/03/custom_theme.png" class="card-img gallery_img rounded-bottom-0" alt="..." style="-webkit-filter: brightness(70%); filter: brightness(70%); aspect-ratio: 1.5 / 1; object-fit: cover; object-position: center;">
+                                    <div class="card-img-overlay d-flex">
+                                        <h5 class="card-title text-white align-self-center mx-auto">En savoir plus <i class="bi bi-info-circle-fill"></i></h5>
                                     </div>
-                                    <img id="picture3Section7" src="https://akobo.fr/wp-content/uploads/2025/03/custom.png" class="card-img-bottom border-top gallery_img" alt="..." style="aspect-ratio: 1.7 / 1; object-fit: cover; object-position: center;">
-                                    <a onclick="select_theme(2, event)" href="#" id="picture3Section7_link" class="stretched-link" style="opacity: 0; overflow: hidden; height: 0; width: 0; display: block;">Modal</a>
+                                    <a onclick="set_up_theme_modal_before_opening(2)" href="#" id="picture3Section7_link" class="stretched-link" data-bs-toggle="modal" data-bs-target="#themeModal" style="opacity: 0; overflow: hidden; height: 0; width: 0; display: block;">Modal</a>
+                                    <div class="card-body text-center py-2">
+                                        <span class="card-title fs-5 my-0">Personnalisé</span>
+                                        <span class="badge text-bg-primary card-title fs-6 my-0 d-none">Personnalisé <i class="bi bi-check"></i></span>
+                                    </div>                                    
                                 </div>
-                                <span class="badge text-bg-primary card-title fs-6 my-0 w-100 rounded-top-0 d-none">Thème actif <i class="bi bi-check"></i></span>
-                                <button onclick="set_up_theme_modal_before_opening(2)" type="button" class="btn btn-dark btn-sm w-100 rounded-top-0" data-bs-toggle="modal" data-bs-target="#themeModal">En savoir plus <i class="bi bi-question-circle"></i></button>
                             </div>
                         </div>
                         
