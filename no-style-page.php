@@ -129,6 +129,15 @@
             #any_questions:hover {
                 color: #0a58ca;
             }
+
+            .picture_card:hover img {
+                -webkit-filter: brightness(80%);
+                filter: brightness(80%);
+            }
+
+            .picture_card:hover .card-img-overlay h5 {
+                visibility: visible;
+            }
         </style>
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
         <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.3.0/font/bootstrap-icons.css">
@@ -183,8 +192,9 @@
             const themes_names_and_images = [
                 ["Fluffy", "https://akobo.fr/wp-content/uploads/2025/03/template1.png"],
                 ["Baron", "https://akobo.fr/wp-content/uploads/2025/03/template2.png"],
-                ["Personnalisé", "https://akobo.fr/wp-content/uploads/2025/03/custom_theme.png"]
+                ["Personnalisé", "https://akobo.fr/wp-content/uploads/2025/03/custom.png"]
             ];
+            let theme_modal;
 
             document.addEventListener("DOMContentLoaded", (event) => {
                 nb_slides_spans = document.getElementsByClassName("nb_slides");
@@ -195,6 +205,7 @@
                 copy_link_btn = document.getElementById("copy_link_btn");
                 save_btn = document.getElementById("save_btn");
                 published_modal = new bootstrap.Modal(document.getElementById('published_modal'));
+                theme_modal = new bootstrap.Modal(document.getElementById('themeModal'));
 
                 //initialize delete tooltips
                 tooltipTriggerList = document.getElementsByClassName("delete_tooltip");
@@ -826,14 +837,16 @@
                 document.getElementById("add_row_btn").disabled = false;
             };
 
-            function select_theme(theme_nb) {
+            function select_theme(theme_nb, ev=-1) {
+                if (ev != -1) {
+                    ev.preventDefault();
+                }
+
                 document.getElementById("thumbnail_theme_"+current_theme.toString()).classList.remove("border", "border-primary", "border-3", "rounded-3");
-                document.querySelector("#thumbnail_theme_"+current_theme.toString()+" .fs-5").classList.remove("d-none");
-                document.querySelector("#thumbnail_theme_"+current_theme.toString()+" .fs-6").classList.add("d-none");
+                document.querySelector("#thumbnail_theme_"+current_theme.toString()+" .badge").classList.add("d-none");
                 current_theme = theme_nb;
                 document.getElementById("thumbnail_theme_"+current_theme.toString()).classList.add("border", "border-primary", "border-3", "rounded-3");
-                document.querySelector("#thumbnail_theme_"+current_theme.toString()+" .fs-5").classList.add("d-none");
-                document.querySelector("#thumbnail_theme_"+current_theme.toString()+" .fs-6").classList.remove("d-none");
+                document.querySelector("#thumbnail_theme_"+current_theme.toString()+" .badge").classList.remove("d-none");
                 document.getElementById("current_theme").textContent = themes_names_and_images[theme_nb][0];
             };
 
@@ -923,7 +936,7 @@
                             <a id="link_sect_2" onclick="go_to_section(2, event)" class="nav-link" href="#">Description</a>
                         </li>
                         <li class="nav-item">
-                            <a id="link_sect_3" onclick="go_to_section(3, event)" class="nav-link" href="#">Caractéristiques</a>
+                            <a id="link_sect_3" onclick="go_to_section(3, event)" class="nav-link" href="#">Équipements</a>
                         </li>
                         <li class="nav-item">
                             <a id="link_sect_4" onclick="go_to_section(4, event)" class="nav-link" href="#">Galerie photos</a>
@@ -995,9 +1008,9 @@
 
                         <div class="mb-3">
                             <label for="welcomePictureSection1" class="form-label">Photo d'accueil</label>
-                            <div class="card" style="width: 18rem; height: 12rem;">
-                                <img id="welcomePictureSection1" src="" class="card-img" alt="..." style="-webkit-filter: brightness(70%); filter: brightness(70%); width: 18rem; height: 12rem; object-fit: contain;">
-                                <div class="card-img-overlay d-flex">
+                            <div class="card picture_card" style="width: 18rem; height: 12rem;">
+                                <img id="welcomePictureSection1" src="" class="card-img" alt="..." style="width: 18rem; height: 12rem; object-fit: contain; background-color: rgba(0, 0, 0, 0.8);">
+                                <div class="card-img-overlay d-flex" style="visibility: hidden;">
                                     <h5 class="card-title text-white align-self-center mx-auto">Sélectionner image</h5>
                                 </div>
                                 <a href="#" id="welcomePictureSection1_link" class="stretched-link" data-bs-toggle="modal" data-bs-target="#myModal" style="opacity: 0; overflow: hidden; height: 0; width: 0; display: block;">Modal</a>
@@ -1010,7 +1023,17 @@
                     <div id="section2" class="card-body d-none">
 
                         <div class="mb-3">
-                            <h5>Premier qualificatif</h5>
+                            <div class="alert alert-primary" role="alert">
+                                <h4 class="alert-heading">Pour valoriser votre logement :</h4>
+                                <ul class="mb-0">
+                                    <li>Choisissez 2 adjectifs qui décrivent le mieux votre logement (ex : calme, spacieux).</li>
+                                    <li>Pour chaque adjectif, développez avec un court texte et illustrez-le par une photo de votre logement.</li>
+                                </ul>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <h5>Premier adjectif</h5>
                         </div>
 
                         <div class="mb-3">
@@ -1019,7 +1042,7 @@
                         </div>
 
                         <div class="mb-3">
-                            <label for="textQualifier1Section2" class="form-label">Développez avec un court texte</label>
+                            <label for="textQualifier1Section2" class="form-label">Développez en 2-3 phrases max. :</label>
                             <textarea class="form-control" id="textQualifier1Section2" name="text" maxlength="200" 
                             placeholder="ex : La Villa Florentine a été entièrement rénovée l'année dernière. Elle possède les équipements les plus récents dans chacune de ses pièces." 
                             rows="4" aria-describedby="countHelp1Section2" data-section="2" required></textarea>
@@ -1028,9 +1051,9 @@
 
                         <div class="mb-3">
                             <label for="picture1Section2" class="form-label">Photo d'illustration</label>
-                            <div class="card" style="width: 18rem; height: 12rem;">
-                                <img id="picture1Section2" src="" class="card-img" alt="..." style="-webkit-filter: brightness(70%); filter: brightness(70%); width: 18rem; height: 12rem; object-fit: contain;">
-                                <div class="card-img-overlay d-flex">
+                            <div class="card picture_card" style="width: 18rem; height: 12rem;">
+                                <img id="picture1Section2" src="" class="card-img" alt="..." style="width: 18rem; height: 12rem; object-fit: contain; background-color: rgba(0, 0, 0, 0.8);">
+                                <div class="card-img-overlay d-flex" style="visibility: hidden;">
                                     <h5 class="card-title text-white align-self-center mx-auto">Sélectionner image</h5>
                                 </div>
                                 <a href="#" id="picture1Section2_link" class="stretched-link" data-bs-toggle="modal" data-bs-target="#myModal" style="opacity: 0; overflow: hidden; height: 0; width: 0; display: block;">Modal</a>
@@ -1042,7 +1065,7 @@
                         </div>
 
                         <div class="mb-3">
-                            <h5>Second qualificatif</h5>
+                            <h5>Second adjectif</h5>
                         </div>
 
                         <div class="mb-3">
@@ -1051,7 +1074,7 @@
                         </div>
 
                         <div class="mb-3">
-                            <label for="textQualifier2Section2" class="form-label">Développez avec un court texte</label>
+                            <label for="textQualifier2Section2" class="form-label">Développez en 2-3 phrases max. :</label>
                             <textarea class="form-control" id="textQualifier2Section2" name="text" maxlength="200" 
                             placeholder="ex : La Villa Florentine offre des espaces ouverts et lumineux, créant ainsi une atmosphère chaleureuse et propice aux moments de partage." 
                             rows="4" aria-describedby="countHelp2Section2" data-section="2" required></textarea>
@@ -1060,9 +1083,9 @@
 
                         <div class="mb-3">
                             <label for="picture2Section2" class="form-label">Photo d'illustration</label>
-                            <div class="card" style="width: 18rem; height: 12rem;">
-                                <img id="picture2Section2" src="" class="card-img" alt="..." style="-webkit-filter: brightness(70%); filter: brightness(70%); width: 18rem; height: 12rem; object-fit: contain;">
-                                <div class="card-img-overlay d-flex">
+                            <div class="card picture_card" style="width: 18rem; height: 12rem;">
+                                <img id="picture2Section2" src="" class="card-img" alt="..." style="width: 18rem; height: 12rem; object-fit: contain; background-color: rgba(0, 0, 0, 0.8);">
+                                <div class="card-img-overlay d-flex" style="visibility: hidden;">
                                     <h5 class="card-title text-white align-self-center mx-auto">Sélectionner image</h5>
                                 </div>
                                 <a href="#" id="picture2Section2_link" class="stretched-link" data-bs-toggle="modal" data-bs-target="#myModal" style="opacity: 0; overflow: hidden; height: 0; width: 0; display: block;">Modal</a>
@@ -1071,11 +1094,11 @@
 
                     </div>
 
-                    <!--Section 3 : Caractéristiques-->
+                    <!--Section 3 : Équipements-->
                     <div id="section3" class="card-body d-none">
 
                         <div class="mb-3">
-                            <p>Indiquez les divers éléments de votre logement (chambres, couchages, WiFi, parking, etc). Maximum 12 éléments.</p>
+                            <p>Indiquez les équipements de votre logement (WiFi, parking, clim, etc). Maximum 12 éléments.</p>
                         </div>
                             
                         <div id="newinput"></div>
@@ -1097,54 +1120,54 @@
                             <div class="card-body">
                                 <div class="row row-cols-1 row-cols-md-3 g-5 p-4">
                                     <div class="col">
-                                        <div class="card">
-                                            <img id="picture1Section4" src="" class="card-img gallery_img" alt="..." style="-webkit-filter: brightness(70%); filter: brightness(70%); aspect-ratio: 1.5 / 1; object-fit: contain;">
-                                            <div class="card-img-overlay d-flex">
+                                        <div class="card picture_card">
+                                            <img id="picture1Section4" src="" class="card-img gallery_img" alt="..." style="aspect-ratio: 1.5 / 1; object-fit: contain; background-color: rgba(0, 0, 0, 0.8);">
+                                            <div class="card-img-overlay d-flex" style="visibility: hidden;">
                                                 <h5 class="card-title text-white align-self-center mx-auto">Sélectionner image</h5>
                                             </div>
                                             <a href="#" id="picture1Section4_link" class="stretched-link" data-bs-toggle="modal" data-bs-target="#myModal" style="opacity: 0; overflow: hidden; height: 0; width: 0; display: block;">Modal</a>
                                         </div>
                                     </div>
                                     <div class="col">
-                                        <div class="card">
-                                            <img id="picture2Section4" src="" class="card-img gallery_img" alt="..." style="-webkit-filter: brightness(70%); filter: brightness(70%); aspect-ratio: 1.5 / 1; object-fit: contain;">
-                                            <div class="card-img-overlay d-flex">
+                                        <div class="card picture_card">
+                                            <img id="picture2Section4" src="" class="card-img gallery_img" alt="..." style="aspect-ratio: 1.5 / 1; object-fit: contain; background-color: rgba(0, 0, 0, 0.8);">
+                                            <div class="card-img-overlay d-flex" style="visibility: hidden;">
                                                 <h5 class="card-title text-white align-self-center mx-auto">Sélectionner image</h5>
                                             </div>
                                             <a href="#" id="picture2Section4_link" class="stretched-link" data-bs-toggle="modal" data-bs-target="#myModal" style="opacity: 0; overflow: hidden; height: 0; width: 0; display: block;">Modal</a>
                                         </div>
                                     </div>
                                     <div class="col">
-                                        <div class="card">
-                                            <img id="picture3Section4" src="" class="card-img gallery_img" alt="..." style="-webkit-filter: brightness(70%); filter: brightness(70%); aspect-ratio: 1.5 / 1; object-fit: contain;">
-                                            <div class="card-img-overlay d-flex">
+                                        <div class="card picture_card">
+                                            <img id="picture3Section4" src="" class="card-img gallery_img" alt="..." style="aspect-ratio: 1.5 / 1; object-fit: contain; background-color: rgba(0, 0, 0, 0.8);">
+                                            <div class="card-img-overlay d-flex" style="visibility: hidden;">
                                                 <h5 class="card-title text-white align-self-center mx-auto">Sélectionner image</h5>
                                             </div>
                                             <a href="#" id="picture3Section4_link" class="stretched-link" data-bs-toggle="modal" data-bs-target="#myModal" style="opacity: 0; overflow: hidden; height: 0; width: 0; display: block;">Modal</a>
                                         </div>
                                     </div>
                                     <div class="col">
-                                        <div class="card">
-                                            <img id="picture4Section4" src="" class="card-img gallery_img" alt="..." style="-webkit-filter: brightness(70%); filter: brightness(70%); aspect-ratio: 1.5 / 1; object-fit: contain;">
-                                            <div class="card-img-overlay d-flex">
+                                        <div class="card picture_card">
+                                            <img id="picture4Section4" src="" class="card-img gallery_img" alt="..." style="aspect-ratio: 1.5 / 1; object-fit: contain; background-color: rgba(0, 0, 0, 0.8);">
+                                            <div class="card-img-overlay d-flex" style="visibility: hidden;">
                                                 <h5 class="card-title text-white align-self-center mx-auto">Sélectionner image</h5>
                                             </div>
                                             <a href="#" id="picture4Section4_link" class="stretched-link" data-bs-toggle="modal" data-bs-target="#myModal" style="opacity: 0; overflow: hidden; height: 0; width: 0; display: block;">Modal</a>
                                         </div>
                                     </div>
                                     <div class="col">
-                                        <div class="card">
-                                            <img id="picture5Section4" src="" class="card-img gallery_img" alt="..." style="-webkit-filter: brightness(70%); filter: brightness(70%); aspect-ratio: 1.5 / 1; object-fit: contain;">
-                                            <div class="card-img-overlay d-flex">
+                                        <div class="card picture_card">
+                                            <img id="picture5Section4" src="" class="card-img gallery_img" alt="..." style="aspect-ratio: 1.5 / 1; object-fit: contain; background-color: rgba(0, 0, 0, 0.8);">
+                                            <div class="card-img-overlay d-flex" style="visibility: hidden;">
                                                 <h5 class="card-title text-white align-self-center mx-auto">Sélectionner image</h5>
                                             </div>
                                             <a href="#" id="picture5Section4_link" class="stretched-link" data-bs-toggle="modal" data-bs-target="#myModal" style="opacity: 0; overflow: hidden; height: 0; width: 0; display: block;">Modal</a>
                                         </div>
                                     </div>
                                     <div class="col">
-                                        <div class="card">
-                                            <img id="picture6Section4" src="" class="card-img gallery_img" alt="..." style="-webkit-filter: brightness(70%); filter: brightness(70%); aspect-ratio: 1.5 / 1; object-fit: contain;">
-                                            <div class="card-img-overlay d-flex">
+                                        <div class="card picture_card">
+                                            <img id="picture6Section4" src="" class="card-img gallery_img" alt="..." style="aspect-ratio: 1.5 / 1; object-fit: contain; background-color: rgba(0, 0, 0, 0.8);">
+                                            <div class="card-img-overlay d-flex" style="visibility: hidden;">
                                                 <h5 class="card-title text-white align-self-center mx-auto">Sélectionner image</h5>
                                             </div>
                                             <a href="#" id="picture6Section4_link" class="stretched-link" data-bs-toggle="modal" data-bs-target="#myModal" style="opacity: 0; overflow: hidden; height: 0; width: 0; display: block;">Modal</a>
@@ -1158,6 +1181,15 @@
 
                     <!--Section 5 : Contact propriétaire-->
                     <div id="section5" class="card-body d-none">
+
+                        <div class="mb-3">
+                            <div class="alert alert-primary" role="alert">
+                                <div class="col">
+                                    <i class="bi bi-info-circle-fill" style="position: relative; top: -2px;"></i> Les demandes de réservation et questions posées via le formulaire de votre site vous sont transférées par e-mail.<br>
+                                    Assurez-vous qu'elles n'atterrissent pas dans vos spams.
+                                </div>
+                            </div>                              
+                        </div>
 
                         <div class="mb-3">
                             <label for="emailSection5" class="form-label">E-mail</label>
@@ -1187,9 +1219,9 @@
 
                         <div class="mb-3">
                             <label for="contactPictureSection5" class="form-label">Photo de la section "Nous contacter"</label>
-                            <div class="card" style="width: 18rem; height: 12rem;">
-                                <img id="contactPictureSection5" src="" class="card-img" alt="..." style="-webkit-filter: brightness(70%); filter: brightness(70%); width: 18rem; height: 12rem; object-fit: contain;">
-                                <div class="card-img-overlay d-flex">
+                            <div class="card picture_card" style="width: 18rem; height: 12rem;">
+                                <img id="contactPictureSection5" src="" class="card-img" alt="..." style="width: 18rem; height: 12rem; object-fit: contain; background-color: rgba(0, 0, 0, 0.8);">
+                                <div class="card-img-overlay d-flex" style="visibility: hidden;">
                                     <h5 class="card-title text-white align-self-center mx-auto">Sélectionner image</h5>
                                 </div>
                                 <a href="#" id="contactPictureSection5_link" class="stretched-link" data-bs-toggle="modal" data-bs-target="#myModal" style="opacity: 0; overflow: hidden; height: 0; width: 0; display: block;">Modal</a>
@@ -1265,50 +1297,41 @@
                     <div id="section7" class="card-body d-none">
 
                         <div class="mb-3">
-                            <p>Choisissez le thème visuel que vous souhaitez appliquer à votre site.</p>
+                            <p>Choisissez le thème visuel que vous souhaitez activer sur votre site.</p>
                             <!--<span class="badge text-bg-primary fs-6">Thème actuel : <strong id="current_theme"></strong></span>-->
-                            <p>Thème actuel : <strong id="current_theme"></strong></p>
+                            <p>Thème actif : <strong id="current_theme"></strong></p>
                         </div>
                         
-                        <div class="row row-cols-1 row-cols-md-3 g-5 p-4">
+                        <div class="row row-cols-1 row-cols-md-4 g-5 p-4">
                             <div class="col">
-                                <div id="thumbnail_theme_0" class="card">
-                                    <img id="picture1Section7" src="https://akobo.fr/wp-content/uploads/2025/03/template1.png" class="card-img gallery_img rounded-bottom-0" alt="..." style="-webkit-filter: brightness(70%); filter: brightness(70%); aspect-ratio: 1.5 / 1; object-fit: cover; object-position: top;">
-                                    <div class="card-img-overlay d-flex">
-                                        <h5 class="card-title text-white align-self-center mx-auto">Voir plus <i class="bi bi-zoom-in"></i></h5>
+                                <div id="thumbnail_theme_0" class="card rounded-bottom-0">
+                                    <div class="card-body py-2">
+                                        <span class="card-title fs-5 my-0">Fluffy <span class="badge text-bg-primary d-none">Actif</span></span>
                                     </div>
-                                    <a onclick="set_up_theme_modal_before_opening(0)" href="#" id="picture1Section7_link" class="stretched-link" data-bs-toggle="modal" data-bs-target="#themeModal" style="opacity: 0; overflow: hidden; height: 0; width: 0; display: block;">Modal</a>
-                                    <div class="card-body text-center py-2">
-                                        <span class="card-title fs-5 my-0">Fluffy</span>
-                                        <span class="badge text-bg-primary card-title fs-6 my-0 d-none">Fluffy <i class="bi bi-check"></i></span>
-                                    </div>                                    
+                                    <img id="picture1Section7" src="https://akobo.fr/wp-content/uploads/2025/03/template1.png" class="card-img-bottom border-top gallery_img" alt="..." style="aspect-ratio: 1.7 / 1; object-fit: cover; object-position: top;">
+                                    <a onclick="select_theme(0, event)" href="#" id="picture1Section7_link" class="stretched-link" style="opacity: 0; overflow: hidden; height: 0; width: 0; display: block;">Modal</a>
                                 </div>
+                                <button onclick="set_up_theme_modal_before_opening(0)" type="button" class="btn btn-dark w-100 rounded-top-0 rounded-bottom-3" data-bs-toggle="modal" data-bs-target="#themeModal">Voir plus <i class="bi bi-zoom-in"></i></button>
                             </div>
                             <div class="col">
-                                <div id="thumbnail_theme_1" class="card">
-                                    <img id="picture2Section7" src="https://akobo.fr/wp-content/uploads/2025/03/template2.png" class="card-img gallery_img rounded-bottom-0" alt="..." style="-webkit-filter: brightness(70%); filter: brightness(70%); aspect-ratio: 1.5 / 1; object-fit: cover; object-position: top;">
-                                    <div class="card-img-overlay d-flex">
-                                        <h5 class="card-title text-white align-self-center mx-auto">Voir plus <i class="bi bi-zoom-in"></i></h5>
+                                <div id="thumbnail_theme_1" class="card rounded-bottom-0">
+                                    <div class="card-body py-2">
+                                        <span class="card-title fs-5 my-0">Baron <span class="badge text-bg-primary d-none">Actif</span></span>
                                     </div>
-                                    <a onclick="set_up_theme_modal_before_opening(1)" href="#" id="picture2Section7_link" class="stretched-link" data-bs-toggle="modal" data-bs-target="#themeModal" style="opacity: 0; overflow: hidden; height: 0; width: 0; display: block;">Modal</a>
-                                    <div class="card-body text-center py-2">
-                                        <span class="card-title fs-5 my-0">Baron</span>
-                                        <span class="badge text-bg-primary card-title fs-6 my-0 d-none">Baron <i class="bi bi-check"></i></span>
-                                    </div>                                    
+                                    <img id="picture2Section7" src="https://akobo.fr/wp-content/uploads/2025/03/template2.png" class="card-img-bottom border-top gallery_img" alt="..." style="aspect-ratio: 1.7 / 1; object-fit: cover; object-position: top;">
+                                    <a onclick="select_theme(1, event)" href="#" id="picture2Section7_link" class="stretched-link" style="opacity: 0; overflow: hidden; height: 0; width: 0; display: block;">Modal</a>
                                 </div>
+                                <button onclick="set_up_theme_modal_before_opening(1)" type="button" class="btn btn-dark w-100 rounded-top-0 rounded-bottom-3" data-bs-toggle="modal" data-bs-target="#themeModal">Voir plus <i class="bi bi-zoom-in"></i></button>
                             </div>
                             <div class="col">
-                                <div id="thumbnail_theme_2" class="card">
-                                    <img id="picture3Section7" src="https://akobo.fr/wp-content/uploads/2025/03/custom_theme.png" class="card-img gallery_img rounded-bottom-0" alt="..." style="-webkit-filter: brightness(70%); filter: brightness(70%); aspect-ratio: 1.5 / 1; object-fit: cover; object-position: center;">
-                                    <div class="card-img-overlay d-flex">
-                                        <h5 class="card-title text-white align-self-center mx-auto">En savoir plus <i class="bi bi-info-circle-fill"></i></h5>
+                                <div id="thumbnail_theme_2" class="card rounded-bottom-0">
+                                    <div class="card-body py-2">
+                                        <span class="card-title fs-5 my-0">Personnalisé <span class="badge text-bg-primary d-none">Actif</span></span>
                                     </div>
-                                    <a onclick="set_up_theme_modal_before_opening(2)" href="#" id="picture3Section7_link" class="stretched-link" data-bs-toggle="modal" data-bs-target="#themeModal" style="opacity: 0; overflow: hidden; height: 0; width: 0; display: block;">Modal</a>
-                                    <div class="card-body text-center py-2">
-                                        <span class="card-title fs-5 my-0">Personnalisé</span>
-                                        <span class="badge text-bg-primary card-title fs-6 my-0 d-none">Personnalisé <i class="bi bi-check"></i></span>
-                                    </div>                                    
+                                    <img id="picture3Section7" src="https://akobo.fr/wp-content/uploads/2025/03/custom.png" class="card-img-bottom border-top gallery_img" alt="..." style="aspect-ratio: 1.7 / 1; object-fit: cover; object-position: center;">
+                                    <a onclick="select_theme(2, event)" href="#" id="picture3Section7_link" class="stretched-link" style="opacity: 0; overflow: hidden; height: 0; width: 0; display: block;">Modal</a>
                                 </div>
+                                <button onclick="set_up_theme_modal_before_opening(2)" type="button" class="btn btn-dark w-100 rounded-top-0 rounded-bottom-3" data-bs-toggle="modal" data-bs-target="#themeModal">En savoir plus <i class="bi bi-question-circle"></i></button>
                             </div>
                         </div>
                         
