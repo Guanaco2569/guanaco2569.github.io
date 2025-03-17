@@ -96,27 +96,21 @@
                 user-select: none; /* Standard syntax */
             }
 
-            .card-header {
+            .sections-card-header {
                 background-color: #0d6efd;
             }
 
-            .nav-link {
+            .sections-nav-link {
                 color: #fff;
             }
 
-            .nav-link:hover {
+            .sections-nav-link:hover {
                 color: #d3d4d5;
             }
 
-            .nav-link.active {
+            .sections-nav-link.active {
                 background-color: #f8f9fa !important;
                 color: #000 !important;
-            }
-
-            .logo {
-                background: url("logo.png") 50% 50%;
-                background-size: contain;
-                background-repeat: no-repeat;
             }
 
             #any_questions {
@@ -135,6 +129,10 @@
 
             .picture_card:hover .card-img-overlay h5 {
                 visibility: visible;
+            }
+
+            #section3 .active {
+                border-color: #dee2e6;
             }
         </style>
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
@@ -387,7 +385,7 @@
                         update_params();
                         const make_res = await SendRequestToMake(params);
                         save_btn.disabled = false;
-                        save_btn.innerHTML = "&nbsp;Publier <svg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='currentColor' class='bi bi-floppy' viewBox='0 0 16 16' style='position: relative; top: -1px;'><path d='M11 2H9v3h2z'/><path d='M1.5 0h11.586a1.5 1.5 0 0 1 1.06.44l1.415 1.414A1.5 1.5 0 0 1 16 2.914V14.5a1.5 1.5 0 0 1-1.5 1.5h-13A1.5 1.5 0 0 1 0 14.5v-13A1.5 1.5 0 0 1 1.5 0M1 1.5v13a.5.5 0 0 0 .5.5H2v-4.5A1.5 1.5 0 0 1 3.5 9h9a1.5 1.5 0 0 1 1.5 1.5V15h.5a.5.5 0 0 0 .5-.5V2.914a.5.5 0 0 0-.146-.353l-1.415-1.415A.5.5 0 0 0 13.086 1H13v4.5A1.5 1.5 0 0 1 11.5 7h-7A1.5 1.5 0 0 1 3 5.5V1H1.5a.5.5 0 0 0-.5.5m3 4a.5.5 0 0 0 .5.5h7a.5.5 0 0 0 .5-.5V1H4zM3 15h10v-4.5a.5.5 0 0 0-.5-.5h-9a.5.5 0 0 0-.5.5z'/></svg>&nbsp;";
+                        save_btn.innerHTML = "&nbsp;Enregistrer <svg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='currentColor' class='bi bi-floppy' viewBox='0 0 16 16' style='position: relative; top: -1px;'><path d='M11 2H9v3h2z'/><path d='M1.5 0h11.586a1.5 1.5 0 0 1 1.06.44l1.415 1.414A1.5 1.5 0 0 1 16 2.914V14.5a1.5 1.5 0 0 1-1.5 1.5h-13A1.5 1.5 0 0 1 0 14.5v-13A1.5 1.5 0 0 1 1.5 0M1 1.5v13a.5.5 0 0 0 .5.5H2v-4.5A1.5 1.5 0 0 1 3.5 9h9a1.5 1.5 0 0 1 1.5 1.5V15h.5a.5.5 0 0 0 .5-.5V2.914a.5.5 0 0 0-.146-.353l-1.415-1.415A.5.5 0 0 0 13.086 1H13v4.5A1.5 1.5 0 0 1 11.5 7h-7A1.5 1.5 0 0 1 3 5.5V1H1.5a.5.5 0 0 0-.5.5m3 4a.5.5 0 0 0 .5.5h7a.5.5 0 0 0 .5-.5V1H4zM3 15h10v-4.5a.5.5 0 0 0-.5-.5h-9a.5.5 0 0 0-.5.5z'/></svg>&nbsp;";
                         save_btn.style.width = "";
                         if(make_res.ok)
                         {
@@ -494,9 +492,9 @@
 
                 //SECTION 3
                 
-                for (const elt of params.caracteristiques) {
+                /*for (const elt of params.caracteristiques) {
                     add_row(elt);
-                }
+                }*/
 
 
                 // SECTION 5
@@ -982,7 +980,7 @@
                 <div class="col-sm">
                     <div class="float-sm-end">
                         <a id="view_site_btn" href="#" target="_blank" class="btn btn-secondary" role="button">Voir site <i class="bi bi-box-arrow-up-right" style="position: relative; top: -2px;"></i></a>
-                        <button type="button" id="save_btn" class="btn btn-primary" data-bs-toggle="tooltip" title="Impossible ! Certains champs sont vides." data-bs-trigger="manual">&nbsp;Publier <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-floppy" viewBox="0 0 16 16" style="position: relative; top: -1px;">
+                        <button type="button" id="save_btn" class="btn btn-primary" data-bs-toggle="tooltip" title="Impossible ! Certains champs sont vides." data-bs-trigger="manual">&nbsp;Enregistrer <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-floppy" viewBox="0 0 16 16" style="position: relative; top: -1px;">
                                                                                 <path d="M11 2H9v3h2z"/>
                                                                                 <path d="M1.5 0h11.586a1.5 1.5 0 0 1 1.06.44l1.415 1.414A1.5 1.5 0 0 1 16 2.914V14.5a1.5 1.5 0 0 1-1.5 1.5h-13A1.5 1.5 0 0 1 0 14.5v-13A1.5 1.5 0 0 1 1.5 0M1 1.5v13a.5.5 0 0 0 .5.5H2v-4.5A1.5 1.5 0 0 1 3.5 9h9a1.5 1.5 0 0 1 1.5 1.5V15h.5a.5.5 0 0 0 .5-.5V2.914a.5.5 0 0 0-.146-.353l-1.415-1.415A.5.5 0 0 0 13.086 1H13v4.5A1.5 1.5 0 0 1 11.5 7h-7A1.5 1.5 0 0 1 3 5.5V1H1.5a.5.5 0 0 0-.5.5m3 4a.5.5 0 0 0 .5.5h7a.5.5 0 0 0 .5-.5V1H4zM3 15h10v-4.5a.5.5 0 0 0-.5-.5h-9a.5.5 0 0 0-.5.5z"/>
                                                                             </svg>&nbsp;
@@ -992,31 +990,31 @@
             </div>
             
             <div class="card text-bg-light mb-3">
-                <div class="card-header">
+                <div class="card-header sections-card-header">
                     <ul class="nav nav-pills card-header-pills">
                         <li class="nav-item">
-                            <a id="link_sect_1" onclick="go_to_section(1, event)" class="nav-link active" aria-current="true" href="#">Présentation du logement</a>
+                            <a id="link_sect_1" onclick="go_to_section(1, event)" class="nav-link sections-nav-link active" aria-current="true" href="#">Présentation du logement</a>
                         </li>
                         <li class="nav-item">
-                            <a id="link_sect_2" onclick="go_to_section(2, event)" class="nav-link" href="#">Description</a>
+                            <a id="link_sect_2" onclick="go_to_section(2, event)" class="nav-link sections-nav-link" href="#">Description</a>
                         </li>
                         <li class="nav-item">
-                            <a id="link_sect_3" onclick="go_to_section(3, event)" class="nav-link" href="#">Équipements</a>
+                            <a id="link_sect_3" onclick="go_to_section(3, event)" class="nav-link sections-nav-link" href="#">Caractéristiques</a>
                         </li>
                         <li class="nav-item">
-                            <a id="link_sect_4" onclick="go_to_section(4, event)" class="nav-link" href="#">Galerie photos</a>
+                            <a id="link_sect_4" onclick="go_to_section(4, event)" class="nav-link sections-nav-link" href="#">Galerie photos</a>
                         </li>
                         <li class="nav-item">
-                            <a id="link_sect_5" onclick="go_to_section(5, event)" class="nav-link" href="#">Contact propriétaire</a>
+                            <a id="link_sect_5" onclick="go_to_section(5, event)" class="nav-link sections-nav-link" href="#">Contact propriétaire</a>
                         </li>
                         <li class="nav-item">
-                            <a id="link_sect_6" onclick="go_to_section(6, event)" class="nav-link" href="#">Liens externes</a>
+                            <a id="link_sect_6" onclick="go_to_section(6, event)" class="nav-link sections-nav-link" href="#">Liens externes</a>
                         </li>
                         <li class="nav-item">
-                            <a id="link_sect_7" onclick="go_to_section(7, event)" class="nav-link" href="#">Apparence</a>
+                            <a id="link_sect_7" onclick="go_to_section(7, event)" class="nav-link sections-nav-link" href="#">Apparence</a>
                         </li>
                         <li class="nav-item">
-                            <a id="link_sect_8" onclick="go_to_section(8, event)" class="nav-link" href="#">Abonnement</a>
+                            <a id="link_sect_8" onclick="go_to_section(8, event)" class="nav-link sections-nav-link" href="#">Abonnement</a>
                         </li>
                     </ul>
                 </div>
@@ -1026,7 +1024,7 @@
                     <div id="section1" class="card-body">
 
                         <div class="mb-3">
-                            <label for="nameSection1" class="form-label">Nom</label>
+                            <label for="nameSection1" class="form-label">Nom du logement</label>
                             <input class="form-control" type="text" id="nameSection1" placeholder="ex : Villa Florentine" data-section="1" required>
                         </div>
 
@@ -1068,7 +1066,7 @@
                             <div class="form-check form-switch" id="prmAccessibilitySection1">
                                 <input class="form-check-input" type="checkbox" role="switch" id="switchPrmAccessible">
                                 <label class="form-check-label" for="switchPrmAccessible" id="switchPrmAccessibleLabel">Non</label>
-                            </div>  
+                            </div>
                         </div>
 
                         <div class="mb-3">
@@ -1159,18 +1157,327 @@
 
                     </div>
 
-                    <!--Section 3 : Équipements-->
+                    <!--Section 3 : Caractéristiques-->
                     <div id="section3" class="card-body d-none">
 
                         <div class="mb-3">
-                            <p>Indiquez les équipements de votre logement (WiFi, parking, clim, etc). Maximum 12 éléments.</p>
+                            <p>Indiquez le nombre de pièces et les équipements de votre logement.</p>
                         </div>
+
+                        <ul class="nav nav-tabs" id="myTab" role="tablist">
+                            <li class="nav-item" role="presentation">
+                              <button class="nav-link active" id="home-tab" data-bs-toggle="tab" data-bs-target="#home-tab-pane" type="button" role="tab" aria-controls="home-tab-pane" aria-selected="true">Nombre de pièces</button>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                              <button class="nav-link" id="profile-tab" data-bs-toggle="tab" data-bs-target="#profile-tab-pane" type="button" role="tab" aria-controls="profile-tab-pane" aria-selected="false">Équipements</button>
+                            </li>
+                          </ul>
+                          <div class="tab-content" id="myTabContent">
+                            <div class="tab-pane fade show active" id="home-tab-pane" role="tabpanel" aria-labelledby="home-tab" tabindex="0">
+                                <div class="my-3 mx-lg-5">
+                                    <div class="row mb-3">
+                                        <label for="bedrooms_select" class="col-sm-2 col-form-label">Chambres</label>
+                                        <div class="col-sm-4">
+                                            <select id="bedrooms_select" class="form-select" aria-label="Number of bedrooms">
+                                                <option value="0" selected>0</option>
+                                                <option value="1">1</option>
+                                                <option value="2">2</option>
+                                                <option value="3">3</option>
+                                                <option value="4">4</option>
+                                                <option value="5">5</option>
+                                                <option value="6">6</option>
+                                                <option value="7">7</option>
+                                                <option value="8">8</option>
+                                                <option value="9">9</option>
+                                            </select>                                              
+                                        </div>
+                                    </div>
+                                    <div class="row mb-3">
+                                        <label for="kitchens_select" class="col-sm-2 col-form-label">Cuisines</label>
+                                        <div class="col-sm-4">
+                                            <select id="kitchens_select" class="form-select" aria-label="Number of kitchens">
+                                                <option value="0" selected>0</option>
+                                                <option value="1">1</option>
+                                                <option value="2">2</option>
+                                                <option value="3">3</option>
+                                                <option value="4">4</option>
+                                                <option value="5">5</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="row mb-3">
+                                        <label for="bathrooms_select" class="col-sm-2 col-form-label">Salles de bains</label>
+                                        <div class="col-sm-4">
+                                            <select id="bathrooms_select" class="form-select" aria-label="Number of bathrooms">
+                                                <option value="0" selected>0</option>
+                                                <option value="1">1</option>
+                                                <option value="2">2</option>
+                                                <option value="3">3</option>
+                                                <option value="4">4</option>
+                                                <option value="5">5</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="row mb-3">
+                                        <label for="toilets_select" class="col-sm-2 col-form-label">Toilettes</label>
+                                        <div class="col-sm-4">
+                                            <select id="toilets_select" class="form-select" aria-label="Number of toilets">
+                                                <option value="0" selected>0</option>
+                                                <option value="1">1</option>
+                                                <option value="2">2</option>
+                                                <option value="3">3</option>
+                                                <option value="4">4</option>
+                                                <option value="5">5</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="row mb-3">
+                                        <label for="living_rooms_select" class="col-sm-2 col-form-label">Salons</label>
+                                        <div class="col-sm-4">
+                                            <select id="living_rooms_select" class="form-select" aria-label="Number of living rooms">
+                                                <option value="0" selected>0</option>
+                                                <option value="1">1</option>
+                                                <option value="2">2</option>
+                                                <option value="3">3</option>
+                                                <option value="4">4</option>
+                                                <option value="5">5</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="row mb-3">
+                                        <label for="dining_rooms_select" class="col-sm-2 col-form-label">Salles à manger</label>
+                                        <div class="col-sm-4">
+                                            <select id="dining_rooms_select" class="form-select" aria-label="Number of dining rooms">
+                                                <option value="0" selected>0</option>
+                                                <option value="1">1</option>
+                                                <option value="2">2</option>
+                                                <option value="3">3</option>
+                                                <option value="4">4</option>
+                                                <option value="5">5</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="row mb-3">
+                                        <label for="studies_select" class="col-sm-2 col-form-label">Bureaux</label>
+                                        <div class="col-sm-4">
+                                            <select id="studies_select" class="form-select" aria-label="Number of studies">
+                                                <option value="0" selected>0</option>
+                                                <option value="1">1</option>
+                                                <option value="2">2</option>
+                                                <option value="3">3</option>
+                                                <option value="4">4</option>
+                                                <option value="5">5</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <label for="outdoor_checkbox" class="col-sm-2 col-form-label">Espace extérieur</label>
+                                        <div class="col-sm-4 align-self-center">
+                                            <div class="form-check form-switch" id="outdoor_checkbox">
+                                                <input class="form-check-input" type="checkbox" role="switch" id="switchOutdoor">
+                                                <label class="form-check-label" for="switchOutdoor" id="switchOutdoorLabel">Non</label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="tab-pane fade" id="profile-tab-pane" role="tabpanel" aria-labelledby="profile-tab" tabindex="0">
+
+                                <div class="card mx-lg-5 my-3">
+                                    <h5 class="card-header"><strong>Ensemble du logement</strong></h5>
+                                    <div class="card-body mx-lg-5">
+                                        <div class="row">
+                                            <label for="item0_global" class="col-sm-4 col-form-label">Wi-Fi gratuit</label>
+                                            <div class="col-sm-4">
+                                                <div id="item0_global" class="btn-group w-100" role="group">
+                                                    <input id="item0_global_btn1" type="radio" class="btn-check" name="btnradio" autocomplete="off" checked>
+                                                    <label for="item0_global_btn1" class="btn btn-outline-primary">Oui</label>
+                                                  
+                                                    <input id="item0_global_btn2" type="radio" class="btn-check" name="btnradio" autocomplete="off">
+                                                    <label for="item0_global_btn2" class="btn btn-outline-primary">Non</label>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <hr class="bg-dark border-top border-dark" />
+                                        <div class="row">
+                                            <label for="item1_global" class="col-sm-4 col-form-label">Parking gratuit</label>
+                                            <div class="col-sm-4">
+                                                <div id="item0_global" class="btn-group w-100" role="group">
+                                                    <input id="item0_global_btn1" type="radio" class="btn-check" name="btnradio" autocomplete="off" checked>
+                                                    <label for="item0_global_btn1" class="btn btn-outline-primary">Oui</label>
+                                                  
+                                                    <input id="item0_global_btn2" type="radio" class="btn-check" name="btnradio" autocomplete="off">
+                                                    <label for="item0_global_btn2" class="btn btn-outline-primary">Non</label>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <hr class="bg-dark border-top border-dark" />
+                                        <div class="row">
+                                            <label for="item2_global" class="col-sm-4 col-form-label">Coffre-fort</label>
+                                            <div class="col-sm-4">
+                                                <div id="item0_global" class="btn-group w-100" role="group">
+                                                    <input id="item0_global_btn1" type="radio" class="btn-check" name="btnradio" autocomplete="off" checked>
+                                                    <label for="item0_global_btn1" class="btn btn-outline-primary">Oui</label>
+                                                  
+                                                    <input id="item0_global_btn2" type="radio" class="btn-check" name="btnradio" autocomplete="off">
+                                                    <label for="item0_global_btn2" class="btn btn-outline-primary">Non</label>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <hr class="bg-dark border-top border-dark" />
+                                        <div class="row">
+                                            <label for="item2_global" class="col-sm-4 col-form-label">Télévision</label>
+                                            <div class="col-sm-4">
+                                                <div id="item0_global" class="btn-group w-100" role="group">
+                                                    <input id="item0_global_btn1" type="radio" class="btn-check" name="btnradio" autocomplete="off" checked>
+                                                    <label for="item0_global_btn1" class="btn btn-outline-primary">Oui</label>
+                                                  
+                                                    <input id="item0_global_btn2" type="radio" class="btn-check" name="btnradio" autocomplete="off">
+                                                    <label for="item0_global_btn2" class="btn btn-outline-primary">Non</label>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <hr class="bg-dark border-top border-dark" />
+                                        <div class="row">
+                                            <label for="item2_global" class="col-sm-4 col-form-label">Chaînes du cable</label>
+                                            <div class="col-sm-4">
+                                                <div id="item0_global" class="btn-group w-100" role="group">
+                                                    <input id="item0_global_btn1" type="radio" class="btn-check" name="btnradio" autocomplete="off" checked>
+                                                    <label for="item0_global_btn1" class="btn btn-outline-primary">Oui</label>
+                                                  
+                                                    <input id="item0_global_btn2" type="radio" class="btn-check" name="btnradio" autocomplete="off">
+                                                    <label for="item0_global_btn2" class="btn btn-outline-primary">Non</label>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <hr class="bg-dark border-top border-dark" />
+                                        <div class="row">
+                                            <label for="item2_global" class="col-sm-4 col-form-label">Boîte à clé</label>
+                                            <div class="col-sm-4">
+                                                <div id="item0_global" class="btn-group w-100" role="group">
+                                                    <input id="item0_global_btn1" type="radio" class="btn-check" name="btnradio" autocomplete="off" checked>
+                                                    <label for="item0_global_btn1" class="btn btn-outline-primary">Oui</label>
+                                                  
+                                                    <input id="item0_global_btn2" type="radio" class="btn-check" name="btnradio" autocomplete="off">
+                                                    <label for="item0_global_btn2" class="btn btn-outline-primary">Non</label>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <hr class="bg-dark border-top border-dark" />
+                                        <div class="row">
+                                            <label for="item2_global" class="col-sm-4 col-form-label">Lave-linge</label>
+                                            <div class="col-sm-4">
+                                                <div id="item0_global" class="btn-group w-100" role="group">
+                                                    <input id="item0_global_btn1" type="radio" class="btn-check" name="btnradio" autocomplete="off" checked>
+                                                    <label for="item0_global_btn1" class="btn btn-outline-primary">Oui</label>
+                                                  
+                                                    <input id="item0_global_btn2" type="radio" class="btn-check" name="btnradio" autocomplete="off">
+                                                    <label for="item0_global_btn2" class="btn btn-outline-primary">Non</label>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <hr class="bg-dark border-top border-dark" />
+                                        <div class="row">
+                                            <label for="item2_global" class="col-sm-4 col-form-label">Sèche-linge</label>
+                                            <div class="col-sm-4">
+                                                <div id="item0_global" class="btn-group w-100" role="group">
+                                                    <input id="item0_global_btn1" type="radio" class="btn-check" name="btnradio" autocomplete="off" checked>
+                                                    <label for="item0_global_btn1" class="btn btn-outline-primary">Oui</label>
+                                                  
+                                                    <input id="item0_global_btn2" type="radio" class="btn-check" name="btnradio" autocomplete="off">
+                                                    <label for="item0_global_btn2" class="btn btn-outline-primary">Non</label>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <hr class="bg-dark border-top border-dark" />
+                                        <div class="row">
+                                            <label for="item2_global" class="col-sm-4 col-form-label">Fer à repasser</label>
+                                            <div class="col-sm-4">
+                                                <div id="item0_global" class="btn-group w-100" role="group">
+                                                    <input id="item0_global_btn1" type="radio" class="btn-check" name="btnradio" autocomplete="off" checked>
+                                                    <label for="item0_global_btn1" class="btn btn-outline-primary">Oui</label>
+                                                  
+                                                    <input id="item0_global_btn2" type="radio" class="btn-check" name="btnradio" autocomplete="off">
+                                                    <label for="item0_global_btn2" class="btn btn-outline-primary">Non</label>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <hr class="bg-dark border-top border-dark" />
+                                        <div class="row">
+                                            <label for="item2_global" class="col-sm-4 col-form-label">Piscine</label>
+                                            <div class="col-sm-4">
+                                                <div id="item0_global" class="btn-group w-100" role="group">
+                                                    <input id="item0_global_btn1" type="radio" class="btn-check" name="btnradio" autocomplete="off" checked>
+                                                    <label for="item0_global_btn1" class="btn btn-outline-primary">Oui</label>
+                                                  
+                                                    <input id="item0_global_btn2" type="radio" class="btn-check" name="btnradio" autocomplete="off">
+                                                    <label for="item0_global_btn2" class="btn btn-outline-primary">Non</label>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <hr class="bg-dark border-top border-dark" />
+                                        <div class="row">
+                                            <label for="item2_global" class="col-sm-4 col-form-label">Piscine intérieure</label>
+                                            <div class="col-sm-4">
+                                                <div id="item0_global" class="btn-group w-100" role="group">
+                                                    <input id="item0_global_btn1" type="radio" class="btn-check" name="btnradio" autocomplete="off" checked>
+                                                    <label for="item0_global_btn1" class="btn btn-outline-primary">Oui</label>
+                                                  
+                                                    <input id="item0_global_btn2" type="radio" class="btn-check" name="btnradio" autocomplete="off">
+                                                    <label for="item0_global_btn2" class="btn btn-outline-primary">Non</label>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <hr class="bg-dark border-top border-dark" />
+                                        <div class="row">
+                                            <label for="item2_global" class="col-sm-4 col-form-label">Piscine chauffée</label>
+                                            <div class="col-sm-4">
+                                                <div id="item0_global" class="btn-group w-100" role="group">
+                                                    <input id="item0_global_btn1" type="radio" class="btn-check" name="btnradio" autocomplete="off" checked>
+                                                    <label for="item0_global_btn1" class="btn btn-outline-primary">Oui</label>
+                                                  
+                                                    <input id="item0_global_btn2" type="radio" class="btn-check" name="btnradio" autocomplete="off">
+                                                    <label for="item0_global_btn2" class="btn btn-outline-primary">Non</label>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <hr class="bg-dark border-top border-dark" />
+                                        <div class="row">
+                                            <label for="item2_global" class="col-sm-4 col-form-label">Piscine à débordement</label>
+                                            <div class="col-sm-4">
+                                                <div id="item0_global" class="btn-group w-100" role="group">
+                                                    <input id="item0_global_btn1" type="radio" class="btn-check" name="btnradio" autocomplete="off" checked>
+                                                    <label for="item0_global_btn1" class="btn btn-outline-primary">Oui</label>
+                                                  
+                                                    <input id="item0_global_btn2" type="radio" class="btn-check" name="btnradio" autocomplete="off">
+                                                    <label for="item0_global_btn2" class="btn btn-outline-primary">Non</label>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <hr class="bg-dark border-top border-dark" />
+                                        <div class="row">
+                                            <label for="item2_global" class="col-sm-4 col-form-label">Piscine d'eau salée</label>
+                                            <div class="col-sm-4">
+                                                <div id="item0_global" class="btn-group w-100" role="group">
+                                                    <input id="item0_global_btn1" type="radio" class="btn-check" name="btnradio" autocomplete="off" checked>
+                                                    <label for="item0_global_btn1" class="btn btn-outline-primary">Oui</label>
+                                                  
+                                                    <input id="item0_global_btn2" type="radio" class="btn-check" name="btnradio" autocomplete="off">
+                                                    <label for="item0_global_btn2" class="btn btn-outline-primary">Non</label>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                            </div>
+                          </div>
                             
-                        <div id="newinput"></div>
+                        <!--<div id="newinput"></div>
 
                         <button onclick="add_row('')" type="button" id="add_row_btn" class="btn btn-dark">
                             <span class="bi bi-plus-square" style="position: relative; top: -2px;"></span> Ajouter (<span id="nb_fields"></span>/12)
-                        </button>
+                        </button>-->
 
                     </div>
 
@@ -1673,7 +1980,7 @@
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
                     <div class="modal-body my-2 text-center">
-                        <p>Votre site est publié ici :</p>
+                        <p>Votre site est publié à cette adresse :</p>
                         <div class="alert alert-primary" role="alert">
                             <a href="#" target="_blank" id="published_modal_link" class="alert-link"></a>
                         </div>
