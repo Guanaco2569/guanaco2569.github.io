@@ -263,17 +263,19 @@
             ];
             let theme_modal;
             let nb_rooms = {
-                bedrooms: 0,
-                kitchens: 0,
-                bathrooms: 0,
-                toilets: 0,
-                living_rooms: 0,
-                dining_rooms: 0,
-                studies: 0,
-                outdoor: 0
+                bedrooms: 1,
+                kitchens: 1,
+                bathrooms: 1,
+                toilets: 1,
+                living_rooms: 1,
+                dining_rooms: 1,
+                studies: 1,
+                outdoor: 1
             };
             let equipment = {
-                global: [false, false, false, false, false, false, false, false, false, false, false, false, false, false],
+                global: [
+                    [false, false, false, false, false, false, false, false, false, false, false, false, false, false]
+                ],
                 bedrooms: [
                     [false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false],
                     [false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false],
@@ -299,10 +301,18 @@
                     [false, false, false, false, false, false, false, false, false, false, false, false, false],
                     [false, false, false, false, false, false, false, false, false, false, false, false, false]
                 ],
-                outdoor: [false, false, false, false, false],
-                laundry: [false, false, false, false, false, false, false, false, false],
-                accessibility: [false, false, false, false, false, false, false, false, false, false, false, false],
-                safety: [false, false, false]
+                outdoor: [
+                    [false, false, false, false, false]
+                ],
+                laundry: [
+                    [false, false, false, false, false, false, false, false, false]
+                ],
+                accessibility: [
+                    [false, false, false, false, false, false, false, false, false, false, false, false]
+                ],
+                safety: [
+                    [false, false, false]
+                ]
             };
 
             document.addEventListener("DOMContentLoaded", (event) => {
@@ -541,14 +551,15 @@
                 /*for (const elt of params.caracteristiques) {
                     add_row(elt);
                 }*/
-                change_nb_rooms(1, "bedrooms");
-                change_nb_rooms(1, "kitchens");
-                change_nb_rooms(1, "bathrooms");
-                change_nb_rooms(1, "toilets");
-                change_nb_rooms(1, "living_rooms");
-                change_nb_rooms(1, "dining_rooms");
-                change_nb_rooms(1, "studies");
-                change_nb_rooms(1, "outdoor");
+                
+                Object.entries(nb_rooms).forEach(([rooms_type, nb]) => {
+                    change_nb_rooms(nb, rooms_type);
+                });
+
+                room_item_available(0, "bedroom0", false);
+                Object.entries(equipment).forEach(([rooms_type, value]) => {
+                    
+                });
 
 
                 // SECTION 5
@@ -1024,7 +1035,7 @@
             };
 
             function room_item_available(item_id, room, availability) {
-                //availability == true ? document.getElementById("item0_bedroom0_btn1").
+                availability == true ? document.getElementById("item"+item_id.toString()+"_"+room+"_btn1").checked = true : document.getElementById("item"+item_id.toString()+"_"+room+"_btn2").checked = true;
             };
         </script>
     </head>
