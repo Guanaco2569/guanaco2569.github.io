@@ -98,27 +98,21 @@
                 user-select: none; /* Standard syntax */
             }
 
-            .card-header {
+            .sections-card-header {
                 background-color: #0d6efd;
             }
 
-            .nav-link {
+            .sections-nav-link {
                 color: #fff;
             }
 
-            .nav-link:hover {
+            .sections-nav-link:hover {
                 color: #d3d4d5;
             }
 
-            .nav-link.active {
+            .sections-nav-link.active {
                 background-color: #f8f9fa !important;
                 color: #000 !important;
-            }
-
-            .logo {
-                background: url("logo.png") 50% 50%;
-                background-size: contain;
-                background-repeat: no-repeat;
             }
 
             #any_questions {
@@ -137,6 +131,14 @@
 
             .picture_card:hover .card-img-overlay h5 {
                 visibility: visible;
+            }
+
+            #section3 .active {
+                border-color: #dee2e6;
+            }
+
+            .accordion-button::after {
+                display: none;
             }
         </style>
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
@@ -322,7 +324,7 @@
                         update_params();
                         const make_res = await SendRequestToMake(params);
                         save_btn.disabled = false;
-                        save_btn.innerHTML = "&nbsp;Publier <svg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='currentColor' class='bi bi-floppy' viewBox='0 0 16 16' style='position: relative; top: -1px;'><path d='M11 2H9v3h2z'/><path d='M1.5 0h11.586a1.5 1.5 0 0 1 1.06.44l1.415 1.414A1.5 1.5 0 0 1 16 2.914V14.5a1.5 1.5 0 0 1-1.5 1.5h-13A1.5 1.5 0 0 1 0 14.5v-13A1.5 1.5 0 0 1 1.5 0M1 1.5v13a.5.5 0 0 0 .5.5H2v-4.5A1.5 1.5 0 0 1 3.5 9h9a1.5 1.5 0 0 1 1.5 1.5V15h.5a.5.5 0 0 0 .5-.5V2.914a.5.5 0 0 0-.146-.353l-1.415-1.415A.5.5 0 0 0 13.086 1H13v4.5A1.5 1.5 0 0 1 11.5 7h-7A1.5 1.5 0 0 1 3 5.5V1H1.5a.5.5 0 0 0-.5.5m3 4a.5.5 0 0 0 .5.5h7a.5.5 0 0 0 .5-.5V1H4zM3 15h10v-4.5a.5.5 0 0 0-.5-.5h-9a.5.5 0 0 0-.5.5z'/></svg>&nbsp;";
+                        save_btn.innerHTML = "&nbsp;Enregistrer <svg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='currentColor' class='bi bi-floppy' viewBox='0 0 16 16' style='position: relative; top: -1px;'><path d='M11 2H9v3h2z'/><path d='M1.5 0h11.586a1.5 1.5 0 0 1 1.06.44l1.415 1.414A1.5 1.5 0 0 1 16 2.914V14.5a1.5 1.5 0 0 1-1.5 1.5h-13A1.5 1.5 0 0 1 0 14.5v-13A1.5 1.5 0 0 1 1.5 0M1 1.5v13a.5.5 0 0 0 .5.5H2v-4.5A1.5 1.5 0 0 1 3.5 9h9a1.5 1.5 0 0 1 1.5 1.5V15h.5a.5.5 0 0 0 .5-.5V2.914a.5.5 0 0 0-.146-.353l-1.415-1.415A.5.5 0 0 0 13.086 1H13v4.5A1.5 1.5 0 0 1 11.5 7h-7A1.5 1.5 0 0 1 3 5.5V1H1.5a.5.5 0 0 0-.5.5m3 4a.5.5 0 0 0 .5.5h7a.5.5 0 0 0 .5-.5V1H4zM3 15h10v-4.5a.5.5 0 0 0-.5-.5h-9a.5.5 0 0 0-.5.5z'/></svg>&nbsp;";
                         save_btn.style.width = "";
                         if(make_res.ok)
                         {
@@ -429,8 +431,20 @@
 
                 //SECTION 3
                 
-                for (const elt of params.caracteristiques) {
-                    add_row(elt);
+                Object.entries(params.caracteristiques[0]).forEach(([room_type, nb]) => {
+                    change_nb_rooms(nb, room_type);
+                });
+
+                for (const [room_type, rooms] of Object.entries(params.caracteristiques[1])) {
+                    for (const [room_id, items_availability] of rooms.entries()) {
+                        for (const [item_id, availability] of items_availability.entries()) {
+                            room_item_available(item_id, room_type+room_id.toString(), availability > 0);
+
+                            if (room_type == "bedroom" && item_id <= 5) {
+                                switch_item_indicator_display(item_id, room_type+room_id.toString(), availability);
+                            }
+                        }
+                    }
                 }
 
 
@@ -492,10 +506,39 @@
                 params.esprit[1].Desc = document.getElementById("textQualifier2Section2").value;
                 params.esprit[1].Img = images_list[selected_images[2]];
 
-                params.caracteristiques = [];
-                document.querySelectorAll(".item_input").forEach(elt => {
-                    params.caracteristiques.push(elt.value);
-                });
+                for (const room_type in params.caracteristiques[0]) {
+                    if (room_type == "outdoor") {
+                        document.getElementById("outdoor_switch").checked == true ? params.caracteristiques[0][room_type] = 1 : params.caracteristiques[0][room_type] = 0;
+                    }
+                    else {
+                        params.caracteristiques[0][room_type] = parseInt(document.getElementById(room_type+"_select").value);
+                    }
+                }
+
+                for (const [room_type, rooms] of Object.entries(params.caracteristiques[1])) {
+                    for (const [room_id, items_availability] of rooms.entries()) {
+                        for (let i = 0; i < items_availability.length; i++) {
+                            if (!document.querySelectorAll("#"+room_type+"_accordion .accordion-item")[room_id].classList.contains("d-none")) {
+                                if (document.getElementById("item"+i.toString()+"_"+room_type+room_id.toString()+"_btn1").checked) {
+                                    if (room_type == "bedroom" && i <= 5) {
+                                        params.caracteristiques[1][room_type][room_id][i] = parseInt(document.querySelector("#item"+i.toString()+"_"+room_type+room_id.toString()+"_indicator input:checked").value);
+                                    }
+                                    else {
+                                        params.caracteristiques[1][room_type][room_id][i] = 1;
+                                    }
+                                }
+                                else {
+                                    params.caracteristiques[1][room_type][room_id][i] = 0;
+                                }
+                            }
+                            else {
+                                params.caracteristiques[1][room_type][room_id][i] = 0;
+                            }
+                        }
+                    }
+                }
+
+                console.log(params.caracteristiques[1]);
 
                 for (let i = 0; i < params.galerie_images.length; i++) {
                     params.galerie_images[i] = images_list[selected_images[i+3]];
@@ -855,6 +898,71 @@
                 document.getElementById("theme_name").textContent = themes_names_and_images[theme_nb][0];
                 document.getElementById("theme_img").src = themes_names_and_images[theme_nb][1];
             };
+            
+            function change_nb_rooms(nb, room_type) {
+                //change select/switch value
+                if (room_type == "outdoor") {
+                    if (nb == 1) {
+                        document.getElementById("outdoor_switch").checked = true;
+                        document.getElementById("outdoor_switchLabel").innerText = "Oui";
+                    }
+                    else {
+                        document.getElementById("outdoor_switch").checked = false;
+                        document.getElementById("outdoor_switchLabel").innerText = "Non";
+                    }
+                }
+                else {
+                    document.getElementById(room_type+"_select").value = nb.toString();
+                }
+
+                //change number of sections in equipment page
+                if (["bedroom", "kitchen", "bathroom", "outdoor"].includes(room_type)) {
+                    document.querySelectorAll("#"+room_type+"_accordion .accordion-item").forEach((elt, index) => {
+                        if (index < nb) {
+                            elt.classList.remove("d-none");
+                            elt.classList.remove("rounded-bottom-3");
+                            if (index == nb-1) {
+                                elt.classList.add("rounded-bottom-3");
+                            }
+                        }
+                        else {
+                            elt.classList.add("d-none");
+                        }
+                    });
+                    let current_first_room_title = document.querySelector("#"+room_type+"_accordion .fs-5").textContent;
+                    if (nb == 1) {
+                        if (current_first_room_title.slice(-4) == " n°1") {
+                            document.querySelector("#"+room_type+"_accordion .fs-5").textContent = current_first_room_title.slice(0, -4);
+                        }
+                    }
+                    else {
+                        if (current_first_room_title.slice(-4) != " n°1") {
+                            document.querySelector("#"+room_type+"_accordion .fs-5").textContent += " n°1";
+                        }
+                    }
+                }
+            };
+
+            function room_item_available(item_id, room, availability) {
+                availability == true ? document.getElementById("item"+item_id.toString()+"_"+room+"_btn1").checked = true : document.getElementById("item"+item_id.toString()+"_"+room+"_btn2").checked = true;
+            };
+
+            function select_item_indicator_btn(item_id, room, nb) {
+                document.querySelectorAll("#item"+item_id.toString()+"_"+room+"_indicator input").forEach(elt => {
+                    elt.checked = false;
+                });
+                document.getElementById("item"+item_id.toString()+"_"+room+"_btnradio"+(nb-1).toString()).checked = true;
+            };
+
+            function switch_item_indicator_display(item_id, room, nb) {
+                if (nb > 0) {
+                    select_item_indicator_btn(item_id, room, nb);
+                    document.getElementById("item"+item_id.toString()+"_"+room+"_indicator").classList.remove("d-none");
+                }
+                else {
+                    document.getElementById("item"+item_id.toString()+"_"+room+"_indicator").classList.add("d-none");
+                }
+            };
         </script>
     </head>
     <body class="d-flex flex-column h-100">
@@ -863,39 +971,15 @@
 
             <div class="row my-3">
                 <div class="col">
-                    <!--<h1>
-                        <svg style="position: relative; top: -4px;" width="32" height="32" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg">
-                            <g transform="matrix(0.12851406,0,0,0.12812962,-0.06425703,-0.01027692)">
-                                <path
-                                    style="fill:#0d6efd;"
-                                    d="M 44.225313,248.9311 C 26.075466,246.57282 8.6035971,231.25612 2.7154611,212.54153 0.50484204,205.51539 0.5,205.32406 0.5,125 0.5,44.675938 0.50484204,44.48461 2.7154611,37.458475 8.7609441,18.243774 25.905799,3.51422 45.130828,1.0184198 c 9.636009,-1.25095009 150.102332,-1.25095009 159.738342,0 C 224.0942,3.51422 241.23906,18.243774 247.28454,37.458475 249.49516,44.48461 249.5,44.675938 249.5,125 c 0,80.32406 -0.005,80.51539 -2.21546,87.54153 -6.04548,19.2147 -23.19034,33.94425 -42.41537,36.44005 -8.92002,1.158 -151.688391,1.11313 -160.643857,-0.0505 z M 206.6446,138.28345 c 10.59648,-5.66705 10.36056,-20.57227 -0.41036,-25.92699 C 202.74182,110.62022 199.16505,110.5 151,110.5 c -51.263932,0 -51.518998,0.0102 -55.644603,2.21655 -2.875407,1.53779 -4.789336,3.5484 -6.25,6.56573 -2.618642,5.40939 -2.62596,7.01093 -0.05629,12.31916 2.307712,4.7671 5.178779,7.00502 10.684297,8.32812 2.071626,0.49785 26.041596,0.82987 53.266596,0.73782 49.04124,-0.16583 49.53841,-0.18792 53.6446,-2.38393 z m 0,-68.000004 C 217.24108,64.616399 217.00516,49.711184 206.23424,44.356462 202.89612,42.696931 199.84803,42.5 177.5,42.5 c -23.90093,0 -25.18221,0.09745 -29.1446,2.216554 -2.87541,1.537782 -4.78934,3.548395 -6.25,6.565725 -2.61864,5.409392 -2.62596,7.010933 -0.0563,12.319163 4.07944,8.427002 7.74743,9.316398 37.45089,9.080905 21.64724,-0.171622 23.24377,-0.312715 27.1446,-2.398901 z m 0,137.000004 c 10.59648,-5.66705 10.36056,-20.57227 -0.41036,-25.92699 C 202.74182,179.62022 199.16505,179.5 151,179.5 c -51.26393,0 -105.519,0.0102 -109.6446,2.21655 -2.87541,1.53779 -4.789339,3.5484 -6.250003,6.56573 -2.618642,5.40939 -2.62596,7.01093 -0.05629,12.31916 2.307712,4.7671 5.178783,7.00502 10.684293,8.32812 2.07163,0.49785 80.0416,0.82987 107.2666,0.73782 49.04124,-0.16583 49.53841,-0.18792 53.6446,-2.38393 z"
-                                    id="path2" />
+                    <h1>
+                        <svg style="position: relative; top: -4px; border-radius: 5px;" version="1.1" id="svg1" width="151" height="46" viewBox="0 0 151 46" xmlns="http://www.w3.org/2000/svg" xmlns:svg="http://www.w3.org/2000/svg">
+                            <defs id="defs1" />
+                            <g id="g1" transform="translate(-75.5,-23)">
+                                <g id="g2" transform="matrix(0.5,0,0,0.5,75.5,23)">
+                                    <path style="fill:#0d6efd;fill-opacity:1" d="M 0,46 V 0 H 151 302 V 46 92 H 151 0 Z m 191.5,22.901255 c 10.7636,-2.926599 15.66076,-15.291731 10.25,-25.880823 -3.19718,-6.257026 -6.52563,-8.350274 -14.01077,-8.811329 -5.2832,-0.325424 -6.76144,-0.02612 -9.64728,1.953293 -5.47284,3.753856 -7.41384,7.139569 -7.89333,13.768481 -0.71039,9.820971 3.99366,17.152545 12.28046,19.139912 4.3263,1.037548 4.6004,1.032396 9.02092,-0.169534 z m -8.88929,-9.433401 c -1.94758,-1.947579 -3.03497,-7.636736 -2.14286,-11.211281 1.63174,-6.538099 7.98972,-8.541949 11.2591,-3.548539 2.37591,3.628794 2.26252,11.541132 -0.20445,14.267108 -2.16882,2.396514 -6.75446,2.650043 -8.91179,0.492712 z m 90.88589,7.615297 c 11.2588,-6.35447 10.56649,-26.029081 -1.11089,-31.570363 -4.93897,-2.343694 -13.88711,-1.716073 -18.07782,1.267975 -8.61605,6.135165 -8.72354,23.271354 -0.18509,29.504988 5.28063,3.855206 13.36636,4.188004 19.3738,0.7974 z m -13.49705,-7.583698 c -1.86094,-2.242293 -2.43835,-10.025882 -1.00115,-13.495601 2.02703,-4.893664 8.43795,-5.489163 10.71174,-0.994994 1.75165,3.462139 1.60365,11.098125 -0.26684,13.768636 -1.84134,2.628872 -7.50201,3.06162 -9.44375,0.721959 z M 69.171259,67.345012 c 2.242545,-2.029475 2.317589,-3.713307 0.257312,-5.773583 C 68.094259,60.237116 64.50303,60 45.628571,60 29.673016,60 23.061354,60.338646 22.2,61.2 c -1.768352,1.768352 -1.458849,5.549854 0.55,6.719901 1.035979,0.603403 10.490131,1.031689 23.171259,1.04969 18.557326,0.02634 21.665755,-0.190856 23.25,-1.624579 z M 98.880638,63.75 100.35114,59 h 8.14886 8.14886 l 1.4705,4.75 1.4705,4.75 5.20507,0.30226 C 128.41762,69.01263 130,68.729657 130,67.871452 130,66.882099 118.10355,31.597523 115.4613,24.75 114.91705,23.339557 113.56162,23 108.47572,23 h -6.3103 L 100.595,27.25 C 96.068779,39.499245 87,66.483055 87,67.701404 c 0,1.063156 1.261132,1.329881 5.205071,1.100856 L 97.410142,68.5 Z M 104,49.357813 C 104,48.177477 108.07953,35 108.44494,35 108.80347,35 113,48.271422 113,49.405237 113,49.732357 110.975,50 108.5,50 106.025,50 104,49.711016 104,49.357813 Z m 41,14.723974 C 145,58.940925 145.70713,56 146.94323,56 c 0.40109,0 2.71545,2.91429 5.14301,6.4762 l 4.41376,6.4762 5.80902,0.0238 c 4.37758,0.01793 5.62768,-0.284221 5.07315,-1.2262 -0.40473,-0.6875 -3.01879,-4.609399 -5.80902,-8.715332 -2.79023,-4.105932 -5.41551,-8.012164 -5.83395,-8.680514 -0.47391,-0.756947 1.50582,-3.842202 5.25,-8.181706 C 164.29514,38.340859 167,34.934591 167,34.602962 167,34.271333 164.55217,34 161.56038,34 h -5.43961 L 150.81038,40.457199 145.5,46.914398 145.21922,34.957199 144.93844,23 H 139.96922 135 v 23 23 h 5 5 z m 74.82546,2.861001 0.76101,-2.057212 1.86175,2.057212 c 2.28266,2.522304 9.22192,2.79627 13.59163,0.536605 6.13472,-3.172389 9.11531,-16.385616 5.59612,-24.808203 C 238.3236,34.743552 228.612,31.370959 222.63486,36.07258 L 220,38.14516 V 30.57258 23 h -5 -5 v 23 23 h 4.53222 c 3.66096,0 4.67852,-0.395476 5.29324,-2.057212 z m 1.73124,-8.165294 C 219.21278,55.431079 219.4801,46.519898 222,44 c 4.5677,-4.567698 9.99272,-1.164559 10.74417,6.739869 0.36292,3.817476 0.0226,5.304717 -1.7184,7.510131 -2.74552,3.477851 -7.22767,3.727539 -9.46907,0.527494 z M 69.171259,49.345012 c 2.269186,-2.053585 2.324803,-4.139388 0.173753,-6.516271 C 67.886478,41.217078 65.966889,41 53.173753,41 41.069534,41 38.353614,41.274996 36.828741,42.654988 34.559555,44.708573 34.503938,46.794376 36.654988,49.171259 38.113522,50.782922 40.033111,51 52.826247,51 64.930466,51 67.646386,50.725004 69.171259,49.345012 Z m 1.008844,-19.84095 c 0.942433,-2.068416 0.820774,-2.845611 -0.710265,-4.537391 -1.614233,-1.783707 -2.850335,-2.005169 -9.790394,-1.754062 -6.708156,0.242715 -8.153549,0.605507 -9.297946,2.33377 -1.154191,1.743053 -1.126261,2.373011 0.188433,4.25 C 51.954242,31.772759 52.986304,32 60.578143,32 c 8.054956,0 8.519788,-0.120829 9.60196,-2.495938 z" id="path2" />
+                                </g>
                             </g>
                         </svg> Mon site
-                    </h1>-->
-                    <h1>
-                        <svg style="position: relative; top: -4px; border-radius: 5px;" version="1.1"
-   id="svg1"
-   width="151"
-   height="46"
-   viewBox="0 0 151 46"
-   xmlns="http://www.w3.org/2000/svg"
-   xmlns:svg="http://www.w3.org/2000/svg">
-  <defs
-     id="defs1" />
-  <g
-     id="g1"
-     transform="translate(-75.5,-23)">
-    <g
-       id="g2"
-       transform="matrix(0.5,0,0,0.5,75.5,23)">
-      <path
-         style="fill:#0d6efd;fill-opacity:1"
-         d="M 0,46 V 0 H 151 302 V 46 92 H 151 0 Z m 191.5,22.901255 c 10.7636,-2.926599 15.66076,-15.291731 10.25,-25.880823 -3.19718,-6.257026 -6.52563,-8.350274 -14.01077,-8.811329 -5.2832,-0.325424 -6.76144,-0.02612 -9.64728,1.953293 -5.47284,3.753856 -7.41384,7.139569 -7.89333,13.768481 -0.71039,9.820971 3.99366,17.152545 12.28046,19.139912 4.3263,1.037548 4.6004,1.032396 9.02092,-0.169534 z m -8.88929,-9.433401 c -1.94758,-1.947579 -3.03497,-7.636736 -2.14286,-11.211281 1.63174,-6.538099 7.98972,-8.541949 11.2591,-3.548539 2.37591,3.628794 2.26252,11.541132 -0.20445,14.267108 -2.16882,2.396514 -6.75446,2.650043 -8.91179,0.492712 z m 90.88589,7.615297 c 11.2588,-6.35447 10.56649,-26.029081 -1.11089,-31.570363 -4.93897,-2.343694 -13.88711,-1.716073 -18.07782,1.267975 -8.61605,6.135165 -8.72354,23.271354 -0.18509,29.504988 5.28063,3.855206 13.36636,4.188004 19.3738,0.7974 z m -13.49705,-7.583698 c -1.86094,-2.242293 -2.43835,-10.025882 -1.00115,-13.495601 2.02703,-4.893664 8.43795,-5.489163 10.71174,-0.994994 1.75165,3.462139 1.60365,11.098125 -0.26684,13.768636 -1.84134,2.628872 -7.50201,3.06162 -9.44375,0.721959 z M 69.171259,67.345012 c 2.242545,-2.029475 2.317589,-3.713307 0.257312,-5.773583 C 68.094259,60.237116 64.50303,60 45.628571,60 29.673016,60 23.061354,60.338646 22.2,61.2 c -1.768352,1.768352 -1.458849,5.549854 0.55,6.719901 1.035979,0.603403 10.490131,1.031689 23.171259,1.04969 18.557326,0.02634 21.665755,-0.190856 23.25,-1.624579 z M 98.880638,63.75 100.35114,59 h 8.14886 8.14886 l 1.4705,4.75 1.4705,4.75 5.20507,0.30226 C 128.41762,69.01263 130,68.729657 130,67.871452 130,66.882099 118.10355,31.597523 115.4613,24.75 114.91705,23.339557 113.56162,23 108.47572,23 h -6.3103 L 100.595,27.25 C 96.068779,39.499245 87,66.483055 87,67.701404 c 0,1.063156 1.261132,1.329881 5.205071,1.100856 L 97.410142,68.5 Z M 104,49.357813 C 104,48.177477 108.07953,35 108.44494,35 108.80347,35 113,48.271422 113,49.405237 113,49.732357 110.975,50 108.5,50 106.025,50 104,49.711016 104,49.357813 Z m 41,14.723974 C 145,58.940925 145.70713,56 146.94323,56 c 0.40109,0 2.71545,2.91429 5.14301,6.4762 l 4.41376,6.4762 5.80902,0.0238 c 4.37758,0.01793 5.62768,-0.284221 5.07315,-1.2262 -0.40473,-0.6875 -3.01879,-4.609399 -5.80902,-8.715332 -2.79023,-4.105932 -5.41551,-8.012164 -5.83395,-8.680514 -0.47391,-0.756947 1.50582,-3.842202 5.25,-8.181706 C 164.29514,38.340859 167,34.934591 167,34.602962 167,34.271333 164.55217,34 161.56038,34 h -5.43961 L 150.81038,40.457199 145.5,46.914398 145.21922,34.957199 144.93844,23 H 139.96922 135 v 23 23 h 5 5 z m 74.82546,2.861001 0.76101,-2.057212 1.86175,2.057212 c 2.28266,2.522304 9.22192,2.79627 13.59163,0.536605 6.13472,-3.172389 9.11531,-16.385616 5.59612,-24.808203 C 238.3236,34.743552 228.612,31.370959 222.63486,36.07258 L 220,38.14516 V 30.57258 23 h -5 -5 v 23 23 h 4.53222 c 3.66096,0 4.67852,-0.395476 5.29324,-2.057212 z m 1.73124,-8.165294 C 219.21278,55.431079 219.4801,46.519898 222,44 c 4.5677,-4.567698 9.99272,-1.164559 10.74417,6.739869 0.36292,3.817476 0.0226,5.304717 -1.7184,7.510131 -2.74552,3.477851 -7.22767,3.727539 -9.46907,0.527494 z M 69.171259,49.345012 c 2.269186,-2.053585 2.324803,-4.139388 0.173753,-6.516271 C 67.886478,41.217078 65.966889,41 53.173753,41 41.069534,41 38.353614,41.274996 36.828741,42.654988 34.559555,44.708573 34.503938,46.794376 36.654988,49.171259 38.113522,50.782922 40.033111,51 52.826247,51 64.930466,51 67.646386,50.725004 69.171259,49.345012 Z m 1.008844,-19.84095 c 0.942433,-2.068416 0.820774,-2.845611 -0.710265,-4.537391 -1.614233,-1.783707 -2.850335,-2.005169 -9.790394,-1.754062 -6.708156,0.242715 -8.153549,0.605507 -9.297946,2.33377 -1.154191,1.743053 -1.126261,2.373011 0.188433,4.25 C 51.954242,31.772759 52.986304,32 60.578143,32 c 8.054956,0 8.519788,-0.120829 9.60196,-2.495938 z"
-         id="path2" />
-    </g>
-  </g>
-</svg> Mon site
                     </h1>
                 </div>
                 <!--<div class="col mt-auto">
@@ -917,7 +1001,7 @@
                 <div class="col-sm">
                     <div class="float-sm-end">
                         <a id="view_site_btn" href="#" target="_blank" class="btn btn-secondary" role="button">Voir site <i class="bi bi-box-arrow-up-right" style="position: relative; top: -2px;"></i></a>
-                        <button type="button" id="save_btn" class="btn btn-primary" data-bs-toggle="tooltip" title="Impossible ! Certains champs sont vides." data-bs-trigger="manual">&nbsp;Publier <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-floppy" viewBox="0 0 16 16" style="position: relative; top: -1px;">
+                        <button type="button" id="save_btn" class="btn btn-primary" data-bs-toggle="tooltip" title="Impossible ! Certains champs sont vides." data-bs-trigger="manual">&nbsp;Enregistrer <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-floppy" viewBox="0 0 16 16" style="position: relative; top: -1px;">
                                                                                 <path d="M11 2H9v3h2z"/>
                                                                                 <path d="M1.5 0h11.586a1.5 1.5 0 0 1 1.06.44l1.415 1.414A1.5 1.5 0 0 1 16 2.914V14.5a1.5 1.5 0 0 1-1.5 1.5h-13A1.5 1.5 0 0 1 0 14.5v-13A1.5 1.5 0 0 1 1.5 0M1 1.5v13a.5.5 0 0 0 .5.5H2v-4.5A1.5 1.5 0 0 1 3.5 9h9a1.5 1.5 0 0 1 1.5 1.5V15h.5a.5.5 0 0 0 .5-.5V2.914a.5.5 0 0 0-.146-.353l-1.415-1.415A.5.5 0 0 0 13.086 1H13v4.5A1.5 1.5 0 0 1 11.5 7h-7A1.5 1.5 0 0 1 3 5.5V1H1.5a.5.5 0 0 0-.5.5m3 4a.5.5 0 0 0 .5.5h7a.5.5 0 0 0 .5-.5V1H4zM3 15h10v-4.5a.5.5 0 0 0-.5-.5h-9a.5.5 0 0 0-.5.5z"/>
                                                                             </svg>&nbsp;
@@ -927,31 +1011,31 @@
             </div>
             
             <div class="card text-bg-light mb-3">
-                <div class="card-header">
+                <div class="card-header sections-card-header">
                     <ul class="nav nav-pills card-header-pills">
                         <li class="nav-item">
-                            <a id="link_sect_1" onclick="go_to_section(1, event)" class="nav-link active" aria-current="true" href="#">Présentation du logement</a>
+                            <a id="link_sect_1" onclick="go_to_section(1, event)" class="nav-link sections-nav-link active" aria-current="true" href="#">Présentation du logement</a>
                         </li>
                         <li class="nav-item">
-                            <a id="link_sect_2" onclick="go_to_section(2, event)" class="nav-link" href="#">Description</a>
+                            <a id="link_sect_2" onclick="go_to_section(2, event)" class="nav-link sections-nav-link" href="#">Description</a>
                         </li>
                         <li class="nav-item">
-                            <a id="link_sect_3" onclick="go_to_section(3, event)" class="nav-link" href="#">Équipements</a>
+                            <a id="link_sect_3" onclick="go_to_section(3, event)" class="nav-link sections-nav-link" href="#">Caractéristiques</a>
                         </li>
                         <li class="nav-item">
-                            <a id="link_sect_4" onclick="go_to_section(4, event)" class="nav-link" href="#">Galerie photos</a>
+                            <a id="link_sect_4" onclick="go_to_section(4, event)" class="nav-link sections-nav-link" href="#">Galerie photos</a>
                         </li>
                         <li class="nav-item">
-                            <a id="link_sect_5" onclick="go_to_section(5, event)" class="nav-link" href="#">Contact propriétaire</a>
+                            <a id="link_sect_5" onclick="go_to_section(5, event)" class="nav-link sections-nav-link" href="#">Contact propriétaire</a>
                         </li>
                         <li class="nav-item">
-                            <a id="link_sect_6" onclick="go_to_section(6, event)" class="nav-link" href="#">Liens externes</a>
+                            <a id="link_sect_6" onclick="go_to_section(6, event)" class="nav-link sections-nav-link" href="#">Liens externes</a>
                         </li>
                         <li class="nav-item">
-                            <a id="link_sect_7" onclick="go_to_section(7, event)" class="nav-link" href="#">Apparence</a>
+                            <a id="link_sect_7" onclick="go_to_section(7, event)" class="nav-link sections-nav-link" href="#">Apparence</a>
                         </li>
                         <li class="nav-item">
-                            <a id="link_sect_8" onclick="go_to_section(8, event)" class="nav-link" href="#">Abonnement</a>
+                            <a id="link_sect_8" onclick="go_to_section(8, event)" class="nav-link sections-nav-link" href="#">Abonnement</a>
                         </li>
                     </ul>
                 </div>
@@ -961,7 +1045,7 @@
                     <div id="section1" class="card-body">
 
                         <div class="mb-3">
-                            <label for="nameSection1" class="form-label">Nom</label>
+                            <label for="nameSection1" class="form-label">Nom du logement</label>
                             <input class="form-control" type="text" id="nameSection1" placeholder="ex : Villa Florentine" data-section="1" required>
                         </div>
 
@@ -971,7 +1055,7 @@
                         </div>
 
                         <div class="mb-3">
-                            <label for="welcomeTextSection1" class="form-label">Texte de bienvenue</label>
+                            <label for="welcomeTextSection1" class="form-label">Texte de présentation</label>
                             <textarea class="form-control" id="welcomeTextSection1" name="text" maxlength="200" 
                             placeholder="ex : Nous vous accueillons pour vos séjours à Aix-les-Bains dans cette villa située à proximité de l'Esplanade du Lac." 
                             rows="4" aria-describedby="countHelpSection1" data-section="1" required></textarea>
@@ -1003,7 +1087,7 @@
                             <div class="form-check form-switch" id="prmAccessibilitySection1">
                                 <input class="form-check-input" type="checkbox" role="switch" id="switchPrmAccessible">
                                 <label class="form-check-label" for="switchPrmAccessible" id="switchPrmAccessibleLabel">Non</label>
-                            </div>  
+                            </div>
                         </div>
 
                         <div class="mb-3">
@@ -1094,18 +1178,4314 @@
 
                     </div>
 
-                    <!--Section 3 : Équipements-->
+                    <!--Section 3 : Caractéristiques-->
                     <div id="section3" class="card-body d-none">
 
                         <div class="mb-3">
-                            <p>Indiquez les équipements de votre logement (WiFi, parking, clim, etc). Maximum 12 éléments.</p>
+                            <p>Indiquez le nombre de pièces et les équipements de votre logement.</p>
+                        </div>
+
+                        <ul class="nav nav-tabs" id="myTab" role="tablist">
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link active" id="home-tab" data-bs-toggle="tab" data-bs-target="#home-tab-pane" type="button" role="tab" aria-controls="home-tab-pane" aria-selected="true">Nombre de pièces</button>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link" id="profile-tab" data-bs-toggle="tab" data-bs-target="#profile-tab-pane" type="button" role="tab" aria-controls="profile-tab-pane" aria-selected="false">Équipements</button>
+                            </li>
+                        </ul>
+                        <div class="tab-content" id="myTabContent">
+                            <div class="tab-pane fade show active" id="home-tab-pane" role="tabpanel" aria-labelledby="home-tab" tabindex="0">
+                                <div class="mt-4 mb-3 mx-lg-5">
+                                    <div class="row mb-3">
+                                        <label for="bedroom_select" class="col-sm-2 col-form-label">Chambres</label>
+                                        <div class="col-sm-4">
+                                            <select id="bedroom_select" onchange="change_nb_rooms(this.value, 'bedroom')" class="form-select" aria-label="Number of bedrooms">
+                                                <option value="0">0</option>
+                                                <option value="1">1</option>
+                                                <option value="2">2</option>
+                                                <option value="3">3</option>
+                                                <option value="4">4</option>
+                                                <option value="5">5</option>
+                                                <option value="6">6</option>
+                                                <option value="7">7</option>
+                                                <option value="8">8</option>
+                                                <option value="9">9</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="row mb-3">
+                                        <label for="kitchen_select" class="col-sm-2 col-form-label">Cuisines</label>
+                                        <div class="col-sm-4">
+                                            <select id="kitchen_select" onchange="change_nb_rooms(this.value, 'kitchen')" class="form-select" aria-label="Number of kitchens">
+                                                <option value="0">0</option>
+                                                <option value="1">1</option>
+                                                <option value="2">2</option>
+                                                <option value="3">3</option>
+                                                <option value="4">4</option>
+                                                <option value="5">5</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="row mb-3">
+                                        <label for="bathroom_select" class="col-sm-2 col-form-label">Salles de bains</label>
+                                        <div class="col-sm-4">
+                                            <select id="bathroom_select" onchange="change_nb_rooms(this.value, 'bathroom')" class="form-select" aria-label="Number of bathrooms">
+                                                <option value="0">0</option>
+                                                <option value="1">1</option>
+                                                <option value="2">2</option>
+                                                <option value="3">3</option>
+                                                <option value="4">4</option>
+                                                <option value="5">5</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="row mb-3">
+                                        <label for="toilet_select" class="col-sm-2 col-form-label">Toilettes</label>
+                                        <div class="col-sm-4">
+                                            <select id="toilet_select" onchange="change_nb_rooms(this.value, 'toilet')" class="form-select" aria-label="Number of toilets">
+                                                <option value="0">0</option>
+                                                <option value="1">1</option>
+                                                <option value="2">2</option>
+                                                <option value="3">3</option>
+                                                <option value="4">4</option>
+                                                <option value="5">5</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="row mb-3">
+                                        <label for="living_room_select" class="col-sm-2 col-form-label">Salons</label>
+                                        <div class="col-sm-4">
+                                            <select id="living_room_select" onchange="change_nb_rooms(this.value, 'living_room')" class="form-select" aria-label="Number of living rooms">
+                                                <option value="0">0</option>
+                                                <option value="1">1</option>
+                                                <option value="2">2</option>
+                                                <option value="3">3</option>
+                                                <option value="4">4</option>
+                                                <option value="5">5</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="row mb-3">
+                                        <label for="dining_room_select" class="col-sm-2 col-form-label">Salles à manger</label>
+                                        <div class="col-sm-4">
+                                            <select id="dining_room_select" onchange="change_nb_rooms(this.value, 'dining_room')" class="form-select" aria-label="Number of dining rooms">
+                                                <option value="0">0</option>
+                                                <option value="1">1</option>
+                                                <option value="2">2</option>
+                                                <option value="3">3</option>
+                                                <option value="4">4</option>
+                                                <option value="5">5</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="row mb-3">
+                                        <label for="study_select" class="col-sm-2 col-form-label">Bureaux</label>
+                                        <div class="col-sm-4">
+                                            <select id="study_select" onchange="change_nb_rooms(this.value, 'study')" class="form-select" aria-label="Number of studies">
+                                                <option value="0">0</option>
+                                                <option value="1">1</option>
+                                                <option value="2">2</option>
+                                                <option value="3">3</option>
+                                                <option value="4">4</option>
+                                                <option value="5">5</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <label for="outdoor_checkbox" class="col-sm-2 col-form-label">Espace extérieur</label>
+                                        <div class="col-sm-4 align-self-center">
+                                            <div class="form-check form-switch" id="outdoor_checkbox">
+                                                <input id="outdoor_switch" onchange="this.checked ? change_nb_rooms(1, 'outdoor') : change_nb_rooms(0, 'outdoor')" class="form-check-input" type="checkbox" role="switch">
+                                                <label class="form-check-label" for="outdoor_switch" id="outdoor_switchLabel">Non</label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="tab-pane fade" id="profile-tab-pane" role="tabpanel" aria-labelledby="profile-tab" tabindex="0">
+
+                                <div id="global_accordion" class="accordion mx-lg-5 mt-4 mb-3">
+                                    <div class="accordion-item">
+                                        <p class="accordion-header">
+                                            <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapse_global0" aria-expanded="true" aria-controls="collapse_global0" disabled>
+                                                <strong class="fs-5">Ensemble du logement</strong>
+                                            </button>
+                                        </p>
+                                        <div id="collapse_global0" class="accordion-collapse collapse show">
+                                            <div class="accordion-body mx-lg-5 mb-4">
+                                                <div class="row">
+                                                    <label for="item0_global0" class="col-sm-4 col-form-label">Wi-Fi gratuit</label>
+                                                    <div class="col-sm-4">
+                                                        <div id="item0_global0" class="btn-group w-100" role="group">
+                                                            <input id="item0_global0_btn1" type="radio" class="btn-check" name="btnradio0_global0" autocomplete="off"><label for="item0_global0_btn1" class="btn btn-outline-primary">Oui</label>
+                                                            <input id="item0_global0_btn2" type="radio" class="btn-check" name="btnradio0_global0" autocomplete="off"><label for="item0_global0_btn2" class="btn btn-outline-primary">Non</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <hr class="bg-dark border-top border-dark" />
+                                                <div class="row">
+                                                    <label for="item1_global0" class="col-sm-4 col-form-label">Parking gratuit</label>
+                                                    <div class="col-sm-4">
+                                                        <div id="item1_global0" class="btn-group w-100" role="group">
+                                                            <input id="item1_global0_btn1" type="radio" class="btn-check" name="btnradio1_global0" autocomplete="off"><label for="item1_global0_btn1" class="btn btn-outline-primary">Oui</label>
+                                                            <input id="item1_global0_btn2" type="radio" class="btn-check" name="btnradio1_global0" autocomplete="off"><label for="item1_global0_btn2" class="btn btn-outline-primary">Non</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <hr class="bg-dark border-top border-dark" />
+                                                <div class="row">
+                                                    <label for="item2_global0" class="col-sm-4 col-form-label">Coffre-fort</label>
+                                                    <div class="col-sm-4">
+                                                        <div id="item2_global0" class="btn-group w-100" role="group">
+                                                            <input id="item2_global0_btn1" type="radio" class="btn-check" name="btnradio2_global0" autocomplete="off"><label for="item2_global0_btn1" class="btn btn-outline-primary">Oui</label>
+                                                            <input id="item2_global0_btn2" type="radio" class="btn-check" name="btnradio2_global0" autocomplete="off"><label for="item2_global0_btn2" class="btn btn-outline-primary">Non</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <hr class="bg-dark border-top border-dark" />
+                                                <div class="row">
+                                                    <label for="item3_global0" class="col-sm-4 col-form-label">Télévision</label>
+                                                    <div class="col-sm-4">
+                                                        <div id="item3_global0" class="btn-group w-100" role="group">
+                                                            <input id="item3_global0_btn1" type="radio" class="btn-check" name="btnradio3_global0" autocomplete="off"><label for="item3_global0_btn1" class="btn btn-outline-primary">Oui</label>
+                                                            <input id="item3_global0_btn2" type="radio" class="btn-check" name="btnradio3_global0" autocomplete="off"><label for="item3_global0_btn2" class="btn btn-outline-primary">Non</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <hr class="bg-dark border-top border-dark" />
+                                                <div class="row">
+                                                    <label for="item4_global0" class="col-sm-4 col-form-label">Chaînes du cable</label>
+                                                    <div class="col-sm-4">
+                                                        <div id="item4_global0" class="btn-group w-100" role="group">
+                                                            <input id="item4_global0_btn1" type="radio" class="btn-check" name="btnradio4_global0" autocomplete="off"><label for="item4_global0_btn1" class="btn btn-outline-primary">Oui</label>
+                                                            <input id="item4_global0_btn2" type="radio" class="btn-check" name="btnradio4_global0" autocomplete="off"><label for="item4_global0_btn2" class="btn btn-outline-primary">Non</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <hr class="bg-dark border-top border-dark" />
+                                                <div class="row">
+                                                    <label for="item5_global0" class="col-sm-4 col-form-label">Boîte à clé</label>
+                                                    <div class="col-sm-4">
+                                                        <div id="item5_global0" class="btn-group w-100" role="group">
+                                                            <input id="item5_global0_btn1" type="radio" class="btn-check" name="btnradio5_global0" autocomplete="off"><label for="item5_global0_btn1" class="btn btn-outline-primary">Oui</label>
+                                                            <input id="item5_global0_btn2" type="radio" class="btn-check" name="btnradio5_global0" autocomplete="off"><label for="item5_global0_btn2" class="btn btn-outline-primary">Non</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <hr class="bg-dark border-top border-dark" />
+                                                <div class="row">
+                                                    <label for="item6_global0" class="col-sm-4 col-form-label">Lave-linge</label>
+                                                    <div class="col-sm-4">
+                                                        <div id="item6_global0" class="btn-group w-100" role="group">
+                                                            <input id="item6_global0_btn1" type="radio" class="btn-check" name="btnradio6_global0" autocomplete="off"><label for="item6_global0_btn1" class="btn btn-outline-primary">Oui</label>
+                                                            <input id="item6_global0_btn2" type="radio" class="btn-check" name="btnradio6_global0" autocomplete="off"><label for="item6_global0_btn2" class="btn btn-outline-primary">Non</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <hr class="bg-dark border-top border-dark" />
+                                                <div class="row">
+                                                    <label for="item7_global0" class="col-sm-4 col-form-label">Sèche-linge</label>
+                                                    <div class="col-sm-4">
+                                                        <div id="item7_global0" class="btn-group w-100" role="group">
+                                                            <input id="item7_global0_btn1" type="radio" class="btn-check" name="btnradio7_global0" autocomplete="off"><label for="item7_global0_btn1" class="btn btn-outline-primary">Oui</label>
+                                                            <input id="item7_global0_btn2" type="radio" class="btn-check" name="btnradio7_global0" autocomplete="off"><label for="item7_global0_btn2" class="btn btn-outline-primary">Non</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <hr class="bg-dark border-top border-dark" />
+                                                <div class="row">
+                                                    <label for="item8_global0" class="col-sm-4 col-form-label">Fer à repasser</label>
+                                                    <div class="col-sm-4">
+                                                        <div id="item8_global0" class="btn-group w-100" role="group">
+                                                            <input id="item8_global0_btn1" type="radio" class="btn-check" name="btnradio8_global0" autocomplete="off"><label for="item8_global0_btn1" class="btn btn-outline-primary">Oui</label>
+                                                            <input id="item8_global0_btn2" type="radio" class="btn-check" name="btnradio8_global0" autocomplete="off"><label for="item8_global0_btn2" class="btn btn-outline-primary">Non</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <hr class="bg-dark border-top border-dark" />
+                                                <div class="row">
+                                                    <label for="item9_global0" class="col-sm-4 col-form-label">Piscine</label>
+                                                    <div class="col-sm-4">
+                                                        <div id="item9_global0" class="btn-group w-100" role="group">
+                                                            <input id="item9_global0_btn1" type="radio" class="btn-check" name="btnradio9_global0" autocomplete="off"><label for="item9_global0_btn1" class="btn btn-outline-primary">Oui</label>
+                                                            <input id="item9_global0_btn2" type="radio" class="btn-check" name="btnradio9_global0" autocomplete="off"><label for="item9_global0_btn2" class="btn btn-outline-primary">Non</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <hr class="bg-dark border-top border-dark" />
+                                                <div class="row">
+                                                    <label for="item10_global0" class="col-sm-4 col-form-label">Piscine intérieure</label>
+                                                    <div class="col-sm-4">
+                                                        <div id="item10_global0" class="btn-group w-100" role="group">
+                                                            <input id="item10_global0_btn1" type="radio" class="btn-check" name="btnradio10_global0" autocomplete="off"><label for="item10_global0_btn1" class="btn btn-outline-primary">Oui</label>
+                                                            <input id="item10_global0_btn2" type="radio" class="btn-check" name="btnradio10_global0" autocomplete="off"><label for="item10_global0_btn2" class="btn btn-outline-primary">Non</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <hr class="bg-dark border-top border-dark" />
+                                                <div class="row">
+                                                    <label for="item11_global0" class="col-sm-4 col-form-label">Piscine chauffée</label>
+                                                    <div class="col-sm-4">
+                                                        <div id="item11_global0" class="btn-group w-100" role="group">
+                                                            <input id="item11_global0_btn1" type="radio" class="btn-check" name="btnradio11_global0" autocomplete="off"><label for="item11_global0_btn1" class="btn btn-outline-primary">Oui</label>
+                                                            <input id="item11_global0_btn2" type="radio" class="btn-check" name="btnradio11_global0" autocomplete="off"><label for="item11_global0_btn2" class="btn btn-outline-primary">Non</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <hr class="bg-dark border-top border-dark" />
+                                                <div class="row">
+                                                    <label for="item12_global0" class="col-sm-4 col-form-label">Piscine à débordement</label>
+                                                    <div class="col-sm-4">
+                                                        <div id="item12_global0" class="btn-group w-100" role="group">
+                                                            <input id="item12_global0_btn1" type="radio" class="btn-check" name="btnradio12_global0" autocomplete="off"><label for="item12_global0_btn1" class="btn btn-outline-primary">Oui</label>
+                                                            <input id="item12_global0_btn2" type="radio" class="btn-check" name="btnradio12_global0" autocomplete="off"><label for="item12_global0_btn2" class="btn btn-outline-primary">Non</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <hr class="bg-dark border-top border-dark" />
+                                                <div class="row">
+                                                    <label for="item13_global0" class="col-sm-4 col-form-label">Piscine d'eau salée</label>
+                                                    <div class="col-sm-4">
+                                                        <div id="item13_global0" class="btn-group w-100" role="group">
+                                                            <input id="item13_global0_btn1" type="radio" class="btn-check" name="btnradio13_global0" autocomplete="off"><label for="item13_global0_btn1" class="btn btn-outline-primary">Oui</label>
+                                                            <input id="item13_global0_btn2" type="radio" class="btn-check" name="btnradio13_global0" autocomplete="off"><label for="item13_global0_btn2" class="btn btn-outline-primary">Non</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div id="bedroom_accordion" class="accordion mx-lg-5 mt-5 mb-3">
+
+                                    <div class="accordion-item">
+                                        <p class="accordion-header">
+                                            <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapse_bedroom0" aria-expanded="true" aria-controls="collapse_bedroom0" disabled>
+                                                <strong class="fs-5">Chambre n°1</strong>
+                                            </button>
+                                        </p>
+                                        <div id="collapse_bedroom0" class="accordion-collapse collapse show">
+                                            <div class="accordion-body mx-lg-5 mb-4">
+                                                <div class="row">
+                                                    <label for="item0_bedroom0" class="col-sm-4 col-form-label">Lit simple</label>
+                                                    <div class="col-sm-4">
+                                                        <div id="item0_bedroom0" class="btn-group w-100" role="group">
+                                                            <input id="item0_bedroom0_btn1" onchange="switch_item_indicator_display(0, 'bedroom0', 1)" type="radio" class="btn-check" name="item0_bedroom0_btn" autocomplete="off"><label for="item0_bedroom0_btn1" class="btn btn-outline-primary">Oui</label>
+                                                            <input id="item0_bedroom0_btn2" onchange="switch_item_indicator_display(0, 'bedroom0', 0)" type="radio" class="btn-check" name="item0_bedroom0_btn" autocomplete="off"><label for="item0_bedroom0_btn2" class="btn btn-outline-primary">Non</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div id="item0_bedroom0_indicator" class="row mt-2">
+                                                    <div class="col-sm-4"></div>
+                                                    <div class="col-sm-4">
+                                                        <p class="mb-1"><small>Précisez le nombre</small></p>
+                                                        <div class="btn-group btn-group-sm" role="group">
+                                                            <input class="btn-check" type="radio" name="item0_bedroom0_btnradio" id="item0_bedroom0_btnradio0" autocomplete="off" value="1"><label class="btn btn-outline-primary" for="item0_bedroom0_btnradio0">1</label>
+                                                            <input class="btn-check" type="radio" name="item0_bedroom0_btnradio" id="item0_bedroom0_btnradio1" autocomplete="off" value="2"><label class="btn btn-outline-primary" for="item0_bedroom0_btnradio1">2</label>
+                                                            <input class="btn-check" type="radio" name="item0_bedroom0_btnradio" id="item0_bedroom0_btnradio2" autocomplete="off" value="3"><label class="btn btn-outline-primary" for="item0_bedroom0_btnradio2">3</label>
+                                                            <input class="btn-check" type="radio" name="item0_bedroom0_btnradio" id="item0_bedroom0_btnradio3" autocomplete="off" value="4"><label class="btn btn-outline-primary" for="item0_bedroom0_btnradio3">4</label>
+                                                            <input class="btn-check" type="radio" name="item0_bedroom0_btnradio" id="item0_bedroom0_btnradio4" autocomplete="off" value="5"><label class="btn btn-outline-primary" for="item0_bedroom0_btnradio4">5</label>
+                                                            <input class="btn-check" type="radio" name="item0_bedroom0_btnradio" id="item0_bedroom0_btnradio5" autocomplete="off" value="6"><label class="btn btn-outline-primary" for="item0_bedroom0_btnradio5">6</label>
+                                                            <input class="btn-check" type="radio" name="item0_bedroom0_btnradio" id="item0_bedroom0_btnradio6" autocomplete="off" value="7"><label class="btn btn-outline-primary" for="item0_bedroom0_btnradio6">7</label>
+                                                            <input class="btn-check" type="radio" name="item0_bedroom0_btnradio" id="item0_bedroom0_btnradio7" autocomplete="off" value="8"><label class="btn btn-outline-primary" for="item0_bedroom0_btnradio7">8</label>
+                                                            <input class="btn-check" type="radio" name="item0_bedroom0_btnradio" id="item0_bedroom0_btnradio8" autocomplete="off" value="9"><label class="btn btn-outline-primary" for="item0_bedroom0_btnradio8">9</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <hr class="bg-dark border-top border-dark" />
+                                                <div class="row">
+                                                    <label for="item1_bedroom0" class="col-sm-4 col-form-label">Lit double</label>
+                                                    <div class="col-sm-4">
+                                                        <div id="item1_bedroom0" class="btn-group w-100" role="group">
+                                                            <input id="item1_bedroom0_btn1" onchange="switch_item_indicator_display(1, 'bedroom0', 1)" type="radio" class="btn-check" name="item1_bedroom0_btn" autocomplete="off"><label for="item1_bedroom0_btn1" class="btn btn-outline-primary">Oui</label>
+                                                            <input id="item1_bedroom0_btn2" onchange="switch_item_indicator_display(1, 'bedroom0', 0)" type="radio" class="btn-check" name="item1_bedroom0_btn" autocomplete="off"><label for="item1_bedroom0_btn2" class="btn btn-outline-primary">Non</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div id="item1_bedroom0_indicator" class="row mt-2">
+                                                    <div class="col-sm-4"></div>
+                                                    <div class="col-sm-4">
+                                                        <p class="mb-1"><small>Précisez le nombre</small></p>
+                                                        <div class="btn-group btn-group-sm" role="group">
+                                                            <input class="btn-check" type="radio" name="item1_bedroom0_btnradio" id="item1_bedroom0_btnradio0" autocomplete="off" value="1"><label class="btn btn-outline-primary" for="item1_bedroom0_btnradio0">1</label>
+                                                            <input class="btn-check" type="radio" name="item1_bedroom0_btnradio" id="item1_bedroom0_btnradio1" autocomplete="off" value="2"><label class="btn btn-outline-primary" for="item1_bedroom0_btnradio1">2</label>
+                                                            <input class="btn-check" type="radio" name="item1_bedroom0_btnradio" id="item1_bedroom0_btnradio2" autocomplete="off" value="3"><label class="btn btn-outline-primary" for="item1_bedroom0_btnradio2">3</label>
+                                                            <input class="btn-check" type="radio" name="item1_bedroom0_btnradio" id="item1_bedroom0_btnradio3" autocomplete="off" value="4"><label class="btn btn-outline-primary" for="item1_bedroom0_btnradio3">4</label>
+                                                            <input class="btn-check" type="radio" name="item1_bedroom0_btnradio" id="item1_bedroom0_btnradio4" autocomplete="off" value="5"><label class="btn btn-outline-primary" for="item1_bedroom0_btnradio4">5</label>
+                                                            <input class="btn-check" type="radio" name="item1_bedroom0_btnradio" id="item1_bedroom0_btnradio5" autocomplete="off" value="6"><label class="btn btn-outline-primary" for="item1_bedroom0_btnradio5">6</label>
+                                                            <input class="btn-check" type="radio" name="item1_bedroom0_btnradio" id="item1_bedroom0_btnradio6" autocomplete="off" value="7"><label class="btn btn-outline-primary" for="item1_bedroom0_btnradio6">7</label>
+                                                            <input class="btn-check" type="radio" name="item1_bedroom0_btnradio" id="item1_bedroom0_btnradio7" autocomplete="off" value="8"><label class="btn btn-outline-primary" for="item1_bedroom0_btnradio7">8</label>
+                                                            <input class="btn-check" type="radio" name="item1_bedroom0_btnradio" id="item1_bedroom0_btnradio8" autocomplete="off" value="9"><label class="btn btn-outline-primary" for="item1_bedroom0_btnradio8">9</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <hr class="bg-dark border-top border-dark" />
+                                                <div class="row">
+                                                    <label for="item2_bedroom0" class="col-sm-4 col-form-label">Lit superposé</label>
+                                                    <div class="col-sm-4">
+                                                        <div id="item2_bedroom0" class="btn-group w-100" role="group">
+                                                            <input id="item2_bedroom0_btn1" onchange="switch_item_indicator_display(2, 'bedroom0', 1)" type="radio" class="btn-check" name="item2_bedroom0_btn" autocomplete="off"><label for="item2_bedroom0_btn1" class="btn btn-outline-primary">Oui</label>
+                                                            <input id="item2_bedroom0_btn2" onchange="switch_item_indicator_display(2, 'bedroom0', 0)" type="radio" class="btn-check" name="item2_bedroom0_btn" autocomplete="off"><label for="item2_bedroom0_btn2" class="btn btn-outline-primary">Non</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div id="item2_bedroom0_indicator" class="row mt-2">
+                                                    <div class="col-sm-4"></div>
+                                                    <div class="col-sm-4">
+                                                        <p class="mb-1"><small>Précisez le nombre</small></p>
+                                                        <div class="btn-group btn-group-sm" role="group">
+                                                            <input class="btn-check" type="radio" name="item2_bedroom0_btnradio" id="item2_bedroom0_btnradio0" autocomplete="off" value="1"><label class="btn btn-outline-primary" for="item2_bedroom0_btnradio0">1</label>
+                                                            <input class="btn-check" type="radio" name="item2_bedroom0_btnradio" id="item2_bedroom0_btnradio1" autocomplete="off" value="2"><label class="btn btn-outline-primary" for="item2_bedroom0_btnradio1">2</label>
+                                                            <input class="btn-check" type="radio" name="item2_bedroom0_btnradio" id="item2_bedroom0_btnradio2" autocomplete="off" value="3"><label class="btn btn-outline-primary" for="item2_bedroom0_btnradio2">3</label>
+                                                            <input class="btn-check" type="radio" name="item2_bedroom0_btnradio" id="item2_bedroom0_btnradio3" autocomplete="off" value="4"><label class="btn btn-outline-primary" for="item2_bedroom0_btnradio3">4</label>
+                                                            <input class="btn-check" type="radio" name="item2_bedroom0_btnradio" id="item2_bedroom0_btnradio4" autocomplete="off" value="5"><label class="btn btn-outline-primary" for="item2_bedroom0_btnradio4">5</label>
+                                                            <input class="btn-check" type="radio" name="item2_bedroom0_btnradio" id="item2_bedroom0_btnradio5" autocomplete="off" value="6"><label class="btn btn-outline-primary" for="item2_bedroom0_btnradio5">6</label>
+                                                            <input class="btn-check" type="radio" name="item2_bedroom0_btnradio" id="item2_bedroom0_btnradio6" autocomplete="off" value="7"><label class="btn btn-outline-primary" for="item2_bedroom0_btnradio6">7</label>
+                                                            <input class="btn-check" type="radio" name="item2_bedroom0_btnradio" id="item2_bedroom0_btnradio7" autocomplete="off" value="8"><label class="btn btn-outline-primary" for="item2_bedroom0_btnradio7">8</label>
+                                                            <input class="btn-check" type="radio" name="item2_bedroom0_btnradio" id="item2_bedroom0_btnradio8" autocomplete="off" value="9"><label class="btn btn-outline-primary" for="item2_bedroom0_btnradio8">9</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <hr class="bg-dark border-top border-dark" />
+                                                <div class="row">
+                                                    <label for="item3_bedroom0" class="col-sm-4 col-form-label">Lit gigogne (contient 2 couchages)</label>
+                                                    <div class="col-sm-4">
+                                                        <div id="item3_bedroom0" class="btn-group w-100" role="group">
+                                                            <input id="item3_bedroom0_btn1" onchange="switch_item_indicator_display(3, 'bedroom0', 1)" type="radio" class="btn-check" name="item3_bedroom0_btn" autocomplete="off"><label for="item3_bedroom0_btn1" class="btn btn-outline-primary">Oui</label>
+                                                            <input id="item3_bedroom0_btn2" onchange="switch_item_indicator_display(3, 'bedroom0', 0)" type="radio" class="btn-check" name="item3_bedroom0_btn" autocomplete="off"><label for="item3_bedroom0_btn2" class="btn btn-outline-primary">Non</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div id="item3_bedroom0_indicator" class="row mt-2">
+                                                    <div class="col-sm-4"></div>
+                                                    <div class="col-sm-4">
+                                                        <p class="mb-1"><small>Précisez le nombre</small></p>
+                                                        <div class="btn-group btn-group-sm" role="group">
+                                                            <input class="btn-check" type="radio" name="item3_bedroom0_btnradio" id="item3_bedroom0_btnradio0" autocomplete="off" value="1"><label class="btn btn-outline-primary" for="item3_bedroom0_btnradio0">1</label>
+                                                            <input class="btn-check" type="radio" name="item3_bedroom0_btnradio" id="item3_bedroom0_btnradio1" autocomplete="off" value="2"><label class="btn btn-outline-primary" for="item3_bedroom0_btnradio1">2</label>
+                                                            <input class="btn-check" type="radio" name="item3_bedroom0_btnradio" id="item3_bedroom0_btnradio2" autocomplete="off" value="3"><label class="btn btn-outline-primary" for="item3_bedroom0_btnradio2">3</label>
+                                                            <input class="btn-check" type="radio" name="item3_bedroom0_btnradio" id="item3_bedroom0_btnradio3" autocomplete="off" value="4"><label class="btn btn-outline-primary" for="item3_bedroom0_btnradio3">4</label>
+                                                            <input class="btn-check" type="radio" name="item3_bedroom0_btnradio" id="item3_bedroom0_btnradio4" autocomplete="off" value="5"><label class="btn btn-outline-primary" for="item3_bedroom0_btnradio4">5</label>
+                                                            <input class="btn-check" type="radio" name="item3_bedroom0_btnradio" id="item3_bedroom0_btnradio5" autocomplete="off" value="6"><label class="btn btn-outline-primary" for="item3_bedroom0_btnradio5">6</label>
+                                                            <input class="btn-check" type="radio" name="item3_bedroom0_btnradio" id="item3_bedroom0_btnradio6" autocomplete="off" value="7"><label class="btn btn-outline-primary" for="item3_bedroom0_btnradio6">7</label>
+                                                            <input class="btn-check" type="radio" name="item3_bedroom0_btnradio" id="item3_bedroom0_btnradio7" autocomplete="off" value="8"><label class="btn btn-outline-primary" for="item3_bedroom0_btnradio7">8</label>
+                                                            <input class="btn-check" type="radio" name="item3_bedroom0_btnradio" id="item3_bedroom0_btnradio8" autocomplete="off" value="9"><label class="btn btn-outline-primary" for="item3_bedroom0_btnradio8">9</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <hr class="bg-dark border-top border-dark" />
+                                                <div class="row">
+                                                    <label for="item4_bedroom0" class="col-sm-4 col-form-label">Canapé-lit</label>
+                                                    <div class="col-sm-4">
+                                                        <div id="item4_bedroom0" class="btn-group w-100" role="group">
+                                                            <input id="item4_bedroom0_btn1" onchange="switch_item_indicator_display(4, 'bedroom0', 1)" type="radio" class="btn-check" name="item4_bedroom0_btn" autocomplete="off"><label for="item4_bedroom0_btn1" class="btn btn-outline-primary">Oui</label>
+                                                            <input id="item4_bedroom0_btn2" onchange="switch_item_indicator_display(4, 'bedroom0', 0)" type="radio" class="btn-check" name="item4_bedroom0_btn" autocomplete="off"><label for="item4_bedroom0_btn2" class="btn btn-outline-primary">Non</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div id="item4_bedroom0_indicator" class="row mt-2">
+                                                    <div class="col-sm-4"></div>
+                                                    <div class="col-sm-4">
+                                                        <p class="mb-1"><small>Précisez le nombre</small></p>
+                                                        <div class="btn-group btn-group-sm" role="group">
+                                                            <input class="btn-check" type="radio" name="item4_bedroom0_btnradio" id="item4_bedroom0_btnradio0" autocomplete="off" value="1"><label class="btn btn-outline-primary" for="item4_bedroom0_btnradio0">1</label>
+                                                            <input class="btn-check" type="radio" name="item4_bedroom0_btnradio" id="item4_bedroom0_btnradio1" autocomplete="off" value="2"><label class="btn btn-outline-primary" for="item4_bedroom0_btnradio1">2</label>
+                                                            <input class="btn-check" type="radio" name="item4_bedroom0_btnradio" id="item4_bedroom0_btnradio2" autocomplete="off" value="3"><label class="btn btn-outline-primary" for="item4_bedroom0_btnradio2">3</label>
+                                                            <input class="btn-check" type="radio" name="item4_bedroom0_btnradio" id="item4_bedroom0_btnradio3" autocomplete="off" value="4"><label class="btn btn-outline-primary" for="item4_bedroom0_btnradio3">4</label>
+                                                            <input class="btn-check" type="radio" name="item4_bedroom0_btnradio" id="item4_bedroom0_btnradio4" autocomplete="off" value="5"><label class="btn btn-outline-primary" for="item4_bedroom0_btnradio4">5</label>
+                                                            <input class="btn-check" type="radio" name="item4_bedroom0_btnradio" id="item4_bedroom0_btnradio5" autocomplete="off" value="6"><label class="btn btn-outline-primary" for="item4_bedroom0_btnradio5">6</label>
+                                                            <input class="btn-check" type="radio" name="item4_bedroom0_btnradio" id="item4_bedroom0_btnradio6" autocomplete="off" value="7"><label class="btn btn-outline-primary" for="item4_bedroom0_btnradio6">7</label>
+                                                            <input class="btn-check" type="radio" name="item4_bedroom0_btnradio" id="item4_bedroom0_btnradio7" autocomplete="off" value="8"><label class="btn btn-outline-primary" for="item4_bedroom0_btnradio7">8</label>
+                                                            <input class="btn-check" type="radio" name="item4_bedroom0_btnradio" id="item4_bedroom0_btnradio8" autocomplete="off" value="9"><label class="btn btn-outline-primary" for="item4_bedroom0_btnradio8">9</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <hr class="bg-dark border-top border-dark" />
+                                                <div class="row">
+                                                    <label for="item5_bedroom0" class="col-sm-4 col-form-label">Berceau</label>
+                                                    <div class="col-sm-4">
+                                                        <div id="item5_bedroom0" class="btn-group w-100" role="group">
+                                                            <input id="item5_bedroom0_btn1" onchange="switch_item_indicator_display(5, 'bedroom0', 1)" type="radio" class="btn-check" name="item5_bedroom0_btn" autocomplete="off"><label for="item5_bedroom0_btn1" class="btn btn-outline-primary">Oui</label>
+                                                            <input id="item5_bedroom0_btn2" onchange="switch_item_indicator_display(5, 'bedroom0', 0)" type="radio" class="btn-check" name="item5_bedroom0_btn" autocomplete="off"><label for="item5_bedroom0_btn2" class="btn btn-outline-primary">Non</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div id="item5_bedroom0_indicator" class="row mt-2">
+                                                    <div class="col-sm-4"></div>
+                                                    <div class="col-sm-4">
+                                                        <p class="mb-1"><small>Précisez le nombre</small></p>
+                                                        <div class="btn-group btn-group-sm" role="group">
+                                                            <input class="btn-check" type="radio" name="item5_bedroom0_btnradio" id="item5_bedroom0_btnradio0" autocomplete="off" value="1"><label class="btn btn-outline-primary" for="item5_bedroom0_btnradio0">1</label>
+                                                            <input class="btn-check" type="radio" name="item5_bedroom0_btnradio" id="item5_bedroom0_btnradio1" autocomplete="off" value="2"><label class="btn btn-outline-primary" for="item5_bedroom0_btnradio1">2</label>
+                                                            <input class="btn-check" type="radio" name="item5_bedroom0_btnradio" id="item5_bedroom0_btnradio2" autocomplete="off" value="3"><label class="btn btn-outline-primary" for="item5_bedroom0_btnradio2">3</label>
+                                                            <input class="btn-check" type="radio" name="item5_bedroom0_btnradio" id="item5_bedroom0_btnradio3" autocomplete="off" value="4"><label class="btn btn-outline-primary" for="item5_bedroom0_btnradio3">4</label>
+                                                            <input class="btn-check" type="radio" name="item5_bedroom0_btnradio" id="item5_bedroom0_btnradio4" autocomplete="off" value="5"><label class="btn btn-outline-primary" for="item5_bedroom0_btnradio4">5</label>
+                                                            <input class="btn-check" type="radio" name="item5_bedroom0_btnradio" id="item5_bedroom0_btnradio5" autocomplete="off" value="6"><label class="btn btn-outline-primary" for="item5_bedroom0_btnradio5">6</label>
+                                                            <input class="btn-check" type="radio" name="item5_bedroom0_btnradio" id="item5_bedroom0_btnradio6" autocomplete="off" value="7"><label class="btn btn-outline-primary" for="item5_bedroom0_btnradio6">7</label>
+                                                            <input class="btn-check" type="radio" name="item5_bedroom0_btnradio" id="item5_bedroom0_btnradio7" autocomplete="off" value="8"><label class="btn btn-outline-primary" for="item5_bedroom0_btnradio7">8</label>
+                                                            <input class="btn-check" type="radio" name="item5_bedroom0_btnradio" id="item5_bedroom0_btnradio8" autocomplete="off" value="9"><label class="btn btn-outline-primary" for="item5_bedroom0_btnradio8">9</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <hr class="bg-dark border-top border-dark" />
+                                                <div class="row">
+                                                    <label for="item6_bedroom0" class="col-sm-4 col-form-label">Ventilateur</label>
+                                                    <div class="col-sm-4">
+                                                        <div id="item6_bedroom0" class="btn-group w-100" role="group">
+                                                            <input id="item6_bedroom0_btn1" type="radio" class="btn-check" name="item6_bedroom0_btnradio" autocomplete="off"><label for="item6_bedroom0_btn1" class="btn btn-outline-primary">Oui</label>
+                                                            <input id="item6_bedroom0_btn2" type="radio" class="btn-check" name="item6_bedroom0_btnradio" autocomplete="off"><label for="item6_bedroom0_btn2" class="btn btn-outline-primary">Non</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <hr class="bg-dark border-top border-dark" />
+                                                <div class="row">
+                                                    <label for="item7_bedroom0" class="col-sm-4 col-form-label">Climatiseur</label>
+                                                    <div class="col-sm-4">
+                                                        <div id="item7_bedroom0" class="btn-group w-100" role="group">
+                                                            <input id="item7_bedroom0_btn1" type="radio" class="btn-check" name="item7_bedroom0_btnradio" autocomplete="off"><label for="item7_bedroom0_btn1" class="btn btn-outline-primary">Oui</label>
+                                                            <input id="item7_bedroom0_btn2" type="radio" class="btn-check" name="item7_bedroom0_btnradio" autocomplete="off"><label for="item7_bedroom0_btn2" class="btn btn-outline-primary">Non</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <hr class="bg-dark border-top border-dark" />
+                                                <div class="row">
+                                                    <label for="item8_bedroom0" class="col-sm-4 col-form-label">Armoire/penderie</label>
+                                                    <div class="col-sm-4">
+                                                        <div id="item8_bedroom0" class="btn-group w-100" role="group">
+                                                            <input id="item8_bedroom0_btn1" type="radio" class="btn-check" name="item8_bedroom0_btnradio" autocomplete="off"><label for="item8_bedroom0_btn1" class="btn btn-outline-primary">Oui</label>
+                                                            <input id="item8_bedroom0_btn2" type="radio" class="btn-check" name="item8_bedroom0_btnradio" autocomplete="off"><label for="item8_bedroom0_btn2" class="btn btn-outline-primary">Non</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <hr class="bg-dark border-top border-dark" />
+                                                <div class="row">
+                                                    <label for="item9_bedroom0" class="col-sm-4 col-form-label">Chauffage</label>
+                                                    <div class="col-sm-4">
+                                                        <div id="item9_bedroom0" class="btn-group w-100" role="group">
+                                                            <input id="item9_bedroom0_btn1" type="radio" class="btn-check" name="item9_bedroom0_btnradio" autocomplete="off"><label for="item9_bedroom0_btn1" class="btn btn-outline-primary">Oui</label>
+                                                            <input id="item9_bedroom0_btn2" type="radio" class="btn-check" name="item9_bedroom0_btnradio" autocomplete="off"><label for="item9_bedroom0_btn2" class="btn btn-outline-primary">Non</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <hr class="bg-dark border-top border-dark" />
+                                                <div class="row">
+                                                    <label for="item10_bedroom0" class="col-sm-4 col-form-label">Salle de bains privative</label>
+                                                    <div class="col-sm-4">
+                                                        <div id="item10_bedroom0" class="btn-group w-100" role="group">
+                                                            <input id="item10_bedroom0_btn1" type="radio" class="btn-check" name="item10_bedroom0_btnradio" autocomplete="off"><label for="item10_bedroom0_btn1" class="btn btn-outline-primary">Oui</label>
+                                                            <input id="item10_bedroom0_btn2" type="radio" class="btn-check" name="item10_bedroom0_btnradio" autocomplete="off"><label for="item10_bedroom0_btn2" class="btn btn-outline-primary">Non</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <hr class="bg-dark border-top border-dark" />
+                                                <div class="row">
+                                                    <label for="item11_bedroom0" class="col-sm-4 col-form-label">WC privatifs</label>
+                                                    <div class="col-sm-4">
+                                                        <div id="item11_bedroom0" class="btn-group w-100" role="group">
+                                                            <input id="item11_bedroom0_btn1" type="radio" class="btn-check" name="item11_bedroom0_btnradio" autocomplete="off"><label for="item11_bedroom0_btn1" class="btn btn-outline-primary">Oui</label>
+                                                            <input id="item11_bedroom0_btn2" type="radio" class="btn-check" name="item11_bedroom0_btnradio" autocomplete="off"><label for="item11_bedroom0_btn2" class="btn btn-outline-primary">Non</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <hr class="bg-dark border-top border-dark" />
+                                                <div class="row">
+                                                    <label for="item12_bedroom0" class="col-sm-4 col-form-label">Moustiquaire</label>
+                                                    <div class="col-sm-4">
+                                                        <div id="item12_bedroom0" class="btn-group w-100" role="group">
+                                                            <input id="item12_bedroom0_btn1" type="radio" class="btn-check" name="item12_bedroom0_btnradio" autocomplete="off"><label for="item12_bedroom0_btn1" class="btn btn-outline-primary">Oui</label>
+                                                            <input id="item12_bedroom0_btn2" type="radio" class="btn-check" name="item12_bedroom0_btnradio" autocomplete="off"><label for="item12_bedroom0_btn2" class="btn btn-outline-primary">Non</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <hr class="bg-dark border-top border-dark" />
+                                                <div class="row">
+                                                    <label for="item13_bedroom0" class="col-sm-4 col-form-label">Bureau</label>
+                                                    <div class="col-sm-4">
+                                                        <div id="item13_bedroom0" class="btn-group w-100" role="group">
+                                                            <input id="item13_bedroom0_btn1" type="radio" class="btn-check" name="item13_bedroom0_btnradio" autocomplete="off"><label for="item13_bedroom0_btn1" class="btn btn-outline-primary">Oui</label>
+                                                            <input id="item13_bedroom0_btn2" type="radio" class="btn-check" name="item13_bedroom0_btnradio" autocomplete="off"><label for="item13_bedroom0_btn2" class="btn btn-outline-primary">Non</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <hr class="bg-dark border-top border-dark" />
+                                                <div class="row">
+                                                    <label for="item14_bedroom0" class="col-sm-4 col-form-label">Prise près du lit</label>
+                                                    <div class="col-sm-4">
+                                                        <div id="item14_bedroom0" class="btn-group w-100" role="group">
+                                                            <input id="item14_bedroom0_btn1" type="radio" class="btn-check" name="item14_bedroom0_btnradio" autocomplete="off"><label for="item14_bedroom0_btn1" class="btn btn-outline-primary">Oui</label>
+                                                            <input id="item14_bedroom0_btn2" type="radio" class="btn-check" name="item14_bedroom0_btnradio" autocomplete="off"><label for="item14_bedroom0_btn2" class="btn btn-outline-primary">Non</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <hr class="bg-dark border-top border-dark" />
+                                                <div class="row">
+                                                    <label for="item15_bedroom0" class="col-sm-4 col-form-label">Purificateur d'air</label>
+                                                    <div class="col-sm-4">
+                                                        <div id="item15_bedroom0" class="btn-group w-100" role="group">
+                                                            <input id="item15_bedroom0_btn1" type="radio" class="btn-check" name="item15_bedroom0_btnradio" autocomplete="off"><label for="item15_bedroom0_btn1" class="btn btn-outline-primary">Oui</label>
+                                                            <input id="item15_bedroom0_btn2" type="radio" class="btn-check" name="item15_bedroom0_btnradio" autocomplete="off"><label for="item15_bedroom0_btn2" class="btn btn-outline-primary">Non</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="accordion-item">
+                                        <p class="accordion-header">
+                                            <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapse_bedroom1" aria-expanded="true" aria-controls="collapse_bedroom1" disabled>
+                                                <strong class="fs-5">Chambre n°2</strong>
+                                            </button>
+                                        </p>
+                                        <div id="collapse_bedroom1" class="accordion-collapse collapse show">
+                                            <div class="accordion-body mx-lg-5 mb-4">
+                                                <div class="row">
+                                                    <label for="item0_bedroom1" class="col-sm-4 col-form-label">Lit simple</label>
+                                                    <div class="col-sm-4">
+                                                        <div id="item0_bedroom1" class="btn-group w-100" role="group">
+                                                            <input id="item0_bedroom1_btn1" onchange="switch_item_indicator_display(0, 'bedroom1', 1)" type="radio" class="btn-check" name="item0_bedroom1_btn" autocomplete="off"><label for="item0_bedroom1_btn1" class="btn btn-outline-primary">Oui</label>
+                                                            <input id="item0_bedroom1_btn2" onchange="switch_item_indicator_display(0, 'bedroom1', 0)" type="radio" class="btn-check" name="item0_bedroom1_btn" autocomplete="off"><label for="item0_bedroom1_btn2" class="btn btn-outline-primary">Non</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div id="item0_bedroom1_indicator" class="row mt-2">
+                                                    <div class="col-sm-4"></div>
+                                                    <div class="col-sm-4">
+                                                        <p class="mb-1"><small>Précisez le nombre</small></p>
+                                                        <div class="btn-group btn-group-sm" role="group">
+                                                            <input class="btn-check" type="radio" name="item0_bedroom1_btnradio" id="item0_bedroom1_btnradio0" autocomplete="off" value="1"><label class="btn btn-outline-primary" for="item0_bedroom1_btnradio0">1</label>
+                                                            <input class="btn-check" type="radio" name="item0_bedroom1_btnradio" id="item0_bedroom1_btnradio1" autocomplete="off" value="2"><label class="btn btn-outline-primary" for="item0_bedroom1_btnradio1">2</label>
+                                                            <input class="btn-check" type="radio" name="item0_bedroom1_btnradio" id="item0_bedroom1_btnradio2" autocomplete="off" value="3"><label class="btn btn-outline-primary" for="item0_bedroom1_btnradio2">3</label>
+                                                            <input class="btn-check" type="radio" name="item0_bedroom1_btnradio" id="item0_bedroom1_btnradio3" autocomplete="off" value="4"><label class="btn btn-outline-primary" for="item0_bedroom1_btnradio3">4</label>
+                                                            <input class="btn-check" type="radio" name="item0_bedroom1_btnradio" id="item0_bedroom1_btnradio4" autocomplete="off" value="5"><label class="btn btn-outline-primary" for="item0_bedroom1_btnradio4">5</label>
+                                                            <input class="btn-check" type="radio" name="item0_bedroom1_btnradio" id="item0_bedroom1_btnradio5" autocomplete="off" value="6"><label class="btn btn-outline-primary" for="item0_bedroom1_btnradio5">6</label>
+                                                            <input class="btn-check" type="radio" name="item0_bedroom1_btnradio" id="item0_bedroom1_btnradio6" autocomplete="off" value="7"><label class="btn btn-outline-primary" for="item0_bedroom1_btnradio6">7</label>
+                                                            <input class="btn-check" type="radio" name="item0_bedroom1_btnradio" id="item0_bedroom1_btnradio7" autocomplete="off" value="8"><label class="btn btn-outline-primary" for="item0_bedroom1_btnradio7">8</label>
+                                                            <input class="btn-check" type="radio" name="item0_bedroom1_btnradio" id="item0_bedroom1_btnradio8" autocomplete="off" value="9"><label class="btn btn-outline-primary" for="item0_bedroom1_btnradio8">9</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <hr class="bg-dark border-top border-dark" />
+                                                <div class="row">
+                                                    <label for="item1_bedroom1" class="col-sm-4 col-form-label">Lit double</label>
+                                                    <div class="col-sm-4">
+                                                        <div id="item1_bedroom1" class="btn-group w-100" role="group">
+                                                            <input id="item1_bedroom1_btn1" onchange="switch_item_indicator_display(1, 'bedroom1', 1)" type="radio" class="btn-check" name="item1_bedroom1_btn" autocomplete="off"><label for="item1_bedroom1_btn1" class="btn btn-outline-primary">Oui</label>
+                                                            <input id="item1_bedroom1_btn2" onchange="switch_item_indicator_display(1, 'bedroom1', 0)" type="radio" class="btn-check" name="item1_bedroom1_btn" autocomplete="off"><label for="item1_bedroom1_btn2" class="btn btn-outline-primary">Non</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div id="item1_bedroom1_indicator" class="row mt-2">
+                                                    <div class="col-sm-4"></div>
+                                                    <div class="col-sm-4">
+                                                        <p class="mb-1"><small>Précisez le nombre</small></p>
+                                                        <div class="btn-group btn-group-sm" role="group">
+                                                            <input class="btn-check" type="radio" name="item1_bedroom1_btnradio" id="item1_bedroom1_btnradio0" autocomplete="off" value="1"><label class="btn btn-outline-primary" for="item1_bedroom1_btnradio0">1</label>
+                                                            <input class="btn-check" type="radio" name="item1_bedroom1_btnradio" id="item1_bedroom1_btnradio1" autocomplete="off" value="2"><label class="btn btn-outline-primary" for="item1_bedroom1_btnradio1">2</label>
+                                                            <input class="btn-check" type="radio" name="item1_bedroom1_btnradio" id="item1_bedroom1_btnradio2" autocomplete="off" value="3"><label class="btn btn-outline-primary" for="item1_bedroom1_btnradio2">3</label>
+                                                            <input class="btn-check" type="radio" name="item1_bedroom1_btnradio" id="item1_bedroom1_btnradio3" autocomplete="off" value="4"><label class="btn btn-outline-primary" for="item1_bedroom1_btnradio3">4</label>
+                                                            <input class="btn-check" type="radio" name="item1_bedroom1_btnradio" id="item1_bedroom1_btnradio4" autocomplete="off" value="5"><label class="btn btn-outline-primary" for="item1_bedroom1_btnradio4">5</label>
+                                                            <input class="btn-check" type="radio" name="item1_bedroom1_btnradio" id="item1_bedroom1_btnradio5" autocomplete="off" value="6"><label class="btn btn-outline-primary" for="item1_bedroom1_btnradio5">6</label>
+                                                            <input class="btn-check" type="radio" name="item1_bedroom1_btnradio" id="item1_bedroom1_btnradio6" autocomplete="off" value="7"><label class="btn btn-outline-primary" for="item1_bedroom1_btnradio6">7</label>
+                                                            <input class="btn-check" type="radio" name="item1_bedroom1_btnradio" id="item1_bedroom1_btnradio7" autocomplete="off" value="8"><label class="btn btn-outline-primary" for="item1_bedroom1_btnradio7">8</label>
+                                                            <input class="btn-check" type="radio" name="item1_bedroom1_btnradio" id="item1_bedroom1_btnradio8" autocomplete="off" value="9"><label class="btn btn-outline-primary" for="item1_bedroom1_btnradio8">9</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <hr class="bg-dark border-top border-dark" />
+                                                <div class="row">
+                                                    <label for="item2_bedroom1" class="col-sm-4 col-form-label">Lit superposé</label>
+                                                    <div class="col-sm-4">
+                                                        <div id="item2_bedroom1" class="btn-group w-100" role="group">
+                                                            <input id="item2_bedroom1_btn1" onchange="switch_item_indicator_display(2, 'bedroom1', 1)" type="radio" class="btn-check" name="item2_bedroom1_btn" autocomplete="off"><label for="item2_bedroom1_btn1" class="btn btn-outline-primary">Oui</label>
+                                                            <input id="item2_bedroom1_btn2" onchange="switch_item_indicator_display(2, 'bedroom1', 0)" type="radio" class="btn-check" name="item2_bedroom1_btn" autocomplete="off"><label for="item2_bedroom1_btn2" class="btn btn-outline-primary">Non</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div id="item2_bedroom1_indicator" class="row mt-2">
+                                                    <div class="col-sm-4"></div>
+                                                    <div class="col-sm-4">
+                                                        <p class="mb-1"><small>Précisez le nombre</small></p>
+                                                        <div class="btn-group btn-group-sm" role="group">
+                                                            <input class="btn-check" type="radio" name="item2_bedroom1_btnradio" id="item2_bedroom1_btnradio0" autocomplete="off" value="1"><label class="btn btn-outline-primary" for="item2_bedroom1_btnradio0">1</label>
+                                                            <input class="btn-check" type="radio" name="item2_bedroom1_btnradio" id="item2_bedroom1_btnradio1" autocomplete="off" value="2"><label class="btn btn-outline-primary" for="item2_bedroom1_btnradio1">2</label>
+                                                            <input class="btn-check" type="radio" name="item2_bedroom1_btnradio" id="item2_bedroom1_btnradio2" autocomplete="off" value="3"><label class="btn btn-outline-primary" for="item2_bedroom1_btnradio2">3</label>
+                                                            <input class="btn-check" type="radio" name="item2_bedroom1_btnradio" id="item2_bedroom1_btnradio3" autocomplete="off" value="4"><label class="btn btn-outline-primary" for="item2_bedroom1_btnradio3">4</label>
+                                                            <input class="btn-check" type="radio" name="item2_bedroom1_btnradio" id="item2_bedroom1_btnradio4" autocomplete="off" value="5"><label class="btn btn-outline-primary" for="item2_bedroom1_btnradio4">5</label>
+                                                            <input class="btn-check" type="radio" name="item2_bedroom1_btnradio" id="item2_bedroom1_btnradio5" autocomplete="off" value="6"><label class="btn btn-outline-primary" for="item2_bedroom1_btnradio5">6</label>
+                                                            <input class="btn-check" type="radio" name="item2_bedroom1_btnradio" id="item2_bedroom1_btnradio6" autocomplete="off" value="7"><label class="btn btn-outline-primary" for="item2_bedroom1_btnradio6">7</label>
+                                                            <input class="btn-check" type="radio" name="item2_bedroom1_btnradio" id="item2_bedroom1_btnradio7" autocomplete="off" value="8"><label class="btn btn-outline-primary" for="item2_bedroom1_btnradio7">8</label>
+                                                            <input class="btn-check" type="radio" name="item2_bedroom1_btnradio" id="item2_bedroom1_btnradio8" autocomplete="off" value="9"><label class="btn btn-outline-primary" for="item2_bedroom1_btnradio8">9</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <hr class="bg-dark border-top border-dark" />
+                                                <div class="row">
+                                                    <label for="item3_bedroom1" class="col-sm-4 col-form-label">Lit gigogne (contient 2 couchages)</label>
+                                                    <div class="col-sm-4">
+                                                        <div id="item3_bedroom1" class="btn-group w-100" role="group">
+                                                            <input id="item3_bedroom1_btn1" onchange="switch_item_indicator_display(3, 'bedroom1', 1)" type="radio" class="btn-check" name="item3_bedroom1_btn" autocomplete="off"><label for="item3_bedroom1_btn1" class="btn btn-outline-primary">Oui</label>
+                                                            <input id="item3_bedroom1_btn2" onchange="switch_item_indicator_display(3, 'bedroom1', 0)" type="radio" class="btn-check" name="item3_bedroom1_btn" autocomplete="off"><label for="item3_bedroom1_btn2" class="btn btn-outline-primary">Non</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div id="item3_bedroom1_indicator" class="row mt-2">
+                                                    <div class="col-sm-4"></div>
+                                                    <div class="col-sm-4">
+                                                        <p class="mb-1"><small>Précisez le nombre</small></p>
+                                                        <div class="btn-group btn-group-sm" role="group">
+                                                            <input class="btn-check" type="radio" name="item3_bedroom1_btnradio" id="item3_bedroom1_btnradio0" autocomplete="off" value="1"><label class="btn btn-outline-primary" for="item3_bedroom1_btnradio0">1</label>
+                                                            <input class="btn-check" type="radio" name="item3_bedroom1_btnradio" id="item3_bedroom1_btnradio1" autocomplete="off" value="2"><label class="btn btn-outline-primary" for="item3_bedroom1_btnradio1">2</label>
+                                                            <input class="btn-check" type="radio" name="item3_bedroom1_btnradio" id="item3_bedroom1_btnradio2" autocomplete="off" value="3"><label class="btn btn-outline-primary" for="item3_bedroom1_btnradio2">3</label>
+                                                            <input class="btn-check" type="radio" name="item3_bedroom1_btnradio" id="item3_bedroom1_btnradio3" autocomplete="off" value="4"><label class="btn btn-outline-primary" for="item3_bedroom1_btnradio3">4</label>
+                                                            <input class="btn-check" type="radio" name="item3_bedroom1_btnradio" id="item3_bedroom1_btnradio4" autocomplete="off" value="5"><label class="btn btn-outline-primary" for="item3_bedroom1_btnradio4">5</label>
+                                                            <input class="btn-check" type="radio" name="item3_bedroom1_btnradio" id="item3_bedroom1_btnradio5" autocomplete="off" value="6"><label class="btn btn-outline-primary" for="item3_bedroom1_btnradio5">6</label>
+                                                            <input class="btn-check" type="radio" name="item3_bedroom1_btnradio" id="item3_bedroom1_btnradio6" autocomplete="off" value="7"><label class="btn btn-outline-primary" for="item3_bedroom1_btnradio6">7</label>
+                                                            <input class="btn-check" type="radio" name="item3_bedroom1_btnradio" id="item3_bedroom1_btnradio7" autocomplete="off" value="8"><label class="btn btn-outline-primary" for="item3_bedroom1_btnradio7">8</label>
+                                                            <input class="btn-check" type="radio" name="item3_bedroom1_btnradio" id="item3_bedroom1_btnradio8" autocomplete="off" value="9"><label class="btn btn-outline-primary" for="item3_bedroom1_btnradio8">9</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <hr class="bg-dark border-top border-dark" />
+                                                <div class="row">
+                                                    <label for="item4_bedroom1" class="col-sm-4 col-form-label">Canapé-lit</label>
+                                                    <div class="col-sm-4">
+                                                        <div id="item4_bedroom1" class="btn-group w-100" role="group">
+                                                            <input id="item4_bedroom1_btn1" onchange="switch_item_indicator_display(4, 'bedroom1', 1)" type="radio" class="btn-check" name="item4_bedroom1_btn" autocomplete="off"><label for="item4_bedroom1_btn1" class="btn btn-outline-primary">Oui</label>
+                                                            <input id="item4_bedroom1_btn2" onchange="switch_item_indicator_display(4, 'bedroom1', 0)" type="radio" class="btn-check" name="item4_bedroom1_btn" autocomplete="off"><label for="item4_bedroom1_btn2" class="btn btn-outline-primary">Non</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div id="item4_bedroom1_indicator" class="row mt-2">
+                                                    <div class="col-sm-4"></div>
+                                                    <div class="col-sm-4">
+                                                        <p class="mb-1"><small>Précisez le nombre</small></p>
+                                                        <div class="btn-group btn-group-sm" role="group">
+                                                            <input class="btn-check" type="radio" name="item4_bedroom1_btnradio" id="item4_bedroom1_btnradio0" autocomplete="off" value="1"><label class="btn btn-outline-primary" for="item4_bedroom1_btnradio0">1</label>
+                                                            <input class="btn-check" type="radio" name="item4_bedroom1_btnradio" id="item4_bedroom1_btnradio1" autocomplete="off" value="2"><label class="btn btn-outline-primary" for="item4_bedroom1_btnradio1">2</label>
+                                                            <input class="btn-check" type="radio" name="item4_bedroom1_btnradio" id="item4_bedroom1_btnradio2" autocomplete="off" value="3"><label class="btn btn-outline-primary" for="item4_bedroom1_btnradio2">3</label>
+                                                            <input class="btn-check" type="radio" name="item4_bedroom1_btnradio" id="item4_bedroom1_btnradio3" autocomplete="off" value="4"><label class="btn btn-outline-primary" for="item4_bedroom1_btnradio3">4</label>
+                                                            <input class="btn-check" type="radio" name="item4_bedroom1_btnradio" id="item4_bedroom1_btnradio4" autocomplete="off" value="5"><label class="btn btn-outline-primary" for="item4_bedroom1_btnradio4">5</label>
+                                                            <input class="btn-check" type="radio" name="item4_bedroom1_btnradio" id="item4_bedroom1_btnradio5" autocomplete="off" value="6"><label class="btn btn-outline-primary" for="item4_bedroom1_btnradio5">6</label>
+                                                            <input class="btn-check" type="radio" name="item4_bedroom1_btnradio" id="item4_bedroom1_btnradio6" autocomplete="off" value="7"><label class="btn btn-outline-primary" for="item4_bedroom1_btnradio6">7</label>
+                                                            <input class="btn-check" type="radio" name="item4_bedroom1_btnradio" id="item4_bedroom1_btnradio7" autocomplete="off" value="8"><label class="btn btn-outline-primary" for="item4_bedroom1_btnradio7">8</label>
+                                                            <input class="btn-check" type="radio" name="item4_bedroom1_btnradio" id="item4_bedroom1_btnradio8" autocomplete="off" value="9"><label class="btn btn-outline-primary" for="item4_bedroom1_btnradio8">9</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <hr class="bg-dark border-top border-dark" />
+                                                <div class="row">
+                                                    <label for="item5_bedroom1" class="col-sm-4 col-form-label">Berceau</label>
+                                                    <div class="col-sm-4">
+                                                        <div id="item5_bedroom1" class="btn-group w-100" role="group">
+                                                            <input id="item5_bedroom1_btn1" onchange="switch_item_indicator_display(5, 'bedroom1', 1)" type="radio" class="btn-check" name="item5_bedroom1_btn" autocomplete="off"><label for="item5_bedroom1_btn1" class="btn btn-outline-primary">Oui</label>
+                                                            <input id="item5_bedroom1_btn2" onchange="switch_item_indicator_display(5, 'bedroom1', 0)" type="radio" class="btn-check" name="item5_bedroom1_btn" autocomplete="off"><label for="item5_bedroom1_btn2" class="btn btn-outline-primary">Non</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div id="item5_bedroom1_indicator" class="row mt-2">
+                                                    <div class="col-sm-4"></div>
+                                                    <div class="col-sm-4">
+                                                        <p class="mb-1"><small>Précisez le nombre</small></p>
+                                                        <div class="btn-group btn-group-sm" role="group">
+                                                            <input class="btn-check" type="radio" name="item5_bedroom1_btnradio" id="item5_bedroom1_btnradio0" autocomplete="off" value="1"><label class="btn btn-outline-primary" for="item5_bedroom1_btnradio0">1</label>
+                                                            <input class="btn-check" type="radio" name="item5_bedroom1_btnradio" id="item5_bedroom1_btnradio1" autocomplete="off" value="2"><label class="btn btn-outline-primary" for="item5_bedroom1_btnradio1">2</label>
+                                                            <input class="btn-check" type="radio" name="item5_bedroom1_btnradio" id="item5_bedroom1_btnradio2" autocomplete="off" value="3"><label class="btn btn-outline-primary" for="item5_bedroom1_btnradio2">3</label>
+                                                            <input class="btn-check" type="radio" name="item5_bedroom1_btnradio" id="item5_bedroom1_btnradio3" autocomplete="off" value="4"><label class="btn btn-outline-primary" for="item5_bedroom1_btnradio3">4</label>
+                                                            <input class="btn-check" type="radio" name="item5_bedroom1_btnradio" id="item5_bedroom1_btnradio4" autocomplete="off" value="5"><label class="btn btn-outline-primary" for="item5_bedroom1_btnradio4">5</label>
+                                                            <input class="btn-check" type="radio" name="item5_bedroom1_btnradio" id="item5_bedroom1_btnradio5" autocomplete="off" value="6"><label class="btn btn-outline-primary" for="item5_bedroom1_btnradio5">6</label>
+                                                            <input class="btn-check" type="radio" name="item5_bedroom1_btnradio" id="item5_bedroom1_btnradio6" autocomplete="off" value="7"><label class="btn btn-outline-primary" for="item5_bedroom1_btnradio6">7</label>
+                                                            <input class="btn-check" type="radio" name="item5_bedroom1_btnradio" id="item5_bedroom1_btnradio7" autocomplete="off" value="8"><label class="btn btn-outline-primary" for="item5_bedroom1_btnradio7">8</label>
+                                                            <input class="btn-check" type="radio" name="item5_bedroom1_btnradio" id="item5_bedroom1_btnradio8" autocomplete="off" value="9"><label class="btn btn-outline-primary" for="item5_bedroom1_btnradio8">9</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <hr class="bg-dark border-top border-dark" />
+                                                <div class="row">
+                                                    <label for="item6_bedroom1" class="col-sm-4 col-form-label">Ventilateur</label>
+                                                    <div class="col-sm-4">
+                                                        <div id="item6_bedroom1" class="btn-group w-100" role="group">
+                                                            <input id="item6_bedroom1_btn1" type="radio" class="btn-check" name="item6_bedroom1_btnradio" autocomplete="off"><label for="item6_bedroom1_btn1" class="btn btn-outline-primary">Oui</label>
+                                                            <input id="item6_bedroom1_btn2" type="radio" class="btn-check" name="item6_bedroom1_btnradio" autocomplete="off"><label for="item6_bedroom1_btn2" class="btn btn-outline-primary">Non</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <hr class="bg-dark border-top border-dark" />
+                                                <div class="row">
+                                                    <label for="item7_bedroom1" class="col-sm-4 col-form-label">Climatiseur</label>
+                                                    <div class="col-sm-4">
+                                                        <div id="item7_bedroom1" class="btn-group w-100" role="group">
+                                                            <input id="item7_bedroom1_btn1" type="radio" class="btn-check" name="item7_bedroom1_btnradio" autocomplete="off"><label for="item7_bedroom1_btn1" class="btn btn-outline-primary">Oui</label>
+                                                            <input id="item7_bedroom1_btn2" type="radio" class="btn-check" name="item7_bedroom1_btnradio" autocomplete="off"><label for="item7_bedroom1_btn2" class="btn btn-outline-primary">Non</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <hr class="bg-dark border-top border-dark" />
+                                                <div class="row">
+                                                    <label for="item8_bedroom1" class="col-sm-4 col-form-label">Armoire/penderie</label>
+                                                    <div class="col-sm-4">
+                                                        <div id="item8_bedroom1" class="btn-group w-100" role="group">
+                                                            <input id="item8_bedroom1_btn1" type="radio" class="btn-check" name="item8_bedroom1_btnradio" autocomplete="off"><label for="item8_bedroom1_btn1" class="btn btn-outline-primary">Oui</label>
+                                                            <input id="item8_bedroom1_btn2" type="radio" class="btn-check" name="item8_bedroom1_btnradio" autocomplete="off"><label for="item8_bedroom1_btn2" class="btn btn-outline-primary">Non</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <hr class="bg-dark border-top border-dark" />
+                                                <div class="row">
+                                                    <label for="item9_bedroom1" class="col-sm-4 col-form-label">Chauffage</label>
+                                                    <div class="col-sm-4">
+                                                        <div id="item9_bedroom1" class="btn-group w-100" role="group">
+                                                            <input id="item9_bedroom1_btn1" type="radio" class="btn-check" name="item9_bedroom1_btnradio" autocomplete="off"><label for="item9_bedroom1_btn1" class="btn btn-outline-primary">Oui</label>
+                                                            <input id="item9_bedroom1_btn2" type="radio" class="btn-check" name="item9_bedroom1_btnradio" autocomplete="off"><label for="item9_bedroom1_btn2" class="btn btn-outline-primary">Non</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <hr class="bg-dark border-top border-dark" />
+                                                <div class="row">
+                                                    <label for="item10_bedroom1" class="col-sm-4 col-form-label">Salle de bains privative</label>
+                                                    <div class="col-sm-4">
+                                                        <div id="item10_bedroom1" class="btn-group w-100" role="group">
+                                                            <input id="item10_bedroom1_btn1" type="radio" class="btn-check" name="item10_bedroom1_btnradio" autocomplete="off"><label for="item10_bedroom1_btn1" class="btn btn-outline-primary">Oui</label>
+                                                            <input id="item10_bedroom1_btn2" type="radio" class="btn-check" name="item10_bedroom1_btnradio" autocomplete="off"><label for="item10_bedroom1_btn2" class="btn btn-outline-primary">Non</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <hr class="bg-dark border-top border-dark" />
+                                                <div class="row">
+                                                    <label for="item11_bedroom1" class="col-sm-4 col-form-label">WC privatifs</label>
+                                                    <div class="col-sm-4">
+                                                        <div id="item11_bedroom1" class="btn-group w-100" role="group">
+                                                            <input id="item11_bedroom1_btn1" type="radio" class="btn-check" name="item11_bedroom1_btnradio" autocomplete="off"><label for="item11_bedroom1_btn1" class="btn btn-outline-primary">Oui</label>
+                                                            <input id="item11_bedroom1_btn2" type="radio" class="btn-check" name="item11_bedroom1_btnradio" autocomplete="off"><label for="item11_bedroom1_btn2" class="btn btn-outline-primary">Non</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <hr class="bg-dark border-top border-dark" />
+                                                <div class="row">
+                                                    <label for="item12_bedroom1" class="col-sm-4 col-form-label">Moustiquaire</label>
+                                                    <div class="col-sm-4">
+                                                        <div id="item12_bedroom1" class="btn-group w-100" role="group">
+                                                            <input id="item12_bedroom1_btn1" type="radio" class="btn-check" name="item12_bedroom1_btnradio" autocomplete="off"><label for="item12_bedroom1_btn1" class="btn btn-outline-primary">Oui</label>
+                                                            <input id="item12_bedroom1_btn2" type="radio" class="btn-check" name="item12_bedroom1_btnradio" autocomplete="off"><label for="item12_bedroom1_btn2" class="btn btn-outline-primary">Non</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <hr class="bg-dark border-top border-dark" />
+                                                <div class="row">
+                                                    <label for="item13_bedroom1" class="col-sm-4 col-form-label">Bureau</label>
+                                                    <div class="col-sm-4">
+                                                        <div id="item13_bedroom1" class="btn-group w-100" role="group">
+                                                            <input id="item13_bedroom1_btn1" type="radio" class="btn-check" name="item13_bedroom1_btnradio" autocomplete="off"><label for="item13_bedroom1_btn1" class="btn btn-outline-primary">Oui</label>
+                                                            <input id="item13_bedroom1_btn2" type="radio" class="btn-check" name="item13_bedroom1_btnradio" autocomplete="off"><label for="item13_bedroom1_btn2" class="btn btn-outline-primary">Non</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <hr class="bg-dark border-top border-dark" />
+                                                <div class="row">
+                                                    <label for="item14_bedroom1" class="col-sm-4 col-form-label">Prise près du lit</label>
+                                                    <div class="col-sm-4">
+                                                        <div id="item14_bedroom1" class="btn-group w-100" role="group">
+                                                            <input id="item14_bedroom1_btn1" type="radio" class="btn-check" name="item14_bedroom1_btnradio" autocomplete="off"><label for="item14_bedroom1_btn1" class="btn btn-outline-primary">Oui</label>
+                                                            <input id="item14_bedroom1_btn2" type="radio" class="btn-check" name="item14_bedroom1_btnradio" autocomplete="off"><label for="item14_bedroom1_btn2" class="btn btn-outline-primary">Non</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <hr class="bg-dark border-top border-dark" />
+                                                <div class="row">
+                                                    <label for="item15_bedroom1" class="col-sm-4 col-form-label">Purificateur d'air</label>
+                                                    <div class="col-sm-4">
+                                                        <div id="item15_bedroom1" class="btn-group w-100" role="group">
+                                                            <input id="item15_bedroom1_btn1" type="radio" class="btn-check" name="item15_bedroom1_btnradio" autocomplete="off"><label for="item15_bedroom1_btn1" class="btn btn-outline-primary">Oui</label>
+                                                            <input id="item15_bedroom1_btn2" type="radio" class="btn-check" name="item15_bedroom1_btnradio" autocomplete="off"><label for="item15_bedroom1_btn2" class="btn btn-outline-primary">Non</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="accordion-item">
+                                        <p class="accordion-header">
+                                            <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapse_bedroom2" aria-expanded="true" aria-controls="collapse_bedroom2" disabled>
+                                                <strong class="fs-5">Chambre n°3</strong>
+                                            </button>
+                                        </p>
+                                        <div id="collapse_bedroom2" class="accordion-collapse collapse show">
+                                            <div class="accordion-body mx-lg-5 mb-4">
+                                                <div class="row">
+                                                    <label for="item0_bedroom2" class="col-sm-4 col-form-label">Lit simple</label>
+                                                    <div class="col-sm-4">
+                                                        <div id="item0_bedroom2" class="btn-group w-100" role="group">
+                                                            <input id="item0_bedroom2_btn1" onchange="switch_item_indicator_display(0, 'bedroom2', 1)" type="radio" class="btn-check" name="item0_bedroom2_btn" autocomplete="off"><label for="item0_bedroom2_btn1" class="btn btn-outline-primary">Oui</label>
+                                                            <input id="item0_bedroom2_btn2" onchange="switch_item_indicator_display(0, 'bedroom2', 0)" type="radio" class="btn-check" name="item0_bedroom2_btn" autocomplete="off"><label for="item0_bedroom2_btn2" class="btn btn-outline-primary">Non</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div id="item0_bedroom2_indicator" class="row mt-2">
+                                                    <div class="col-sm-4"></div>
+                                                    <div class="col-sm-4">
+                                                        <p class="mb-1"><small>Précisez le nombre</small></p>
+                                                        <div class="btn-group btn-group-sm" role="group">
+                                                            <input class="btn-check" type="radio" name="item0_bedroom2_btnradio" id="item0_bedroom2_btnradio0" autocomplete="off" value="1"><label class="btn btn-outline-primary" for="item0_bedroom2_btnradio0">1</label>
+                                                            <input class="btn-check" type="radio" name="item0_bedroom2_btnradio" id="item0_bedroom2_btnradio1" autocomplete="off" value="2"><label class="btn btn-outline-primary" for="item0_bedroom2_btnradio1">2</label>
+                                                            <input class="btn-check" type="radio" name="item0_bedroom2_btnradio" id="item0_bedroom2_btnradio2" autocomplete="off" value="3"><label class="btn btn-outline-primary" for="item0_bedroom2_btnradio2">3</label>
+                                                            <input class="btn-check" type="radio" name="item0_bedroom2_btnradio" id="item0_bedroom2_btnradio3" autocomplete="off" value="4"><label class="btn btn-outline-primary" for="item0_bedroom2_btnradio3">4</label>
+                                                            <input class="btn-check" type="radio" name="item0_bedroom2_btnradio" id="item0_bedroom2_btnradio4" autocomplete="off" value="5"><label class="btn btn-outline-primary" for="item0_bedroom2_btnradio4">5</label>
+                                                            <input class="btn-check" type="radio" name="item0_bedroom2_btnradio" id="item0_bedroom2_btnradio5" autocomplete="off" value="6"><label class="btn btn-outline-primary" for="item0_bedroom2_btnradio5">6</label>
+                                                            <input class="btn-check" type="radio" name="item0_bedroom2_btnradio" id="item0_bedroom2_btnradio6" autocomplete="off" value="7"><label class="btn btn-outline-primary" for="item0_bedroom2_btnradio6">7</label>
+                                                            <input class="btn-check" type="radio" name="item0_bedroom2_btnradio" id="item0_bedroom2_btnradio7" autocomplete="off" value="8"><label class="btn btn-outline-primary" for="item0_bedroom2_btnradio7">8</label>
+                                                            <input class="btn-check" type="radio" name="item0_bedroom2_btnradio" id="item0_bedroom2_btnradio8" autocomplete="off" value="9"><label class="btn btn-outline-primary" for="item0_bedroom2_btnradio8">9</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <hr class="bg-dark border-top border-dark" />
+                                                <div class="row">
+                                                    <label for="item1_bedroom2" class="col-sm-4 col-form-label">Lit double</label>
+                                                    <div class="col-sm-4">
+                                                        <div id="item1_bedroom2" class="btn-group w-100" role="group">
+                                                            <input id="item1_bedroom2_btn1" onchange="switch_item_indicator_display(1, 'bedroom2', 1)" type="radio" class="btn-check" name="item1_bedroom2_btn" autocomplete="off"><label for="item1_bedroom2_btn1" class="btn btn-outline-primary">Oui</label>
+                                                            <input id="item1_bedroom2_btn2" onchange="switch_item_indicator_display(1, 'bedroom2', 0)" type="radio" class="btn-check" name="item1_bedroom2_btn" autocomplete="off"><label for="item1_bedroom2_btn2" class="btn btn-outline-primary">Non</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div id="item1_bedroom2_indicator" class="row mt-2">
+                                                    <div class="col-sm-4"></div>
+                                                    <div class="col-sm-4">
+                                                        <p class="mb-1"><small>Précisez le nombre</small></p>
+                                                        <div class="btn-group btn-group-sm" role="group">
+                                                            <input class="btn-check" type="radio" name="item1_bedroom2_btnradio" id="item1_bedroom2_btnradio0" autocomplete="off" value="1"><label class="btn btn-outline-primary" for="item1_bedroom2_btnradio0">1</label>
+                                                            <input class="btn-check" type="radio" name="item1_bedroom2_btnradio" id="item1_bedroom2_btnradio1" autocomplete="off" value="2"><label class="btn btn-outline-primary" for="item1_bedroom2_btnradio1">2</label>
+                                                            <input class="btn-check" type="radio" name="item1_bedroom2_btnradio" id="item1_bedroom2_btnradio2" autocomplete="off" value="3"><label class="btn btn-outline-primary" for="item1_bedroom2_btnradio2">3</label>
+                                                            <input class="btn-check" type="radio" name="item1_bedroom2_btnradio" id="item1_bedroom2_btnradio3" autocomplete="off" value="4"><label class="btn btn-outline-primary" for="item1_bedroom2_btnradio3">4</label>
+                                                            <input class="btn-check" type="radio" name="item1_bedroom2_btnradio" id="item1_bedroom2_btnradio4" autocomplete="off" value="5"><label class="btn btn-outline-primary" for="item1_bedroom2_btnradio4">5</label>
+                                                            <input class="btn-check" type="radio" name="item1_bedroom2_btnradio" id="item1_bedroom2_btnradio5" autocomplete="off" value="6"><label class="btn btn-outline-primary" for="item1_bedroom2_btnradio5">6</label>
+                                                            <input class="btn-check" type="radio" name="item1_bedroom2_btnradio" id="item1_bedroom2_btnradio6" autocomplete="off" value="7"><label class="btn btn-outline-primary" for="item1_bedroom2_btnradio6">7</label>
+                                                            <input class="btn-check" type="radio" name="item1_bedroom2_btnradio" id="item1_bedroom2_btnradio7" autocomplete="off" value="8"><label class="btn btn-outline-primary" for="item1_bedroom2_btnradio7">8</label>
+                                                            <input class="btn-check" type="radio" name="item1_bedroom2_btnradio" id="item1_bedroom2_btnradio8" autocomplete="off" value="9"><label class="btn btn-outline-primary" for="item1_bedroom2_btnradio8">9</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <hr class="bg-dark border-top border-dark" />
+                                                <div class="row">
+                                                    <label for="item2_bedroom2" class="col-sm-4 col-form-label">Lit superposé</label>
+                                                    <div class="col-sm-4">
+                                                        <div id="item2_bedroom2" class="btn-group w-100" role="group">
+                                                            <input id="item2_bedroom2_btn1" onchange="switch_item_indicator_display(2, 'bedroom2', 1)" type="radio" class="btn-check" name="item2_bedroom2_btn" autocomplete="off"><label for="item2_bedroom2_btn1" class="btn btn-outline-primary">Oui</label>
+                                                            <input id="item2_bedroom2_btn2" onchange="switch_item_indicator_display(2, 'bedroom2', 0)" type="radio" class="btn-check" name="item2_bedroom2_btn" autocomplete="off"><label for="item2_bedroom2_btn2" class="btn btn-outline-primary">Non</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div id="item2_bedroom2_indicator" class="row mt-2">
+                                                    <div class="col-sm-4"></div>
+                                                    <div class="col-sm-4">
+                                                        <p class="mb-1"><small>Précisez le nombre</small></p>
+                                                        <div class="btn-group btn-group-sm" role="group">
+                                                            <input class="btn-check" type="radio" name="item2_bedroom2_btnradio" id="item2_bedroom2_btnradio0" autocomplete="off" value="1"><label class="btn btn-outline-primary" for="item2_bedroom2_btnradio0">1</label>
+                                                            <input class="btn-check" type="radio" name="item2_bedroom2_btnradio" id="item2_bedroom2_btnradio1" autocomplete="off" value="2"><label class="btn btn-outline-primary" for="item2_bedroom2_btnradio1">2</label>
+                                                            <input class="btn-check" type="radio" name="item2_bedroom2_btnradio" id="item2_bedroom2_btnradio2" autocomplete="off" value="3"><label class="btn btn-outline-primary" for="item2_bedroom2_btnradio2">3</label>
+                                                            <input class="btn-check" type="radio" name="item2_bedroom2_btnradio" id="item2_bedroom2_btnradio3" autocomplete="off" value="4"><label class="btn btn-outline-primary" for="item2_bedroom2_btnradio3">4</label>
+                                                            <input class="btn-check" type="radio" name="item2_bedroom2_btnradio" id="item2_bedroom2_btnradio4" autocomplete="off" value="5"><label class="btn btn-outline-primary" for="item2_bedroom2_btnradio4">5</label>
+                                                            <input class="btn-check" type="radio" name="item2_bedroom2_btnradio" id="item2_bedroom2_btnradio5" autocomplete="off" value="6"><label class="btn btn-outline-primary" for="item2_bedroom2_btnradio5">6</label>
+                                                            <input class="btn-check" type="radio" name="item2_bedroom2_btnradio" id="item2_bedroom2_btnradio6" autocomplete="off" value="7"><label class="btn btn-outline-primary" for="item2_bedroom2_btnradio6">7</label>
+                                                            <input class="btn-check" type="radio" name="item2_bedroom2_btnradio" id="item2_bedroom2_btnradio7" autocomplete="off" value="8"><label class="btn btn-outline-primary" for="item2_bedroom2_btnradio7">8</label>
+                                                            <input class="btn-check" type="radio" name="item2_bedroom2_btnradio" id="item2_bedroom2_btnradio8" autocomplete="off" value="9"><label class="btn btn-outline-primary" for="item2_bedroom2_btnradio8">9</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <hr class="bg-dark border-top border-dark" />
+                                                <div class="row">
+                                                    <label for="item3_bedroom2" class="col-sm-4 col-form-label">Lit gigogne (contient 2 couchages)</label>
+                                                    <div class="col-sm-4">
+                                                        <div id="item3_bedroom2" class="btn-group w-100" role="group">
+                                                            <input id="item3_bedroom2_btn1" onchange="switch_item_indicator_display(3, 'bedroom2', 1)" type="radio" class="btn-check" name="item3_bedroom2_btn" autocomplete="off"><label for="item3_bedroom2_btn1" class="btn btn-outline-primary">Oui</label>
+                                                            <input id="item3_bedroom2_btn2" onchange="switch_item_indicator_display(3, 'bedroom2', 0)" type="radio" class="btn-check" name="item3_bedroom2_btn" autocomplete="off"><label for="item3_bedroom2_btn2" class="btn btn-outline-primary">Non</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div id="item3_bedroom2_indicator" class="row mt-2">
+                                                    <div class="col-sm-4"></div>
+                                                    <div class="col-sm-4">
+                                                        <p class="mb-1"><small>Précisez le nombre</small></p>
+                                                        <div class="btn-group btn-group-sm" role="group">
+                                                            <input class="btn-check" type="radio" name="item3_bedroom2_btnradio" id="item3_bedroom2_btnradio0" autocomplete="off" value="1"><label class="btn btn-outline-primary" for="item3_bedroom2_btnradio0">1</label>
+                                                            <input class="btn-check" type="radio" name="item3_bedroom2_btnradio" id="item3_bedroom2_btnradio1" autocomplete="off" value="2"><label class="btn btn-outline-primary" for="item3_bedroom2_btnradio1">2</label>
+                                                            <input class="btn-check" type="radio" name="item3_bedroom2_btnradio" id="item3_bedroom2_btnradio2" autocomplete="off" value="3"><label class="btn btn-outline-primary" for="item3_bedroom2_btnradio2">3</label>
+                                                            <input class="btn-check" type="radio" name="item3_bedroom2_btnradio" id="item3_bedroom2_btnradio3" autocomplete="off" value="4"><label class="btn btn-outline-primary" for="item3_bedroom2_btnradio3">4</label>
+                                                            <input class="btn-check" type="radio" name="item3_bedroom2_btnradio" id="item3_bedroom2_btnradio4" autocomplete="off" value="5"><label class="btn btn-outline-primary" for="item3_bedroom2_btnradio4">5</label>
+                                                            <input class="btn-check" type="radio" name="item3_bedroom2_btnradio" id="item3_bedroom2_btnradio5" autocomplete="off" value="6"><label class="btn btn-outline-primary" for="item3_bedroom2_btnradio5">6</label>
+                                                            <input class="btn-check" type="radio" name="item3_bedroom2_btnradio" id="item3_bedroom2_btnradio6" autocomplete="off" value="7"><label class="btn btn-outline-primary" for="item3_bedroom2_btnradio6">7</label>
+                                                            <input class="btn-check" type="radio" name="item3_bedroom2_btnradio" id="item3_bedroom2_btnradio7" autocomplete="off" value="8"><label class="btn btn-outline-primary" for="item3_bedroom2_btnradio7">8</label>
+                                                            <input class="btn-check" type="radio" name="item3_bedroom2_btnradio" id="item3_bedroom2_btnradio8" autocomplete="off" value="9"><label class="btn btn-outline-primary" for="item3_bedroom2_btnradio8">9</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <hr class="bg-dark border-top border-dark" />
+                                                <div class="row">
+                                                    <label for="item4_bedroom2" class="col-sm-4 col-form-label">Canapé-lit</label>
+                                                    <div class="col-sm-4">
+                                                        <div id="item4_bedroom2" class="btn-group w-100" role="group">
+                                                            <input id="item4_bedroom2_btn1" onchange="switch_item_indicator_display(4, 'bedroom2', 1)" type="radio" class="btn-check" name="item4_bedroom2_btn" autocomplete="off"><label for="item4_bedroom2_btn1" class="btn btn-outline-primary">Oui</label>
+                                                            <input id="item4_bedroom2_btn2" onchange="switch_item_indicator_display(4, 'bedroom2', 0)" type="radio" class="btn-check" name="item4_bedroom2_btn" autocomplete="off"><label for="item4_bedroom2_btn2" class="btn btn-outline-primary">Non</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div id="item4_bedroom2_indicator" class="row mt-2">
+                                                    <div class="col-sm-4"></div>
+                                                    <div class="col-sm-4">
+                                                        <p class="mb-1"><small>Précisez le nombre</small></p>
+                                                        <div class="btn-group btn-group-sm" role="group">
+                                                            <input class="btn-check" type="radio" name="item4_bedroom2_btnradio" id="item4_bedroom2_btnradio0" autocomplete="off" value="1"><label class="btn btn-outline-primary" for="item4_bedroom2_btnradio0">1</label>
+                                                            <input class="btn-check" type="radio" name="item4_bedroom2_btnradio" id="item4_bedroom2_btnradio1" autocomplete="off" value="2"><label class="btn btn-outline-primary" for="item4_bedroom2_btnradio1">2</label>
+                                                            <input class="btn-check" type="radio" name="item4_bedroom2_btnradio" id="item4_bedroom2_btnradio2" autocomplete="off" value="3"><label class="btn btn-outline-primary" for="item4_bedroom2_btnradio2">3</label>
+                                                            <input class="btn-check" type="radio" name="item4_bedroom2_btnradio" id="item4_bedroom2_btnradio3" autocomplete="off" value="4"><label class="btn btn-outline-primary" for="item4_bedroom2_btnradio3">4</label>
+                                                            <input class="btn-check" type="radio" name="item4_bedroom2_btnradio" id="item4_bedroom2_btnradio4" autocomplete="off" value="5"><label class="btn btn-outline-primary" for="item4_bedroom2_btnradio4">5</label>
+                                                            <input class="btn-check" type="radio" name="item4_bedroom2_btnradio" id="item4_bedroom2_btnradio5" autocomplete="off" value="6"><label class="btn btn-outline-primary" for="item4_bedroom2_btnradio5">6</label>
+                                                            <input class="btn-check" type="radio" name="item4_bedroom2_btnradio" id="item4_bedroom2_btnradio6" autocomplete="off" value="7"><label class="btn btn-outline-primary" for="item4_bedroom2_btnradio6">7</label>
+                                                            <input class="btn-check" type="radio" name="item4_bedroom2_btnradio" id="item4_bedroom2_btnradio7" autocomplete="off" value="8"><label class="btn btn-outline-primary" for="item4_bedroom2_btnradio7">8</label>
+                                                            <input class="btn-check" type="radio" name="item4_bedroom2_btnradio" id="item4_bedroom2_btnradio8" autocomplete="off" value="9"><label class="btn btn-outline-primary" for="item4_bedroom2_btnradio8">9</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <hr class="bg-dark border-top border-dark" />
+                                                <div class="row">
+                                                    <label for="item5_bedroom2" class="col-sm-4 col-form-label">Berceau</label>
+                                                    <div class="col-sm-4">
+                                                        <div id="item5_bedroom2" class="btn-group w-100" role="group">
+                                                            <input id="item5_bedroom2_btn1" onchange="switch_item_indicator_display(5, 'bedroom2', 1)" type="radio" class="btn-check" name="item5_bedroom2_btn" autocomplete="off"><label for="item5_bedroom2_btn1" class="btn btn-outline-primary">Oui</label>
+                                                            <input id="item5_bedroom2_btn2" onchange="switch_item_indicator_display(5, 'bedroom2', 0)" type="radio" class="btn-check" name="item5_bedroom2_btn" autocomplete="off"><label for="item5_bedroom2_btn2" class="btn btn-outline-primary">Non</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div id="item5_bedroom2_indicator" class="row mt-2">
+                                                    <div class="col-sm-4"></div>
+                                                    <div class="col-sm-4">
+                                                        <p class="mb-1"><small>Précisez le nombre</small></p>
+                                                        <div class="btn-group btn-group-sm" role="group">
+                                                            <input class="btn-check" type="radio" name="item5_bedroom2_btnradio" id="item5_bedroom2_btnradio0" autocomplete="off" value="1"><label class="btn btn-outline-primary" for="item5_bedroom2_btnradio0">1</label>
+                                                            <input class="btn-check" type="radio" name="item5_bedroom2_btnradio" id="item5_bedroom2_btnradio1" autocomplete="off" value="2"><label class="btn btn-outline-primary" for="item5_bedroom2_btnradio1">2</label>
+                                                            <input class="btn-check" type="radio" name="item5_bedroom2_btnradio" id="item5_bedroom2_btnradio2" autocomplete="off" value="3"><label class="btn btn-outline-primary" for="item5_bedroom2_btnradio2">3</label>
+                                                            <input class="btn-check" type="radio" name="item5_bedroom2_btnradio" id="item5_bedroom2_btnradio3" autocomplete="off" value="4"><label class="btn btn-outline-primary" for="item5_bedroom2_btnradio3">4</label>
+                                                            <input class="btn-check" type="radio" name="item5_bedroom2_btnradio" id="item5_bedroom2_btnradio4" autocomplete="off" value="5"><label class="btn btn-outline-primary" for="item5_bedroom2_btnradio4">5</label>
+                                                            <input class="btn-check" type="radio" name="item5_bedroom2_btnradio" id="item5_bedroom2_btnradio5" autocomplete="off" value="6"><label class="btn btn-outline-primary" for="item5_bedroom2_btnradio5">6</label>
+                                                            <input class="btn-check" type="radio" name="item5_bedroom2_btnradio" id="item5_bedroom2_btnradio6" autocomplete="off" value="7"><label class="btn btn-outline-primary" for="item5_bedroom2_btnradio6">7</label>
+                                                            <input class="btn-check" type="radio" name="item5_bedroom2_btnradio" id="item5_bedroom2_btnradio7" autocomplete="off" value="8"><label class="btn btn-outline-primary" for="item5_bedroom2_btnradio7">8</label>
+                                                            <input class="btn-check" type="radio" name="item5_bedroom2_btnradio" id="item5_bedroom2_btnradio8" autocomplete="off" value="9"><label class="btn btn-outline-primary" for="item5_bedroom2_btnradio8">9</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <hr class="bg-dark border-top border-dark" />
+                                                <div class="row">
+                                                    <label for="item6_bedroom2" class="col-sm-4 col-form-label">Ventilateur</label>
+                                                    <div class="col-sm-4">
+                                                        <div id="item6_bedroom2" class="btn-group w-100" role="group">
+                                                            <input id="item6_bedroom2_btn1" type="radio" class="btn-check" name="item6_bedroom2_btnradio" autocomplete="off"><label for="item6_bedroom2_btn1" class="btn btn-outline-primary">Oui</label>
+                                                            <input id="item6_bedroom2_btn2" type="radio" class="btn-check" name="item6_bedroom2_btnradio" autocomplete="off"><label for="item6_bedroom2_btn2" class="btn btn-outline-primary">Non</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <hr class="bg-dark border-top border-dark" />
+                                                <div class="row">
+                                                    <label for="item7_bedroom2" class="col-sm-4 col-form-label">Climatiseur</label>
+                                                    <div class="col-sm-4">
+                                                        <div id="item7_bedroom2" class="btn-group w-100" role="group">
+                                                            <input id="item7_bedroom2_btn1" type="radio" class="btn-check" name="item7_bedroom2_btnradio" autocomplete="off"><label for="item7_bedroom2_btn1" class="btn btn-outline-primary">Oui</label>
+                                                            <input id="item7_bedroom2_btn2" type="radio" class="btn-check" name="item7_bedroom2_btnradio" autocomplete="off"><label for="item7_bedroom2_btn2" class="btn btn-outline-primary">Non</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <hr class="bg-dark border-top border-dark" />
+                                                <div class="row">
+                                                    <label for="item8_bedroom2" class="col-sm-4 col-form-label">Armoire/penderie</label>
+                                                    <div class="col-sm-4">
+                                                        <div id="item8_bedroom2" class="btn-group w-100" role="group">
+                                                            <input id="item8_bedroom2_btn1" type="radio" class="btn-check" name="item8_bedroom2_btnradio" autocomplete="off"><label for="item8_bedroom2_btn1" class="btn btn-outline-primary">Oui</label>
+                                                            <input id="item8_bedroom2_btn2" type="radio" class="btn-check" name="item8_bedroom2_btnradio" autocomplete="off"><label for="item8_bedroom2_btn2" class="btn btn-outline-primary">Non</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <hr class="bg-dark border-top border-dark" />
+                                                <div class="row">
+                                                    <label for="item9_bedroom2" class="col-sm-4 col-form-label">Chauffage</label>
+                                                    <div class="col-sm-4">
+                                                        <div id="item9_bedroom2" class="btn-group w-100" role="group">
+                                                            <input id="item9_bedroom2_btn1" type="radio" class="btn-check" name="item9_bedroom2_btnradio" autocomplete="off"><label for="item9_bedroom2_btn1" class="btn btn-outline-primary">Oui</label>
+                                                            <input id="item9_bedroom2_btn2" type="radio" class="btn-check" name="item9_bedroom2_btnradio" autocomplete="off"><label for="item9_bedroom2_btn2" class="btn btn-outline-primary">Non</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <hr class="bg-dark border-top border-dark" />
+                                                <div class="row">
+                                                    <label for="item10_bedroom2" class="col-sm-4 col-form-label">Salle de bains privative</label>
+                                                    <div class="col-sm-4">
+                                                        <div id="item10_bedroom2" class="btn-group w-100" role="group">
+                                                            <input id="item10_bedroom2_btn1" type="radio" class="btn-check" name="item10_bedroom2_btnradio" autocomplete="off"><label for="item10_bedroom2_btn1" class="btn btn-outline-primary">Oui</label>
+                                                            <input id="item10_bedroom2_btn2" type="radio" class="btn-check" name="item10_bedroom2_btnradio" autocomplete="off"><label for="item10_bedroom2_btn2" class="btn btn-outline-primary">Non</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <hr class="bg-dark border-top border-dark" />
+                                                <div class="row">
+                                                    <label for="item11_bedroom2" class="col-sm-4 col-form-label">WC privatifs</label>
+                                                    <div class="col-sm-4">
+                                                        <div id="item11_bedroom2" class="btn-group w-100" role="group">
+                                                            <input id="item11_bedroom2_btn1" type="radio" class="btn-check" name="item11_bedroom2_btnradio" autocomplete="off"><label for="item11_bedroom2_btn1" class="btn btn-outline-primary">Oui</label>
+                                                            <input id="item11_bedroom2_btn2" type="radio" class="btn-check" name="item11_bedroom2_btnradio" autocomplete="off"><label for="item11_bedroom2_btn2" class="btn btn-outline-primary">Non</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <hr class="bg-dark border-top border-dark" />
+                                                <div class="row">
+                                                    <label for="item12_bedroom2" class="col-sm-4 col-form-label">Moustiquaire</label>
+                                                    <div class="col-sm-4">
+                                                        <div id="item12_bedroom2" class="btn-group w-100" role="group">
+                                                            <input id="item12_bedroom2_btn1" type="radio" class="btn-check" name="item12_bedroom2_btnradio" autocomplete="off"><label for="item12_bedroom2_btn1" class="btn btn-outline-primary">Oui</label>
+                                                            <input id="item12_bedroom2_btn2" type="radio" class="btn-check" name="item12_bedroom2_btnradio" autocomplete="off"><label for="item12_bedroom2_btn2" class="btn btn-outline-primary">Non</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <hr class="bg-dark border-top border-dark" />
+                                                <div class="row">
+                                                    <label for="item13_bedroom2" class="col-sm-4 col-form-label">Bureau</label>
+                                                    <div class="col-sm-4">
+                                                        <div id="item13_bedroom2" class="btn-group w-100" role="group">
+                                                            <input id="item13_bedroom2_btn1" type="radio" class="btn-check" name="item13_bedroom2_btnradio" autocomplete="off"><label for="item13_bedroom2_btn1" class="btn btn-outline-primary">Oui</label>
+                                                            <input id="item13_bedroom2_btn2" type="radio" class="btn-check" name="item13_bedroom2_btnradio" autocomplete="off"><label for="item13_bedroom2_btn2" class="btn btn-outline-primary">Non</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <hr class="bg-dark border-top border-dark" />
+                                                <div class="row">
+                                                    <label for="item14_bedroom2" class="col-sm-4 col-form-label">Prise près du lit</label>
+                                                    <div class="col-sm-4">
+                                                        <div id="item14_bedroom2" class="btn-group w-100" role="group">
+                                                            <input id="item14_bedroom2_btn1" type="radio" class="btn-check" name="item14_bedroom2_btnradio" autocomplete="off"><label for="item14_bedroom2_btn1" class="btn btn-outline-primary">Oui</label>
+                                                            <input id="item14_bedroom2_btn2" type="radio" class="btn-check" name="item14_bedroom2_btnradio" autocomplete="off"><label for="item14_bedroom2_btn2" class="btn btn-outline-primary">Non</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <hr class="bg-dark border-top border-dark" />
+                                                <div class="row">
+                                                    <label for="item15_bedroom2" class="col-sm-4 col-form-label">Purificateur d'air</label>
+                                                    <div class="col-sm-4">
+                                                        <div id="item15_bedroom2" class="btn-group w-100" role="group">
+                                                            <input id="item15_bedroom2_btn1" type="radio" class="btn-check" name="item15_bedroom2_btnradio" autocomplete="off"><label for="item15_bedroom2_btn1" class="btn btn-outline-primary">Oui</label>
+                                                            <input id="item15_bedroom2_btn2" type="radio" class="btn-check" name="item15_bedroom2_btnradio" autocomplete="off"><label for="item15_bedroom2_btn2" class="btn btn-outline-primary">Non</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="accordion-item">
+                                        <p class="accordion-header">
+                                            <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapse_bedroom3" aria-expanded="true" aria-controls="collapse_bedroom3" disabled>
+                                                <strong class="fs-5">Chambre n°4</strong>
+                                            </button>
+                                        </p>
+                                        <div id="collapse_bedroom3" class="accordion-collapse collapse show">
+                                            <div class="accordion-body mx-lg-5 mb-4">
+                                                <div class="row">
+                                                    <label for="item0_bedroom3" class="col-sm-4 col-form-label">Lit simple</label>
+                                                    <div class="col-sm-4">
+                                                        <div id="item0_bedroom3" class="btn-group w-100" role="group">
+                                                            <input id="item0_bedroom3_btn1" onchange="switch_item_indicator_display(0, 'bedroom3', 1)" type="radio" class="btn-check" name="item0_bedroom3_btn" autocomplete="off"><label for="item0_bedroom3_btn1" class="btn btn-outline-primary">Oui</label>
+                                                            <input id="item0_bedroom3_btn2" onchange="switch_item_indicator_display(0, 'bedroom3', 0)" type="radio" class="btn-check" name="item0_bedroom3_btn" autocomplete="off"><label for="item0_bedroom3_btn2" class="btn btn-outline-primary">Non</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div id="item0_bedroom3_indicator" class="row mt-2">
+                                                    <div class="col-sm-4"></div>
+                                                    <div class="col-sm-4">
+                                                        <p class="mb-1"><small>Précisez le nombre</small></p>
+                                                        <div class="btn-group btn-group-sm" role="group">
+                                                            <input class="btn-check" type="radio" name="item0_bedroom3_btnradio" id="item0_bedroom3_btnradio0" autocomplete="off" value="1"><label class="btn btn-outline-primary" for="item0_bedroom3_btnradio0">1</label>
+                                                            <input class="btn-check" type="radio" name="item0_bedroom3_btnradio" id="item0_bedroom3_btnradio1" autocomplete="off" value="2"><label class="btn btn-outline-primary" for="item0_bedroom3_btnradio1">2</label>
+                                                            <input class="btn-check" type="radio" name="item0_bedroom3_btnradio" id="item0_bedroom3_btnradio2" autocomplete="off" value="3"><label class="btn btn-outline-primary" for="item0_bedroom3_btnradio2">3</label>
+                                                            <input class="btn-check" type="radio" name="item0_bedroom3_btnradio" id="item0_bedroom3_btnradio3" autocomplete="off" value="4"><label class="btn btn-outline-primary" for="item0_bedroom3_btnradio3">4</label>
+                                                            <input class="btn-check" type="radio" name="item0_bedroom3_btnradio" id="item0_bedroom3_btnradio4" autocomplete="off" value="5"><label class="btn btn-outline-primary" for="item0_bedroom3_btnradio4">5</label>
+                                                            <input class="btn-check" type="radio" name="item0_bedroom3_btnradio" id="item0_bedroom3_btnradio5" autocomplete="off" value="6"><label class="btn btn-outline-primary" for="item0_bedroom3_btnradio5">6</label>
+                                                            <input class="btn-check" type="radio" name="item0_bedroom3_btnradio" id="item0_bedroom3_btnradio6" autocomplete="off" value="7"><label class="btn btn-outline-primary" for="item0_bedroom3_btnradio6">7</label>
+                                                            <input class="btn-check" type="radio" name="item0_bedroom3_btnradio" id="item0_bedroom3_btnradio7" autocomplete="off" value="8"><label class="btn btn-outline-primary" for="item0_bedroom3_btnradio7">8</label>
+                                                            <input class="btn-check" type="radio" name="item0_bedroom3_btnradio" id="item0_bedroom3_btnradio8" autocomplete="off" value="9"><label class="btn btn-outline-primary" for="item0_bedroom3_btnradio8">9</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <hr class="bg-dark border-top border-dark" />
+                                                <div class="row">
+                                                    <label for="item1_bedroom3" class="col-sm-4 col-form-label">Lit double</label>
+                                                    <div class="col-sm-4">
+                                                        <div id="item1_bedroom3" class="btn-group w-100" role="group">
+                                                            <input id="item1_bedroom3_btn1" onchange="switch_item_indicator_display(1, 'bedroom3', 1)" type="radio" class="btn-check" name="item1_bedroom3_btn" autocomplete="off"><label for="item1_bedroom3_btn1" class="btn btn-outline-primary">Oui</label>
+                                                            <input id="item1_bedroom3_btn2" onchange="switch_item_indicator_display(1, 'bedroom3', 0)" type="radio" class="btn-check" name="item1_bedroom3_btn" autocomplete="off"><label for="item1_bedroom3_btn2" class="btn btn-outline-primary">Non</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div id="item1_bedroom3_indicator" class="row mt-2">
+                                                    <div class="col-sm-4"></div>
+                                                    <div class="col-sm-4">
+                                                        <p class="mb-1"><small>Précisez le nombre</small></p>
+                                                        <div class="btn-group btn-group-sm" role="group">
+                                                            <input class="btn-check" type="radio" name="item1_bedroom3_btnradio" id="item1_bedroom3_btnradio0" autocomplete="off" value="1"><label class="btn btn-outline-primary" for="item1_bedroom3_btnradio0">1</label>
+                                                            <input class="btn-check" type="radio" name="item1_bedroom3_btnradio" id="item1_bedroom3_btnradio1" autocomplete="off" value="2"><label class="btn btn-outline-primary" for="item1_bedroom3_btnradio1">2</label>
+                                                            <input class="btn-check" type="radio" name="item1_bedroom3_btnradio" id="item1_bedroom3_btnradio2" autocomplete="off" value="3"><label class="btn btn-outline-primary" for="item1_bedroom3_btnradio2">3</label>
+                                                            <input class="btn-check" type="radio" name="item1_bedroom3_btnradio" id="item1_bedroom3_btnradio3" autocomplete="off" value="4"><label class="btn btn-outline-primary" for="item1_bedroom3_btnradio3">4</label>
+                                                            <input class="btn-check" type="radio" name="item1_bedroom3_btnradio" id="item1_bedroom3_btnradio4" autocomplete="off" value="5"><label class="btn btn-outline-primary" for="item1_bedroom3_btnradio4">5</label>
+                                                            <input class="btn-check" type="radio" name="item1_bedroom3_btnradio" id="item1_bedroom3_btnradio5" autocomplete="off" value="6"><label class="btn btn-outline-primary" for="item1_bedroom3_btnradio5">6</label>
+                                                            <input class="btn-check" type="radio" name="item1_bedroom3_btnradio" id="item1_bedroom3_btnradio6" autocomplete="off" value="7"><label class="btn btn-outline-primary" for="item1_bedroom3_btnradio6">7</label>
+                                                            <input class="btn-check" type="radio" name="item1_bedroom3_btnradio" id="item1_bedroom3_btnradio7" autocomplete="off" value="8"><label class="btn btn-outline-primary" for="item1_bedroom3_btnradio7">8</label>
+                                                            <input class="btn-check" type="radio" name="item1_bedroom3_btnradio" id="item1_bedroom3_btnradio8" autocomplete="off" value="9"><label class="btn btn-outline-primary" for="item1_bedroom3_btnradio8">9</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <hr class="bg-dark border-top border-dark" />
+                                                <div class="row">
+                                                    <label for="item2_bedroom3" class="col-sm-4 col-form-label">Lit superposé</label>
+                                                    <div class="col-sm-4">
+                                                        <div id="item2_bedroom3" class="btn-group w-100" role="group">
+                                                            <input id="item2_bedroom3_btn1" onchange="switch_item_indicator_display(2, 'bedroom3', 1)" type="radio" class="btn-check" name="item2_bedroom3_btn" autocomplete="off"><label for="item2_bedroom3_btn1" class="btn btn-outline-primary">Oui</label>
+                                                            <input id="item2_bedroom3_btn2" onchange="switch_item_indicator_display(2, 'bedroom3', 0)" type="radio" class="btn-check" name="item2_bedroom3_btn" autocomplete="off"><label for="item2_bedroom3_btn2" class="btn btn-outline-primary">Non</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div id="item2_bedroom3_indicator" class="row mt-2">
+                                                    <div class="col-sm-4"></div>
+                                                    <div class="col-sm-4">
+                                                        <p class="mb-1"><small>Précisez le nombre</small></p>
+                                                        <div class="btn-group btn-group-sm" role="group">
+                                                            <input class="btn-check" type="radio" name="item2_bedroom3_btnradio" id="item2_bedroom3_btnradio0" autocomplete="off" value="1"><label class="btn btn-outline-primary" for="item2_bedroom3_btnradio0">1</label>
+                                                            <input class="btn-check" type="radio" name="item2_bedroom3_btnradio" id="item2_bedroom3_btnradio1" autocomplete="off" value="2"><label class="btn btn-outline-primary" for="item2_bedroom3_btnradio1">2</label>
+                                                            <input class="btn-check" type="radio" name="item2_bedroom3_btnradio" id="item2_bedroom3_btnradio2" autocomplete="off" value="3"><label class="btn btn-outline-primary" for="item2_bedroom3_btnradio2">3</label>
+                                                            <input class="btn-check" type="radio" name="item2_bedroom3_btnradio" id="item2_bedroom3_btnradio3" autocomplete="off" value="4"><label class="btn btn-outline-primary" for="item2_bedroom3_btnradio3">4</label>
+                                                            <input class="btn-check" type="radio" name="item2_bedroom3_btnradio" id="item2_bedroom3_btnradio4" autocomplete="off" value="5"><label class="btn btn-outline-primary" for="item2_bedroom3_btnradio4">5</label>
+                                                            <input class="btn-check" type="radio" name="item2_bedroom3_btnradio" id="item2_bedroom3_btnradio5" autocomplete="off" value="6"><label class="btn btn-outline-primary" for="item2_bedroom3_btnradio5">6</label>
+                                                            <input class="btn-check" type="radio" name="item2_bedroom3_btnradio" id="item2_bedroom3_btnradio6" autocomplete="off" value="7"><label class="btn btn-outline-primary" for="item2_bedroom3_btnradio6">7</label>
+                                                            <input class="btn-check" type="radio" name="item2_bedroom3_btnradio" id="item2_bedroom3_btnradio7" autocomplete="off" value="8"><label class="btn btn-outline-primary" for="item2_bedroom3_btnradio7">8</label>
+                                                            <input class="btn-check" type="radio" name="item2_bedroom3_btnradio" id="item2_bedroom3_btnradio8" autocomplete="off" value="9"><label class="btn btn-outline-primary" for="item2_bedroom3_btnradio8">9</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <hr class="bg-dark border-top border-dark" />
+                                                <div class="row">
+                                                    <label for="item3_bedroom3" class="col-sm-4 col-form-label">Lit gigogne (contient 2 couchages)</label>
+                                                    <div class="col-sm-4">
+                                                        <div id="item3_bedroom3" class="btn-group w-100" role="group">
+                                                            <input id="item3_bedroom3_btn1" onchange="switch_item_indicator_display(3, 'bedroom3', 1)" type="radio" class="btn-check" name="item3_bedroom3_btn" autocomplete="off"><label for="item3_bedroom3_btn1" class="btn btn-outline-primary">Oui</label>
+                                                            <input id="item3_bedroom3_btn2" onchange="switch_item_indicator_display(3, 'bedroom3', 0)" type="radio" class="btn-check" name="item3_bedroom3_btn" autocomplete="off"><label for="item3_bedroom3_btn2" class="btn btn-outline-primary">Non</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div id="item3_bedroom3_indicator" class="row mt-2">
+                                                    <div class="col-sm-4"></div>
+                                                    <div class="col-sm-4">
+                                                        <p class="mb-1"><small>Précisez le nombre</small></p>
+                                                        <div class="btn-group btn-group-sm" role="group">
+                                                            <input class="btn-check" type="radio" name="item3_bedroom3_btnradio" id="item3_bedroom3_btnradio0" autocomplete="off" value="1"><label class="btn btn-outline-primary" for="item3_bedroom3_btnradio0">1</label>
+                                                            <input class="btn-check" type="radio" name="item3_bedroom3_btnradio" id="item3_bedroom3_btnradio1" autocomplete="off" value="2"><label class="btn btn-outline-primary" for="item3_bedroom3_btnradio1">2</label>
+                                                            <input class="btn-check" type="radio" name="item3_bedroom3_btnradio" id="item3_bedroom3_btnradio2" autocomplete="off" value="3"><label class="btn btn-outline-primary" for="item3_bedroom3_btnradio2">3</label>
+                                                            <input class="btn-check" type="radio" name="item3_bedroom3_btnradio" id="item3_bedroom3_btnradio3" autocomplete="off" value="4"><label class="btn btn-outline-primary" for="item3_bedroom3_btnradio3">4</label>
+                                                            <input class="btn-check" type="radio" name="item3_bedroom3_btnradio" id="item3_bedroom3_btnradio4" autocomplete="off" value="5"><label class="btn btn-outline-primary" for="item3_bedroom3_btnradio4">5</label>
+                                                            <input class="btn-check" type="radio" name="item3_bedroom3_btnradio" id="item3_bedroom3_btnradio5" autocomplete="off" value="6"><label class="btn btn-outline-primary" for="item3_bedroom3_btnradio5">6</label>
+                                                            <input class="btn-check" type="radio" name="item3_bedroom3_btnradio" id="item3_bedroom3_btnradio6" autocomplete="off" value="7"><label class="btn btn-outline-primary" for="item3_bedroom3_btnradio6">7</label>
+                                                            <input class="btn-check" type="radio" name="item3_bedroom3_btnradio" id="item3_bedroom3_btnradio7" autocomplete="off" value="8"><label class="btn btn-outline-primary" for="item3_bedroom3_btnradio7">8</label>
+                                                            <input class="btn-check" type="radio" name="item3_bedroom3_btnradio" id="item3_bedroom3_btnradio8" autocomplete="off" value="9"><label class="btn btn-outline-primary" for="item3_bedroom3_btnradio8">9</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <hr class="bg-dark border-top border-dark" />
+                                                <div class="row">
+                                                    <label for="item4_bedroom3" class="col-sm-4 col-form-label">Canapé-lit</label>
+                                                    <div class="col-sm-4">
+                                                        <div id="item4_bedroom3" class="btn-group w-100" role="group">
+                                                            <input id="item4_bedroom3_btn1" onchange="switch_item_indicator_display(4, 'bedroom3', 1)" type="radio" class="btn-check" name="item4_bedroom3_btn" autocomplete="off"><label for="item4_bedroom3_btn1" class="btn btn-outline-primary">Oui</label>
+                                                            <input id="item4_bedroom3_btn2" onchange="switch_item_indicator_display(4, 'bedroom3', 0)" type="radio" class="btn-check" name="item4_bedroom3_btn" autocomplete="off"><label for="item4_bedroom3_btn2" class="btn btn-outline-primary">Non</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div id="item4_bedroom3_indicator" class="row mt-2">
+                                                    <div class="col-sm-4"></div>
+                                                    <div class="col-sm-4">
+                                                        <p class="mb-1"><small>Précisez le nombre</small></p>
+                                                        <div class="btn-group btn-group-sm" role="group">
+                                                            <input class="btn-check" type="radio" name="item4_bedroom3_btnradio" id="item4_bedroom3_btnradio0" autocomplete="off" value="1"><label class="btn btn-outline-primary" for="item4_bedroom3_btnradio0">1</label>
+                                                            <input class="btn-check" type="radio" name="item4_bedroom3_btnradio" id="item4_bedroom3_btnradio1" autocomplete="off" value="2"><label class="btn btn-outline-primary" for="item4_bedroom3_btnradio1">2</label>
+                                                            <input class="btn-check" type="radio" name="item4_bedroom3_btnradio" id="item4_bedroom3_btnradio2" autocomplete="off" value="3"><label class="btn btn-outline-primary" for="item4_bedroom3_btnradio2">3</label>
+                                                            <input class="btn-check" type="radio" name="item4_bedroom3_btnradio" id="item4_bedroom3_btnradio3" autocomplete="off" value="4"><label class="btn btn-outline-primary" for="item4_bedroom3_btnradio3">4</label>
+                                                            <input class="btn-check" type="radio" name="item4_bedroom3_btnradio" id="item4_bedroom3_btnradio4" autocomplete="off" value="5"><label class="btn btn-outline-primary" for="item4_bedroom3_btnradio4">5</label>
+                                                            <input class="btn-check" type="radio" name="item4_bedroom3_btnradio" id="item4_bedroom3_btnradio5" autocomplete="off" value="6"><label class="btn btn-outline-primary" for="item4_bedroom3_btnradio5">6</label>
+                                                            <input class="btn-check" type="radio" name="item4_bedroom3_btnradio" id="item4_bedroom3_btnradio6" autocomplete="off" value="7"><label class="btn btn-outline-primary" for="item4_bedroom3_btnradio6">7</label>
+                                                            <input class="btn-check" type="radio" name="item4_bedroom3_btnradio" id="item4_bedroom3_btnradio7" autocomplete="off" value="8"><label class="btn btn-outline-primary" for="item4_bedroom3_btnradio7">8</label>
+                                                            <input class="btn-check" type="radio" name="item4_bedroom3_btnradio" id="item4_bedroom3_btnradio8" autocomplete="off" value="9"><label class="btn btn-outline-primary" for="item4_bedroom3_btnradio8">9</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <hr class="bg-dark border-top border-dark" />
+                                                <div class="row">
+                                                    <label for="item5_bedroom3" class="col-sm-4 col-form-label">Berceau</label>
+                                                    <div class="col-sm-4">
+                                                        <div id="item5_bedroom3" class="btn-group w-100" role="group">
+                                                            <input id="item5_bedroom3_btn1" onchange="switch_item_indicator_display(5, 'bedroom3', 1)" type="radio" class="btn-check" name="item5_bedroom3_btn" autocomplete="off"><label for="item5_bedroom3_btn1" class="btn btn-outline-primary">Oui</label>
+                                                            <input id="item5_bedroom3_btn2" onchange="switch_item_indicator_display(5, 'bedroom3', 0)" type="radio" class="btn-check" name="item5_bedroom3_btn" autocomplete="off"><label for="item5_bedroom3_btn2" class="btn btn-outline-primary">Non</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div id="item5_bedroom3_indicator" class="row mt-2">
+                                                    <div class="col-sm-4"></div>
+                                                    <div class="col-sm-4">
+                                                        <p class="mb-1"><small>Précisez le nombre</small></p>
+                                                        <div class="btn-group btn-group-sm" role="group">
+                                                            <input class="btn-check" type="radio" name="item5_bedroom3_btnradio" id="item5_bedroom3_btnradio0" autocomplete="off" value="1"><label class="btn btn-outline-primary" for="item5_bedroom3_btnradio0">1</label>
+                                                            <input class="btn-check" type="radio" name="item5_bedroom3_btnradio" id="item5_bedroom3_btnradio1" autocomplete="off" value="2"><label class="btn btn-outline-primary" for="item5_bedroom3_btnradio1">2</label>
+                                                            <input class="btn-check" type="radio" name="item5_bedroom3_btnradio" id="item5_bedroom3_btnradio2" autocomplete="off" value="3"><label class="btn btn-outline-primary" for="item5_bedroom3_btnradio2">3</label>
+                                                            <input class="btn-check" type="radio" name="item5_bedroom3_btnradio" id="item5_bedroom3_btnradio3" autocomplete="off" value="4"><label class="btn btn-outline-primary" for="item5_bedroom3_btnradio3">4</label>
+                                                            <input class="btn-check" type="radio" name="item5_bedroom3_btnradio" id="item5_bedroom3_btnradio4" autocomplete="off" value="5"><label class="btn btn-outline-primary" for="item5_bedroom3_btnradio4">5</label>
+                                                            <input class="btn-check" type="radio" name="item5_bedroom3_btnradio" id="item5_bedroom3_btnradio5" autocomplete="off" value="6"><label class="btn btn-outline-primary" for="item5_bedroom3_btnradio5">6</label>
+                                                            <input class="btn-check" type="radio" name="item5_bedroom3_btnradio" id="item5_bedroom3_btnradio6" autocomplete="off" value="7"><label class="btn btn-outline-primary" for="item5_bedroom3_btnradio6">7</label>
+                                                            <input class="btn-check" type="radio" name="item5_bedroom3_btnradio" id="item5_bedroom3_btnradio7" autocomplete="off" value="8"><label class="btn btn-outline-primary" for="item5_bedroom3_btnradio7">8</label>
+                                                            <input class="btn-check" type="radio" name="item5_bedroom3_btnradio" id="item5_bedroom3_btnradio8" autocomplete="off" value="9"><label class="btn btn-outline-primary" for="item5_bedroom3_btnradio8">9</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <hr class="bg-dark border-top border-dark" />
+                                                <div class="row">
+                                                    <label for="item6_bedroom3" class="col-sm-4 col-form-label">Ventilateur</label>
+                                                    <div class="col-sm-4">
+                                                        <div id="item6_bedroom3" class="btn-group w-100" role="group">
+                                                            <input id="item6_bedroom3_btn1" type="radio" class="btn-check" name="item6_bedroom3_btnradio" autocomplete="off"><label for="item6_bedroom3_btn1" class="btn btn-outline-primary">Oui</label>
+                                                            <input id="item6_bedroom3_btn2" type="radio" class="btn-check" name="item6_bedroom3_btnradio" autocomplete="off"><label for="item6_bedroom3_btn2" class="btn btn-outline-primary">Non</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <hr class="bg-dark border-top border-dark" />
+                                                <div class="row">
+                                                    <label for="item7_bedroom3" class="col-sm-4 col-form-label">Climatiseur</label>
+                                                    <div class="col-sm-4">
+                                                        <div id="item7_bedroom3" class="btn-group w-100" role="group">
+                                                            <input id="item7_bedroom3_btn1" type="radio" class="btn-check" name="item7_bedroom3_btnradio" autocomplete="off"><label for="item7_bedroom3_btn1" class="btn btn-outline-primary">Oui</label>
+                                                            <input id="item7_bedroom3_btn2" type="radio" class="btn-check" name="item7_bedroom3_btnradio" autocomplete="off"><label for="item7_bedroom3_btn2" class="btn btn-outline-primary">Non</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <hr class="bg-dark border-top border-dark" />
+                                                <div class="row">
+                                                    <label for="item8_bedroom3" class="col-sm-4 col-form-label">Armoire/penderie</label>
+                                                    <div class="col-sm-4">
+                                                        <div id="item8_bedroom3" class="btn-group w-100" role="group">
+                                                            <input id="item8_bedroom3_btn1" type="radio" class="btn-check" name="item8_bedroom3_btnradio" autocomplete="off"><label for="item8_bedroom3_btn1" class="btn btn-outline-primary">Oui</label>
+                                                            <input id="item8_bedroom3_btn2" type="radio" class="btn-check" name="item8_bedroom3_btnradio" autocomplete="off"><label for="item8_bedroom3_btn2" class="btn btn-outline-primary">Non</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <hr class="bg-dark border-top border-dark" />
+                                                <div class="row">
+                                                    <label for="item9_bedroom3" class="col-sm-4 col-form-label">Chauffage</label>
+                                                    <div class="col-sm-4">
+                                                        <div id="item9_bedroom3" class="btn-group w-100" role="group">
+                                                            <input id="item9_bedroom3_btn1" type="radio" class="btn-check" name="item9_bedroom3_btnradio" autocomplete="off"><label for="item9_bedroom3_btn1" class="btn btn-outline-primary">Oui</label>
+                                                            <input id="item9_bedroom3_btn2" type="radio" class="btn-check" name="item9_bedroom3_btnradio" autocomplete="off"><label for="item9_bedroom3_btn2" class="btn btn-outline-primary">Non</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <hr class="bg-dark border-top border-dark" />
+                                                <div class="row">
+                                                    <label for="item10_bedroom3" class="col-sm-4 col-form-label">Salle de bains privative</label>
+                                                    <div class="col-sm-4">
+                                                        <div id="item10_bedroom3" class="btn-group w-100" role="group">
+                                                            <input id="item10_bedroom3_btn1" type="radio" class="btn-check" name="item10_bedroom3_btnradio" autocomplete="off"><label for="item10_bedroom3_btn1" class="btn btn-outline-primary">Oui</label>
+                                                            <input id="item10_bedroom3_btn2" type="radio" class="btn-check" name="item10_bedroom3_btnradio" autocomplete="off"><label for="item10_bedroom3_btn2" class="btn btn-outline-primary">Non</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <hr class="bg-dark border-top border-dark" />
+                                                <div class="row">
+                                                    <label for="item11_bedroom3" class="col-sm-4 col-form-label">WC privatifs</label>
+                                                    <div class="col-sm-4">
+                                                        <div id="item11_bedroom3" class="btn-group w-100" role="group">
+                                                            <input id="item11_bedroom3_btn1" type="radio" class="btn-check" name="item11_bedroom3_btnradio" autocomplete="off"><label for="item11_bedroom3_btn1" class="btn btn-outline-primary">Oui</label>
+                                                            <input id="item11_bedroom3_btn2" type="radio" class="btn-check" name="item11_bedroom3_btnradio" autocomplete="off"><label for="item11_bedroom3_btn2" class="btn btn-outline-primary">Non</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <hr class="bg-dark border-top border-dark" />
+                                                <div class="row">
+                                                    <label for="item12_bedroom3" class="col-sm-4 col-form-label">Moustiquaire</label>
+                                                    <div class="col-sm-4">
+                                                        <div id="item12_bedroom3" class="btn-group w-100" role="group">
+                                                            <input id="item12_bedroom3_btn1" type="radio" class="btn-check" name="item12_bedroom3_btnradio" autocomplete="off"><label for="item12_bedroom3_btn1" class="btn btn-outline-primary">Oui</label>
+                                                            <input id="item12_bedroom3_btn2" type="radio" class="btn-check" name="item12_bedroom3_btnradio" autocomplete="off"><label for="item12_bedroom3_btn2" class="btn btn-outline-primary">Non</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <hr class="bg-dark border-top border-dark" />
+                                                <div class="row">
+                                                    <label for="item13_bedroom3" class="col-sm-4 col-form-label">Bureau</label>
+                                                    <div class="col-sm-4">
+                                                        <div id="item13_bedroom3" class="btn-group w-100" role="group">
+                                                            <input id="item13_bedroom3_btn1" type="radio" class="btn-check" name="item13_bedroom3_btnradio" autocomplete="off"><label for="item13_bedroom3_btn1" class="btn btn-outline-primary">Oui</label>
+                                                            <input id="item13_bedroom3_btn2" type="radio" class="btn-check" name="item13_bedroom3_btnradio" autocomplete="off"><label for="item13_bedroom3_btn2" class="btn btn-outline-primary">Non</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <hr class="bg-dark border-top border-dark" />
+                                                <div class="row">
+                                                    <label for="item14_bedroom3" class="col-sm-4 col-form-label">Prise près du lit</label>
+                                                    <div class="col-sm-4">
+                                                        <div id="item14_bedroom3" class="btn-group w-100" role="group">
+                                                            <input id="item14_bedroom3_btn1" type="radio" class="btn-check" name="item14_bedroom3_btnradio" autocomplete="off"><label for="item14_bedroom3_btn1" class="btn btn-outline-primary">Oui</label>
+                                                            <input id="item14_bedroom3_btn2" type="radio" class="btn-check" name="item14_bedroom3_btnradio" autocomplete="off"><label for="item14_bedroom3_btn2" class="btn btn-outline-primary">Non</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <hr class="bg-dark border-top border-dark" />
+                                                <div class="row">
+                                                    <label for="item15_bedroom3" class="col-sm-4 col-form-label">Purificateur d'air</label>
+                                                    <div class="col-sm-4">
+                                                        <div id="item15_bedroom3" class="btn-group w-100" role="group">
+                                                            <input id="item15_bedroom3_btn1" type="radio" class="btn-check" name="item15_bedroom3_btnradio" autocomplete="off"><label for="item15_bedroom3_btn1" class="btn btn-outline-primary">Oui</label>
+                                                            <input id="item15_bedroom3_btn2" type="radio" class="btn-check" name="item15_bedroom3_btnradio" autocomplete="off"><label for="item15_bedroom3_btn2" class="btn btn-outline-primary">Non</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="accordion-item">
+                                        <p class="accordion-header">
+                                            <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapse_bedroom4" aria-expanded="true" aria-controls="collapse_bedroom4" disabled>
+                                                <strong class="fs-5">Chambre n°5</strong>
+                                            </button>
+                                        </p>
+                                        <div id="collapse_bedroom4" class="accordion-collapse collapse show">
+                                            <div class="accordion-body mx-lg-5 mb-4">
+                                                <div class="row">
+                                                    <label for="item0_bedroom4" class="col-sm-4 col-form-label">Lit simple</label>
+                                                    <div class="col-sm-4">
+                                                        <div id="item0_bedroom4" class="btn-group w-100" role="group">
+                                                            <input id="item0_bedroom4_btn1" onchange="switch_item_indicator_display(0, 'bedroom4', 1)" type="radio" class="btn-check" name="item0_bedroom4_btn" autocomplete="off"><label for="item0_bedroom4_btn1" class="btn btn-outline-primary">Oui</label>
+                                                            <input id="item0_bedroom4_btn2" onchange="switch_item_indicator_display(0, 'bedroom4', 0)" type="radio" class="btn-check" name="item0_bedroom4_btn" autocomplete="off"><label for="item0_bedroom4_btn2" class="btn btn-outline-primary">Non</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div id="item0_bedroom4_indicator" class="row mt-2">
+                                                    <div class="col-sm-4"></div>
+                                                    <div class="col-sm-4">
+                                                        <p class="mb-1"><small>Précisez le nombre</small></p>
+                                                        <div class="btn-group btn-group-sm" role="group">
+                                                            <input class="btn-check" type="radio" name="item0_bedroom4_btnradio" id="item0_bedroom4_btnradio0" autocomplete="off" value="1"><label class="btn btn-outline-primary" for="item0_bedroom4_btnradio0">1</label>
+                                                            <input class="btn-check" type="radio" name="item0_bedroom4_btnradio" id="item0_bedroom4_btnradio1" autocomplete="off" value="2"><label class="btn btn-outline-primary" for="item0_bedroom4_btnradio1">2</label>
+                                                            <input class="btn-check" type="radio" name="item0_bedroom4_btnradio" id="item0_bedroom4_btnradio2" autocomplete="off" value="3"><label class="btn btn-outline-primary" for="item0_bedroom4_btnradio2">3</label>
+                                                            <input class="btn-check" type="radio" name="item0_bedroom4_btnradio" id="item0_bedroom4_btnradio3" autocomplete="off" value="4"><label class="btn btn-outline-primary" for="item0_bedroom4_btnradio3">4</label>
+                                                            <input class="btn-check" type="radio" name="item0_bedroom4_btnradio" id="item0_bedroom4_btnradio4" autocomplete="off" value="5"><label class="btn btn-outline-primary" for="item0_bedroom4_btnradio4">5</label>
+                                                            <input class="btn-check" type="radio" name="item0_bedroom4_btnradio" id="item0_bedroom4_btnradio5" autocomplete="off" value="6"><label class="btn btn-outline-primary" for="item0_bedroom4_btnradio5">6</label>
+                                                            <input class="btn-check" type="radio" name="item0_bedroom4_btnradio" id="item0_bedroom4_btnradio6" autocomplete="off" value="7"><label class="btn btn-outline-primary" for="item0_bedroom4_btnradio6">7</label>
+                                                            <input class="btn-check" type="radio" name="item0_bedroom4_btnradio" id="item0_bedroom4_btnradio7" autocomplete="off" value="8"><label class="btn btn-outline-primary" for="item0_bedroom4_btnradio7">8</label>
+                                                            <input class="btn-check" type="radio" name="item0_bedroom4_btnradio" id="item0_bedroom4_btnradio8" autocomplete="off" value="9"><label class="btn btn-outline-primary" for="item0_bedroom4_btnradio8">9</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <hr class="bg-dark border-top border-dark" />
+                                                <div class="row">
+                                                    <label for="item1_bedroom4" class="col-sm-4 col-form-label">Lit double</label>
+                                                    <div class="col-sm-4">
+                                                        <div id="item1_bedroom4" class="btn-group w-100" role="group">
+                                                            <input id="item1_bedroom4_btn1" onchange="switch_item_indicator_display(1, 'bedroom4', 1)" type="radio" class="btn-check" name="item1_bedroom4_btn" autocomplete="off"><label for="item1_bedroom4_btn1" class="btn btn-outline-primary">Oui</label>
+                                                            <input id="item1_bedroom4_btn2" onchange="switch_item_indicator_display(1, 'bedroom4', 0)" type="radio" class="btn-check" name="item1_bedroom4_btn" autocomplete="off"><label for="item1_bedroom4_btn2" class="btn btn-outline-primary">Non</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div id="item1_bedroom4_indicator" class="row mt-2">
+                                                    <div class="col-sm-4"></div>
+                                                    <div class="col-sm-4">
+                                                        <p class="mb-1"><small>Précisez le nombre</small></p>
+                                                        <div class="btn-group btn-group-sm" role="group">
+                                                            <input class="btn-check" type="radio" name="item1_bedroom4_btnradio" id="item1_bedroom4_btnradio0" autocomplete="off" value="1"><label class="btn btn-outline-primary" for="item1_bedroom4_btnradio0">1</label>
+                                                            <input class="btn-check" type="radio" name="item1_bedroom4_btnradio" id="item1_bedroom4_btnradio1" autocomplete="off" value="2"><label class="btn btn-outline-primary" for="item1_bedroom4_btnradio1">2</label>
+                                                            <input class="btn-check" type="radio" name="item1_bedroom4_btnradio" id="item1_bedroom4_btnradio2" autocomplete="off" value="3"><label class="btn btn-outline-primary" for="item1_bedroom4_btnradio2">3</label>
+                                                            <input class="btn-check" type="radio" name="item1_bedroom4_btnradio" id="item1_bedroom4_btnradio3" autocomplete="off" value="4"><label class="btn btn-outline-primary" for="item1_bedroom4_btnradio3">4</label>
+                                                            <input class="btn-check" type="radio" name="item1_bedroom4_btnradio" id="item1_bedroom4_btnradio4" autocomplete="off" value="5"><label class="btn btn-outline-primary" for="item1_bedroom4_btnradio4">5</label>
+                                                            <input class="btn-check" type="radio" name="item1_bedroom4_btnradio" id="item1_bedroom4_btnradio5" autocomplete="off" value="6"><label class="btn btn-outline-primary" for="item1_bedroom4_btnradio5">6</label>
+                                                            <input class="btn-check" type="radio" name="item1_bedroom4_btnradio" id="item1_bedroom4_btnradio6" autocomplete="off" value="7"><label class="btn btn-outline-primary" for="item1_bedroom4_btnradio6">7</label>
+                                                            <input class="btn-check" type="radio" name="item1_bedroom4_btnradio" id="item1_bedroom4_btnradio7" autocomplete="off" value="8"><label class="btn btn-outline-primary" for="item1_bedroom4_btnradio7">8</label>
+                                                            <input class="btn-check" type="radio" name="item1_bedroom4_btnradio" id="item1_bedroom4_btnradio8" autocomplete="off" value="9"><label class="btn btn-outline-primary" for="item1_bedroom4_btnradio8">9</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <hr class="bg-dark border-top border-dark" />
+                                                <div class="row">
+                                                    <label for="item2_bedroom4" class="col-sm-4 col-form-label">Lit superposé</label>
+                                                    <div class="col-sm-4">
+                                                        <div id="item2_bedroom4" class="btn-group w-100" role="group">
+                                                            <input id="item2_bedroom4_btn1" onchange="switch_item_indicator_display(2, 'bedroom4', 1)" type="radio" class="btn-check" name="item2_bedroom4_btn" autocomplete="off"><label for="item2_bedroom4_btn1" class="btn btn-outline-primary">Oui</label>
+                                                            <input id="item2_bedroom4_btn2" onchange="switch_item_indicator_display(2, 'bedroom4', 0)" type="radio" class="btn-check" name="item2_bedroom4_btn" autocomplete="off"><label for="item2_bedroom4_btn2" class="btn btn-outline-primary">Non</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div id="item2_bedroom4_indicator" class="row mt-2">
+                                                    <div class="col-sm-4"></div>
+                                                    <div class="col-sm-4">
+                                                        <p class="mb-1"><small>Précisez le nombre</small></p>
+                                                        <div class="btn-group btn-group-sm" role="group">
+                                                            <input class="btn-check" type="radio" name="item2_bedroom4_btnradio" id="item2_bedroom4_btnradio0" autocomplete="off" value="1"><label class="btn btn-outline-primary" for="item2_bedroom4_btnradio0">1</label>
+                                                            <input class="btn-check" type="radio" name="item2_bedroom4_btnradio" id="item2_bedroom4_btnradio1" autocomplete="off" value="2"><label class="btn btn-outline-primary" for="item2_bedroom4_btnradio1">2</label>
+                                                            <input class="btn-check" type="radio" name="item2_bedroom4_btnradio" id="item2_bedroom4_btnradio2" autocomplete="off" value="3"><label class="btn btn-outline-primary" for="item2_bedroom4_btnradio2">3</label>
+                                                            <input class="btn-check" type="radio" name="item2_bedroom4_btnradio" id="item2_bedroom4_btnradio3" autocomplete="off" value="4"><label class="btn btn-outline-primary" for="item2_bedroom4_btnradio3">4</label>
+                                                            <input class="btn-check" type="radio" name="item2_bedroom4_btnradio" id="item2_bedroom4_btnradio4" autocomplete="off" value="5"><label class="btn btn-outline-primary" for="item2_bedroom4_btnradio4">5</label>
+                                                            <input class="btn-check" type="radio" name="item2_bedroom4_btnradio" id="item2_bedroom4_btnradio5" autocomplete="off" value="6"><label class="btn btn-outline-primary" for="item2_bedroom4_btnradio5">6</label>
+                                                            <input class="btn-check" type="radio" name="item2_bedroom4_btnradio" id="item2_bedroom4_btnradio6" autocomplete="off" value="7"><label class="btn btn-outline-primary" for="item2_bedroom4_btnradio6">7</label>
+                                                            <input class="btn-check" type="radio" name="item2_bedroom4_btnradio" id="item2_bedroom4_btnradio7" autocomplete="off" value="8"><label class="btn btn-outline-primary" for="item2_bedroom4_btnradio7">8</label>
+                                                            <input class="btn-check" type="radio" name="item2_bedroom4_btnradio" id="item2_bedroom4_btnradio8" autocomplete="off" value="9"><label class="btn btn-outline-primary" for="item2_bedroom4_btnradio8">9</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <hr class="bg-dark border-top border-dark" />
+                                                <div class="row">
+                                                    <label for="item3_bedroom4" class="col-sm-4 col-form-label">Lit gigogne (contient 2 couchages)</label>
+                                                    <div class="col-sm-4">
+                                                        <div id="item3_bedroom4" class="btn-group w-100" role="group">
+                                                            <input id="item3_bedroom4_btn1" onchange="switch_item_indicator_display(3, 'bedroom4', 1)" type="radio" class="btn-check" name="item3_bedroom4_btn" autocomplete="off"><label for="item3_bedroom4_btn1" class="btn btn-outline-primary">Oui</label>
+                                                            <input id="item3_bedroom4_btn2" onchange="switch_item_indicator_display(3, 'bedroom4', 0)" type="radio" class="btn-check" name="item3_bedroom4_btn" autocomplete="off"><label for="item3_bedroom4_btn2" class="btn btn-outline-primary">Non</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div id="item3_bedroom4_indicator" class="row mt-2">
+                                                    <div class="col-sm-4"></div>
+                                                    <div class="col-sm-4">
+                                                        <p class="mb-1"><small>Précisez le nombre</small></p>
+                                                        <div class="btn-group btn-group-sm" role="group">
+                                                            <input class="btn-check" type="radio" name="item3_bedroom4_btnradio" id="item3_bedroom4_btnradio0" autocomplete="off" value="1"><label class="btn btn-outline-primary" for="item3_bedroom4_btnradio0">1</label>
+                                                            <input class="btn-check" type="radio" name="item3_bedroom4_btnradio" id="item3_bedroom4_btnradio1" autocomplete="off" value="2"><label class="btn btn-outline-primary" for="item3_bedroom4_btnradio1">2</label>
+                                                            <input class="btn-check" type="radio" name="item3_bedroom4_btnradio" id="item3_bedroom4_btnradio2" autocomplete="off" value="3"><label class="btn btn-outline-primary" for="item3_bedroom4_btnradio2">3</label>
+                                                            <input class="btn-check" type="radio" name="item3_bedroom4_btnradio" id="item3_bedroom4_btnradio3" autocomplete="off" value="4"><label class="btn btn-outline-primary" for="item3_bedroom4_btnradio3">4</label>
+                                                            <input class="btn-check" type="radio" name="item3_bedroom4_btnradio" id="item3_bedroom4_btnradio4" autocomplete="off" value="5"><label class="btn btn-outline-primary" for="item3_bedroom4_btnradio4">5</label>
+                                                            <input class="btn-check" type="radio" name="item3_bedroom4_btnradio" id="item3_bedroom4_btnradio5" autocomplete="off" value="6"><label class="btn btn-outline-primary" for="item3_bedroom4_btnradio5">6</label>
+                                                            <input class="btn-check" type="radio" name="item3_bedroom4_btnradio" id="item3_bedroom4_btnradio6" autocomplete="off" value="7"><label class="btn btn-outline-primary" for="item3_bedroom4_btnradio6">7</label>
+                                                            <input class="btn-check" type="radio" name="item3_bedroom4_btnradio" id="item3_bedroom4_btnradio7" autocomplete="off" value="8"><label class="btn btn-outline-primary" for="item3_bedroom4_btnradio7">8</label>
+                                                            <input class="btn-check" type="radio" name="item3_bedroom4_btnradio" id="item3_bedroom4_btnradio8" autocomplete="off" value="9"><label class="btn btn-outline-primary" for="item3_bedroom4_btnradio8">9</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <hr class="bg-dark border-top border-dark" />
+                                                <div class="row">
+                                                    <label for="item4_bedroom4" class="col-sm-4 col-form-label">Canapé-lit</label>
+                                                    <div class="col-sm-4">
+                                                        <div id="item4_bedroom4" class="btn-group w-100" role="group">
+                                                            <input id="item4_bedroom4_btn1" onchange="switch_item_indicator_display(4, 'bedroom4', 1)" type="radio" class="btn-check" name="item4_bedroom4_btn" autocomplete="off"><label for="item4_bedroom4_btn1" class="btn btn-outline-primary">Oui</label>
+                                                            <input id="item4_bedroom4_btn2" onchange="switch_item_indicator_display(4, 'bedroom4', 0)" type="radio" class="btn-check" name="item4_bedroom4_btn" autocomplete="off"><label for="item4_bedroom4_btn2" class="btn btn-outline-primary">Non</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div id="item4_bedroom4_indicator" class="row mt-2">
+                                                    <div class="col-sm-4"></div>
+                                                    <div class="col-sm-4">
+                                                        <p class="mb-1"><small>Précisez le nombre</small></p>
+                                                        <div class="btn-group btn-group-sm" role="group">
+                                                            <input class="btn-check" type="radio" name="item4_bedroom4_btnradio" id="item4_bedroom4_btnradio0" autocomplete="off" value="1"><label class="btn btn-outline-primary" for="item4_bedroom4_btnradio0">1</label>
+                                                            <input class="btn-check" type="radio" name="item4_bedroom4_btnradio" id="item4_bedroom4_btnradio1" autocomplete="off" value="2"><label class="btn btn-outline-primary" for="item4_bedroom4_btnradio1">2</label>
+                                                            <input class="btn-check" type="radio" name="item4_bedroom4_btnradio" id="item4_bedroom4_btnradio2" autocomplete="off" value="3"><label class="btn btn-outline-primary" for="item4_bedroom4_btnradio2">3</label>
+                                                            <input class="btn-check" type="radio" name="item4_bedroom4_btnradio" id="item4_bedroom4_btnradio3" autocomplete="off" value="4"><label class="btn btn-outline-primary" for="item4_bedroom4_btnradio3">4</label>
+                                                            <input class="btn-check" type="radio" name="item4_bedroom4_btnradio" id="item4_bedroom4_btnradio4" autocomplete="off" value="5"><label class="btn btn-outline-primary" for="item4_bedroom4_btnradio4">5</label>
+                                                            <input class="btn-check" type="radio" name="item4_bedroom4_btnradio" id="item4_bedroom4_btnradio5" autocomplete="off" value="6"><label class="btn btn-outline-primary" for="item4_bedroom4_btnradio5">6</label>
+                                                            <input class="btn-check" type="radio" name="item4_bedroom4_btnradio" id="item4_bedroom4_btnradio6" autocomplete="off" value="7"><label class="btn btn-outline-primary" for="item4_bedroom4_btnradio6">7</label>
+                                                            <input class="btn-check" type="radio" name="item4_bedroom4_btnradio" id="item4_bedroom4_btnradio7" autocomplete="off" value="8"><label class="btn btn-outline-primary" for="item4_bedroom4_btnradio7">8</label>
+                                                            <input class="btn-check" type="radio" name="item4_bedroom4_btnradio" id="item4_bedroom4_btnradio8" autocomplete="off" value="9"><label class="btn btn-outline-primary" for="item4_bedroom4_btnradio8">9</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <hr class="bg-dark border-top border-dark" />
+                                                <div class="row">
+                                                    <label for="item5_bedroom4" class="col-sm-4 col-form-label">Berceau</label>
+                                                    <div class="col-sm-4">
+                                                        <div id="item5_bedroom4" class="btn-group w-100" role="group">
+                                                            <input id="item5_bedroom4_btn1" onchange="switch_item_indicator_display(5, 'bedroom4', 1)" type="radio" class="btn-check" name="item5_bedroom4_btn" autocomplete="off"><label for="item5_bedroom4_btn1" class="btn btn-outline-primary">Oui</label>
+                                                            <input id="item5_bedroom4_btn2" onchange="switch_item_indicator_display(5, 'bedroom4', 0)" type="radio" class="btn-check" name="item5_bedroom4_btn" autocomplete="off"><label for="item5_bedroom4_btn2" class="btn btn-outline-primary">Non</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div id="item5_bedroom4_indicator" class="row mt-2">
+                                                    <div class="col-sm-4"></div>
+                                                    <div class="col-sm-4">
+                                                        <p class="mb-1"><small>Précisez le nombre</small></p>
+                                                        <div class="btn-group btn-group-sm" role="group">
+                                                            <input class="btn-check" type="radio" name="item5_bedroom4_btnradio" id="item5_bedroom4_btnradio0" autocomplete="off" value="1"><label class="btn btn-outline-primary" for="item5_bedroom4_btnradio0">1</label>
+                                                            <input class="btn-check" type="radio" name="item5_bedroom4_btnradio" id="item5_bedroom4_btnradio1" autocomplete="off" value="2"><label class="btn btn-outline-primary" for="item5_bedroom4_btnradio1">2</label>
+                                                            <input class="btn-check" type="radio" name="item5_bedroom4_btnradio" id="item5_bedroom4_btnradio2" autocomplete="off" value="3"><label class="btn btn-outline-primary" for="item5_bedroom4_btnradio2">3</label>
+                                                            <input class="btn-check" type="radio" name="item5_bedroom4_btnradio" id="item5_bedroom4_btnradio3" autocomplete="off" value="4"><label class="btn btn-outline-primary" for="item5_bedroom4_btnradio3">4</label>
+                                                            <input class="btn-check" type="radio" name="item5_bedroom4_btnradio" id="item5_bedroom4_btnradio4" autocomplete="off" value="5"><label class="btn btn-outline-primary" for="item5_bedroom4_btnradio4">5</label>
+                                                            <input class="btn-check" type="radio" name="item5_bedroom4_btnradio" id="item5_bedroom4_btnradio5" autocomplete="off" value="6"><label class="btn btn-outline-primary" for="item5_bedroom4_btnradio5">6</label>
+                                                            <input class="btn-check" type="radio" name="item5_bedroom4_btnradio" id="item5_bedroom4_btnradio6" autocomplete="off" value="7"><label class="btn btn-outline-primary" for="item5_bedroom4_btnradio6">7</label>
+                                                            <input class="btn-check" type="radio" name="item5_bedroom4_btnradio" id="item5_bedroom4_btnradio7" autocomplete="off" value="8"><label class="btn btn-outline-primary" for="item5_bedroom4_btnradio7">8</label>
+                                                            <input class="btn-check" type="radio" name="item5_bedroom4_btnradio" id="item5_bedroom4_btnradio8" autocomplete="off" value="9"><label class="btn btn-outline-primary" for="item5_bedroom4_btnradio8">9</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <hr class="bg-dark border-top border-dark" />
+                                                <div class="row">
+                                                    <label for="item6_bedroom4" class="col-sm-4 col-form-label">Ventilateur</label>
+                                                    <div class="col-sm-4">
+                                                        <div id="item6_bedroom4" class="btn-group w-100" role="group">
+                                                            <input id="item6_bedroom4_btn1" type="radio" class="btn-check" name="item6_bedroom4_btnradio" autocomplete="off"><label for="item6_bedroom4_btn1" class="btn btn-outline-primary">Oui</label>
+                                                            <input id="item6_bedroom4_btn2" type="radio" class="btn-check" name="item6_bedroom4_btnradio" autocomplete="off"><label for="item6_bedroom4_btn2" class="btn btn-outline-primary">Non</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <hr class="bg-dark border-top border-dark" />
+                                                <div class="row">
+                                                    <label for="item7_bedroom4" class="col-sm-4 col-form-label">Climatiseur</label>
+                                                    <div class="col-sm-4">
+                                                        <div id="item7_bedroom4" class="btn-group w-100" role="group">
+                                                            <input id="item7_bedroom4_btn1" type="radio" class="btn-check" name="item7_bedroom4_btnradio" autocomplete="off"><label for="item7_bedroom4_btn1" class="btn btn-outline-primary">Oui</label>
+                                                            <input id="item7_bedroom4_btn2" type="radio" class="btn-check" name="item7_bedroom4_btnradio" autocomplete="off"><label for="item7_bedroom4_btn2" class="btn btn-outline-primary">Non</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <hr class="bg-dark border-top border-dark" />
+                                                <div class="row">
+                                                    <label for="item8_bedroom4" class="col-sm-4 col-form-label">Armoire/penderie</label>
+                                                    <div class="col-sm-4">
+                                                        <div id="item8_bedroom4" class="btn-group w-100" role="group">
+                                                            <input id="item8_bedroom4_btn1" type="radio" class="btn-check" name="item8_bedroom4_btnradio" autocomplete="off"><label for="item8_bedroom4_btn1" class="btn btn-outline-primary">Oui</label>
+                                                            <input id="item8_bedroom4_btn2" type="radio" class="btn-check" name="item8_bedroom4_btnradio" autocomplete="off"><label for="item8_bedroom4_btn2" class="btn btn-outline-primary">Non</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <hr class="bg-dark border-top border-dark" />
+                                                <div class="row">
+                                                    <label for="item9_bedroom4" class="col-sm-4 col-form-label">Chauffage</label>
+                                                    <div class="col-sm-4">
+                                                        <div id="item9_bedroom4" class="btn-group w-100" role="group">
+                                                            <input id="item9_bedroom4_btn1" type="radio" class="btn-check" name="item9_bedroom4_btnradio" autocomplete="off"><label for="item9_bedroom4_btn1" class="btn btn-outline-primary">Oui</label>
+                                                            <input id="item9_bedroom4_btn2" type="radio" class="btn-check" name="item9_bedroom4_btnradio" autocomplete="off"><label for="item9_bedroom4_btn2" class="btn btn-outline-primary">Non</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <hr class="bg-dark border-top border-dark" />
+                                                <div class="row">
+                                                    <label for="item10_bedroom4" class="col-sm-4 col-form-label">Salle de bains privative</label>
+                                                    <div class="col-sm-4">
+                                                        <div id="item10_bedroom4" class="btn-group w-100" role="group">
+                                                            <input id="item10_bedroom4_btn1" type="radio" class="btn-check" name="item10_bedroom4_btnradio" autocomplete="off"><label for="item10_bedroom4_btn1" class="btn btn-outline-primary">Oui</label>
+                                                            <input id="item10_bedroom4_btn2" type="radio" class="btn-check" name="item10_bedroom4_btnradio" autocomplete="off"><label for="item10_bedroom4_btn2" class="btn btn-outline-primary">Non</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <hr class="bg-dark border-top border-dark" />
+                                                <div class="row">
+                                                    <label for="item11_bedroom4" class="col-sm-4 col-form-label">WC privatifs</label>
+                                                    <div class="col-sm-4">
+                                                        <div id="item11_bedroom4" class="btn-group w-100" role="group">
+                                                            <input id="item11_bedroom4_btn1" type="radio" class="btn-check" name="item11_bedroom4_btnradio" autocomplete="off"><label for="item11_bedroom4_btn1" class="btn btn-outline-primary">Oui</label>
+                                                            <input id="item11_bedroom4_btn2" type="radio" class="btn-check" name="item11_bedroom4_btnradio" autocomplete="off"><label for="item11_bedroom4_btn2" class="btn btn-outline-primary">Non</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <hr class="bg-dark border-top border-dark" />
+                                                <div class="row">
+                                                    <label for="item12_bedroom4" class="col-sm-4 col-form-label">Moustiquaire</label>
+                                                    <div class="col-sm-4">
+                                                        <div id="item12_bedroom4" class="btn-group w-100" role="group">
+                                                            <input id="item12_bedroom4_btn1" type="radio" class="btn-check" name="item12_bedroom4_btnradio" autocomplete="off"><label for="item12_bedroom4_btn1" class="btn btn-outline-primary">Oui</label>
+                                                            <input id="item12_bedroom4_btn2" type="radio" class="btn-check" name="item12_bedroom4_btnradio" autocomplete="off"><label for="item12_bedroom4_btn2" class="btn btn-outline-primary">Non</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <hr class="bg-dark border-top border-dark" />
+                                                <div class="row">
+                                                    <label for="item13_bedroom4" class="col-sm-4 col-form-label">Bureau</label>
+                                                    <div class="col-sm-4">
+                                                        <div id="item13_bedroom4" class="btn-group w-100" role="group">
+                                                            <input id="item13_bedroom4_btn1" type="radio" class="btn-check" name="item13_bedroom4_btnradio" autocomplete="off"><label for="item13_bedroom4_btn1" class="btn btn-outline-primary">Oui</label>
+                                                            <input id="item13_bedroom4_btn2" type="radio" class="btn-check" name="item13_bedroom4_btnradio" autocomplete="off"><label for="item13_bedroom4_btn2" class="btn btn-outline-primary">Non</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <hr class="bg-dark border-top border-dark" />
+                                                <div class="row">
+                                                    <label for="item14_bedroom4" class="col-sm-4 col-form-label">Prise près du lit</label>
+                                                    <div class="col-sm-4">
+                                                        <div id="item14_bedroom4" class="btn-group w-100" role="group">
+                                                            <input id="item14_bedroom4_btn1" type="radio" class="btn-check" name="item14_bedroom4_btnradio" autocomplete="off"><label for="item14_bedroom4_btn1" class="btn btn-outline-primary">Oui</label>
+                                                            <input id="item14_bedroom4_btn2" type="radio" class="btn-check" name="item14_bedroom4_btnradio" autocomplete="off"><label for="item14_bedroom4_btn2" class="btn btn-outline-primary">Non</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <hr class="bg-dark border-top border-dark" />
+                                                <div class="row">
+                                                    <label for="item15_bedroom4" class="col-sm-4 col-form-label">Purificateur d'air</label>
+                                                    <div class="col-sm-4">
+                                                        <div id="item15_bedroom4" class="btn-group w-100" role="group">
+                                                            <input id="item15_bedroom4_btn1" type="radio" class="btn-check" name="item15_bedroom4_btnradio" autocomplete="off"><label for="item15_bedroom4_btn1" class="btn btn-outline-primary">Oui</label>
+                                                            <input id="item15_bedroom4_btn2" type="radio" class="btn-check" name="item15_bedroom4_btnradio" autocomplete="off"><label for="item15_bedroom4_btn2" class="btn btn-outline-primary">Non</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="accordion-item">
+                                        <p class="accordion-header">
+                                            <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapse_bedroom5" aria-expanded="true" aria-controls="collapse_bedroom5" disabled>
+                                                <strong class="fs-5">Chambre n°6</strong>
+                                            </button>
+                                        </p>
+                                        <div id="collapse_bedroom5" class="accordion-collapse collapse show">
+                                            <div class="accordion-body mx-lg-5 mb-4">
+                                                <div class="row">
+                                                    <label for="item0_bedroom5" class="col-sm-4 col-form-label">Lit simple</label>
+                                                    <div class="col-sm-4">
+                                                        <div id="item0_bedroom5" class="btn-group w-100" role="group">
+                                                            <input id="item0_bedroom5_btn1" onchange="switch_item_indicator_display(0, 'bedroom5', 1)" type="radio" class="btn-check" name="item0_bedroom5_btn" autocomplete="off"><label for="item0_bedroom5_btn1" class="btn btn-outline-primary">Oui</label>
+                                                            <input id="item0_bedroom5_btn2" onchange="switch_item_indicator_display(0, 'bedroom5', 0)" type="radio" class="btn-check" name="item0_bedroom5_btn" autocomplete="off"><label for="item0_bedroom5_btn2" class="btn btn-outline-primary">Non</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div id="item0_bedroom5_indicator" class="row mt-2">
+                                                    <div class="col-sm-4"></div>
+                                                    <div class="col-sm-4">
+                                                        <p class="mb-1"><small>Précisez le nombre</small></p>
+                                                        <div class="btn-group btn-group-sm" role="group">
+                                                            <input class="btn-check" type="radio" name="item0_bedroom5_btnradio" id="item0_bedroom5_btnradio0" autocomplete="off" value="1"><label class="btn btn-outline-primary" for="item0_bedroom5_btnradio0">1</label>
+                                                            <input class="btn-check" type="radio" name="item0_bedroom5_btnradio" id="item0_bedroom5_btnradio1" autocomplete="off" value="2"><label class="btn btn-outline-primary" for="item0_bedroom5_btnradio1">2</label>
+                                                            <input class="btn-check" type="radio" name="item0_bedroom5_btnradio" id="item0_bedroom5_btnradio2" autocomplete="off" value="3"><label class="btn btn-outline-primary" for="item0_bedroom5_btnradio2">3</label>
+                                                            <input class="btn-check" type="radio" name="item0_bedroom5_btnradio" id="item0_bedroom5_btnradio3" autocomplete="off" value="4"><label class="btn btn-outline-primary" for="item0_bedroom5_btnradio3">4</label>
+                                                            <input class="btn-check" type="radio" name="item0_bedroom5_btnradio" id="item0_bedroom5_btnradio4" autocomplete="off" value="5"><label class="btn btn-outline-primary" for="item0_bedroom5_btnradio4">5</label>
+                                                            <input class="btn-check" type="radio" name="item0_bedroom5_btnradio" id="item0_bedroom5_btnradio5" autocomplete="off" value="6"><label class="btn btn-outline-primary" for="item0_bedroom5_btnradio5">6</label>
+                                                            <input class="btn-check" type="radio" name="item0_bedroom5_btnradio" id="item0_bedroom5_btnradio6" autocomplete="off" value="7"><label class="btn btn-outline-primary" for="item0_bedroom5_btnradio6">7</label>
+                                                            <input class="btn-check" type="radio" name="item0_bedroom5_btnradio" id="item0_bedroom5_btnradio7" autocomplete="off" value="8"><label class="btn btn-outline-primary" for="item0_bedroom5_btnradio7">8</label>
+                                                            <input class="btn-check" type="radio" name="item0_bedroom5_btnradio" id="item0_bedroom5_btnradio8" autocomplete="off" value="9"><label class="btn btn-outline-primary" for="item0_bedroom5_btnradio8">9</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <hr class="bg-dark border-top border-dark" />
+                                                <div class="row">
+                                                    <label for="item1_bedroom5" class="col-sm-4 col-form-label">Lit double</label>
+                                                    <div class="col-sm-4">
+                                                        <div id="item1_bedroom5" class="btn-group w-100" role="group">
+                                                            <input id="item1_bedroom5_btn1" onchange="switch_item_indicator_display(1, 'bedroom5', 1)" type="radio" class="btn-check" name="item1_bedroom5_btn" autocomplete="off"><label for="item1_bedroom5_btn1" class="btn btn-outline-primary">Oui</label>
+                                                            <input id="item1_bedroom5_btn2" onchange="switch_item_indicator_display(1, 'bedroom5', 0)" type="radio" class="btn-check" name="item1_bedroom5_btn" autocomplete="off"><label for="item1_bedroom5_btn2" class="btn btn-outline-primary">Non</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div id="item1_bedroom5_indicator" class="row mt-2">
+                                                    <div class="col-sm-4"></div>
+                                                    <div class="col-sm-4">
+                                                        <p class="mb-1"><small>Précisez le nombre</small></p>
+                                                        <div class="btn-group btn-group-sm" role="group">
+                                                            <input class="btn-check" type="radio" name="item1_bedroom5_btnradio" id="item1_bedroom5_btnradio0" autocomplete="off" value="1"><label class="btn btn-outline-primary" for="item1_bedroom5_btnradio0">1</label>
+                                                            <input class="btn-check" type="radio" name="item1_bedroom5_btnradio" id="item1_bedroom5_btnradio1" autocomplete="off" value="2"><label class="btn btn-outline-primary" for="item1_bedroom5_btnradio1">2</label>
+                                                            <input class="btn-check" type="radio" name="item1_bedroom5_btnradio" id="item1_bedroom5_btnradio2" autocomplete="off" value="3"><label class="btn btn-outline-primary" for="item1_bedroom5_btnradio2">3</label>
+                                                            <input class="btn-check" type="radio" name="item1_bedroom5_btnradio" id="item1_bedroom5_btnradio3" autocomplete="off" value="4"><label class="btn btn-outline-primary" for="item1_bedroom5_btnradio3">4</label>
+                                                            <input class="btn-check" type="radio" name="item1_bedroom5_btnradio" id="item1_bedroom5_btnradio4" autocomplete="off" value="5"><label class="btn btn-outline-primary" for="item1_bedroom5_btnradio4">5</label>
+                                                            <input class="btn-check" type="radio" name="item1_bedroom5_btnradio" id="item1_bedroom5_btnradio5" autocomplete="off" value="6"><label class="btn btn-outline-primary" for="item1_bedroom5_btnradio5">6</label>
+                                                            <input class="btn-check" type="radio" name="item1_bedroom5_btnradio" id="item1_bedroom5_btnradio6" autocomplete="off" value="7"><label class="btn btn-outline-primary" for="item1_bedroom5_btnradio6">7</label>
+                                                            <input class="btn-check" type="radio" name="item1_bedroom5_btnradio" id="item1_bedroom5_btnradio7" autocomplete="off" value="8"><label class="btn btn-outline-primary" for="item1_bedroom5_btnradio7">8</label>
+                                                            <input class="btn-check" type="radio" name="item1_bedroom5_btnradio" id="item1_bedroom5_btnradio8" autocomplete="off" value="9"><label class="btn btn-outline-primary" for="item1_bedroom5_btnradio8">9</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <hr class="bg-dark border-top border-dark" />
+                                                <div class="row">
+                                                    <label for="item2_bedroom5" class="col-sm-4 col-form-label">Lit superposé</label>
+                                                    <div class="col-sm-4">
+                                                        <div id="item2_bedroom5" class="btn-group w-100" role="group">
+                                                            <input id="item2_bedroom5_btn1" onchange="switch_item_indicator_display(2, 'bedroom5', 1)" type="radio" class="btn-check" name="item2_bedroom5_btn" autocomplete="off"><label for="item2_bedroom5_btn1" class="btn btn-outline-primary">Oui</label>
+                                                            <input id="item2_bedroom5_btn2" onchange="switch_item_indicator_display(2, 'bedroom5', 0)" type="radio" class="btn-check" name="item2_bedroom5_btn" autocomplete="off"><label for="item2_bedroom5_btn2" class="btn btn-outline-primary">Non</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div id="item2_bedroom5_indicator" class="row mt-2">
+                                                    <div class="col-sm-4"></div>
+                                                    <div class="col-sm-4">
+                                                        <p class="mb-1"><small>Précisez le nombre</small></p>
+                                                        <div class="btn-group btn-group-sm" role="group">
+                                                            <input class="btn-check" type="radio" name="item2_bedroom5_btnradio" id="item2_bedroom5_btnradio0" autocomplete="off" value="1"><label class="btn btn-outline-primary" for="item2_bedroom5_btnradio0">1</label>
+                                                            <input class="btn-check" type="radio" name="item2_bedroom5_btnradio" id="item2_bedroom5_btnradio1" autocomplete="off" value="2"><label class="btn btn-outline-primary" for="item2_bedroom5_btnradio1">2</label>
+                                                            <input class="btn-check" type="radio" name="item2_bedroom5_btnradio" id="item2_bedroom5_btnradio2" autocomplete="off" value="3"><label class="btn btn-outline-primary" for="item2_bedroom5_btnradio2">3</label>
+                                                            <input class="btn-check" type="radio" name="item2_bedroom5_btnradio" id="item2_bedroom5_btnradio3" autocomplete="off" value="4"><label class="btn btn-outline-primary" for="item2_bedroom5_btnradio3">4</label>
+                                                            <input class="btn-check" type="radio" name="item2_bedroom5_btnradio" id="item2_bedroom5_btnradio4" autocomplete="off" value="5"><label class="btn btn-outline-primary" for="item2_bedroom5_btnradio4">5</label>
+                                                            <input class="btn-check" type="radio" name="item2_bedroom5_btnradio" id="item2_bedroom5_btnradio5" autocomplete="off" value="6"><label class="btn btn-outline-primary" for="item2_bedroom5_btnradio5">6</label>
+                                                            <input class="btn-check" type="radio" name="item2_bedroom5_btnradio" id="item2_bedroom5_btnradio6" autocomplete="off" value="7"><label class="btn btn-outline-primary" for="item2_bedroom5_btnradio6">7</label>
+                                                            <input class="btn-check" type="radio" name="item2_bedroom5_btnradio" id="item2_bedroom5_btnradio7" autocomplete="off" value="8"><label class="btn btn-outline-primary" for="item2_bedroom5_btnradio7">8</label>
+                                                            <input class="btn-check" type="radio" name="item2_bedroom5_btnradio" id="item2_bedroom5_btnradio8" autocomplete="off" value="9"><label class="btn btn-outline-primary" for="item2_bedroom5_btnradio8">9</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <hr class="bg-dark border-top border-dark" />
+                                                <div class="row">
+                                                    <label for="item3_bedroom5" class="col-sm-4 col-form-label">Lit gigogne (contient 2 couchages)</label>
+                                                    <div class="col-sm-4">
+                                                        <div id="item3_bedroom5" class="btn-group w-100" role="group">
+                                                            <input id="item3_bedroom5_btn1" onchange="switch_item_indicator_display(3, 'bedroom5', 1)" type="radio" class="btn-check" name="item3_bedroom5_btn" autocomplete="off"><label for="item3_bedroom5_btn1" class="btn btn-outline-primary">Oui</label>
+                                                            <input id="item3_bedroom5_btn2" onchange="switch_item_indicator_display(3, 'bedroom5', 0)" type="radio" class="btn-check" name="item3_bedroom5_btn" autocomplete="off"><label for="item3_bedroom5_btn2" class="btn btn-outline-primary">Non</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div id="item3_bedroom5_indicator" class="row mt-2">
+                                                    <div class="col-sm-4"></div>
+                                                    <div class="col-sm-4">
+                                                        <p class="mb-1"><small>Précisez le nombre</small></p>
+                                                        <div class="btn-group btn-group-sm" role="group">
+                                                            <input class="btn-check" type="radio" name="item3_bedroom5_btnradio" id="item3_bedroom5_btnradio0" autocomplete="off" value="1"><label class="btn btn-outline-primary" for="item3_bedroom5_btnradio0">1</label>
+                                                            <input class="btn-check" type="radio" name="item3_bedroom5_btnradio" id="item3_bedroom5_btnradio1" autocomplete="off" value="2"><label class="btn btn-outline-primary" for="item3_bedroom5_btnradio1">2</label>
+                                                            <input class="btn-check" type="radio" name="item3_bedroom5_btnradio" id="item3_bedroom5_btnradio2" autocomplete="off" value="3"><label class="btn btn-outline-primary" for="item3_bedroom5_btnradio2">3</label>
+                                                            <input class="btn-check" type="radio" name="item3_bedroom5_btnradio" id="item3_bedroom5_btnradio3" autocomplete="off" value="4"><label class="btn btn-outline-primary" for="item3_bedroom5_btnradio3">4</label>
+                                                            <input class="btn-check" type="radio" name="item3_bedroom5_btnradio" id="item3_bedroom5_btnradio4" autocomplete="off" value="5"><label class="btn btn-outline-primary" for="item3_bedroom5_btnradio4">5</label>
+                                                            <input class="btn-check" type="radio" name="item3_bedroom5_btnradio" id="item3_bedroom5_btnradio5" autocomplete="off" value="6"><label class="btn btn-outline-primary" for="item3_bedroom5_btnradio5">6</label>
+                                                            <input class="btn-check" type="radio" name="item3_bedroom5_btnradio" id="item3_bedroom5_btnradio6" autocomplete="off" value="7"><label class="btn btn-outline-primary" for="item3_bedroom5_btnradio6">7</label>
+                                                            <input class="btn-check" type="radio" name="item3_bedroom5_btnradio" id="item3_bedroom5_btnradio7" autocomplete="off" value="8"><label class="btn btn-outline-primary" for="item3_bedroom5_btnradio7">8</label>
+                                                            <input class="btn-check" type="radio" name="item3_bedroom5_btnradio" id="item3_bedroom5_btnradio8" autocomplete="off" value="9"><label class="btn btn-outline-primary" for="item3_bedroom5_btnradio8">9</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <hr class="bg-dark border-top border-dark" />
+                                                <div class="row">
+                                                    <label for="item4_bedroom5" class="col-sm-4 col-form-label">Canapé-lit</label>
+                                                    <div class="col-sm-4">
+                                                        <div id="item4_bedroom5" class="btn-group w-100" role="group">
+                                                            <input id="item4_bedroom5_btn1" onchange="switch_item_indicator_display(4, 'bedroom5', 1)" type="radio" class="btn-check" name="item4_bedroom5_btn" autocomplete="off"><label for="item4_bedroom5_btn1" class="btn btn-outline-primary">Oui</label>
+                                                            <input id="item4_bedroom5_btn2" onchange="switch_item_indicator_display(4, 'bedroom5', 0)" type="radio" class="btn-check" name="item4_bedroom5_btn" autocomplete="off"><label for="item4_bedroom5_btn2" class="btn btn-outline-primary">Non</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div id="item4_bedroom5_indicator" class="row mt-2">
+                                                    <div class="col-sm-4"></div>
+                                                    <div class="col-sm-4">
+                                                        <p class="mb-1"><small>Précisez le nombre</small></p>
+                                                        <div class="btn-group btn-group-sm" role="group">
+                                                            <input class="btn-check" type="radio" name="item4_bedroom5_btnradio" id="item4_bedroom5_btnradio0" autocomplete="off" value="1"><label class="btn btn-outline-primary" for="item4_bedroom5_btnradio0">1</label>
+                                                            <input class="btn-check" type="radio" name="item4_bedroom5_btnradio" id="item4_bedroom5_btnradio1" autocomplete="off" value="2"><label class="btn btn-outline-primary" for="item4_bedroom5_btnradio1">2</label>
+                                                            <input class="btn-check" type="radio" name="item4_bedroom5_btnradio" id="item4_bedroom5_btnradio2" autocomplete="off" value="3"><label class="btn btn-outline-primary" for="item4_bedroom5_btnradio2">3</label>
+                                                            <input class="btn-check" type="radio" name="item4_bedroom5_btnradio" id="item4_bedroom5_btnradio3" autocomplete="off" value="4"><label class="btn btn-outline-primary" for="item4_bedroom5_btnradio3">4</label>
+                                                            <input class="btn-check" type="radio" name="item4_bedroom5_btnradio" id="item4_bedroom5_btnradio4" autocomplete="off" value="5"><label class="btn btn-outline-primary" for="item4_bedroom5_btnradio4">5</label>
+                                                            <input class="btn-check" type="radio" name="item4_bedroom5_btnradio" id="item4_bedroom5_btnradio5" autocomplete="off" value="6"><label class="btn btn-outline-primary" for="item4_bedroom5_btnradio5">6</label>
+                                                            <input class="btn-check" type="radio" name="item4_bedroom5_btnradio" id="item4_bedroom5_btnradio6" autocomplete="off" value="7"><label class="btn btn-outline-primary" for="item4_bedroom5_btnradio6">7</label>
+                                                            <input class="btn-check" type="radio" name="item4_bedroom5_btnradio" id="item4_bedroom5_btnradio7" autocomplete="off" value="8"><label class="btn btn-outline-primary" for="item4_bedroom5_btnradio7">8</label>
+                                                            <input class="btn-check" type="radio" name="item4_bedroom5_btnradio" id="item4_bedroom5_btnradio8" autocomplete="off" value="9"><label class="btn btn-outline-primary" for="item4_bedroom5_btnradio8">9</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <hr class="bg-dark border-top border-dark" />
+                                                <div class="row">
+                                                    <label for="item5_bedroom5" class="col-sm-4 col-form-label">Berceau</label>
+                                                    <div class="col-sm-4">
+                                                        <div id="item5_bedroom5" class="btn-group w-100" role="group">
+                                                            <input id="item5_bedroom5_btn1" onchange="switch_item_indicator_display(5, 'bedroom5', 1)" type="radio" class="btn-check" name="item5_bedroom5_btn" autocomplete="off"><label for="item5_bedroom5_btn1" class="btn btn-outline-primary">Oui</label>
+                                                            <input id="item5_bedroom5_btn2" onchange="switch_item_indicator_display(5, 'bedroom5', 0)" type="radio" class="btn-check" name="item5_bedroom5_btn" autocomplete="off"><label for="item5_bedroom5_btn2" class="btn btn-outline-primary">Non</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div id="item5_bedroom5_indicator" class="row mt-2">
+                                                    <div class="col-sm-4"></div>
+                                                    <div class="col-sm-4">
+                                                        <p class="mb-1"><small>Précisez le nombre</small></p>
+                                                        <div class="btn-group btn-group-sm" role="group">
+                                                            <input class="btn-check" type="radio" name="item5_bedroom5_btnradio" id="item5_bedroom5_btnradio0" autocomplete="off" value="1"><label class="btn btn-outline-primary" for="item5_bedroom5_btnradio0">1</label>
+                                                            <input class="btn-check" type="radio" name="item5_bedroom5_btnradio" id="item5_bedroom5_btnradio1" autocomplete="off" value="2"><label class="btn btn-outline-primary" for="item5_bedroom5_btnradio1">2</label>
+                                                            <input class="btn-check" type="radio" name="item5_bedroom5_btnradio" id="item5_bedroom5_btnradio2" autocomplete="off" value="3"><label class="btn btn-outline-primary" for="item5_bedroom5_btnradio2">3</label>
+                                                            <input class="btn-check" type="radio" name="item5_bedroom5_btnradio" id="item5_bedroom5_btnradio3" autocomplete="off" value="4"><label class="btn btn-outline-primary" for="item5_bedroom5_btnradio3">4</label>
+                                                            <input class="btn-check" type="radio" name="item5_bedroom5_btnradio" id="item5_bedroom5_btnradio4" autocomplete="off" value="5"><label class="btn btn-outline-primary" for="item5_bedroom5_btnradio4">5</label>
+                                                            <input class="btn-check" type="radio" name="item5_bedroom5_btnradio" id="item5_bedroom5_btnradio5" autocomplete="off" value="6"><label class="btn btn-outline-primary" for="item5_bedroom5_btnradio5">6</label>
+                                                            <input class="btn-check" type="radio" name="item5_bedroom5_btnradio" id="item5_bedroom5_btnradio6" autocomplete="off" value="7"><label class="btn btn-outline-primary" for="item5_bedroom5_btnradio6">7</label>
+                                                            <input class="btn-check" type="radio" name="item5_bedroom5_btnradio" id="item5_bedroom5_btnradio7" autocomplete="off" value="8"><label class="btn btn-outline-primary" for="item5_bedroom5_btnradio7">8</label>
+                                                            <input class="btn-check" type="radio" name="item5_bedroom5_btnradio" id="item5_bedroom5_btnradio8" autocomplete="off" value="9"><label class="btn btn-outline-primary" for="item5_bedroom5_btnradio8">9</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <hr class="bg-dark border-top border-dark" />
+                                                <div class="row">
+                                                    <label for="item6_bedroom5" class="col-sm-4 col-form-label">Ventilateur</label>
+                                                    <div class="col-sm-4">
+                                                        <div id="item6_bedroom5" class="btn-group w-100" role="group">
+                                                            <input id="item6_bedroom5_btn1" type="radio" class="btn-check" name="item6_bedroom5_btnradio" autocomplete="off"><label for="item6_bedroom5_btn1" class="btn btn-outline-primary">Oui</label>
+                                                            <input id="item6_bedroom5_btn2" type="radio" class="btn-check" name="item6_bedroom5_btnradio" autocomplete="off"><label for="item6_bedroom5_btn2" class="btn btn-outline-primary">Non</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <hr class="bg-dark border-top border-dark" />
+                                                <div class="row">
+                                                    <label for="item7_bedroom5" class="col-sm-4 col-form-label">Climatiseur</label>
+                                                    <div class="col-sm-4">
+                                                        <div id="item7_bedroom5" class="btn-group w-100" role="group">
+                                                            <input id="item7_bedroom5_btn1" type="radio" class="btn-check" name="item7_bedroom5_btnradio" autocomplete="off"><label for="item7_bedroom5_btn1" class="btn btn-outline-primary">Oui</label>
+                                                            <input id="item7_bedroom5_btn2" type="radio" class="btn-check" name="item7_bedroom5_btnradio" autocomplete="off"><label for="item7_bedroom5_btn2" class="btn btn-outline-primary">Non</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <hr class="bg-dark border-top border-dark" />
+                                                <div class="row">
+                                                    <label for="item8_bedroom5" class="col-sm-4 col-form-label">Armoire/penderie</label>
+                                                    <div class="col-sm-4">
+                                                        <div id="item8_bedroom5" class="btn-group w-100" role="group">
+                                                            <input id="item8_bedroom5_btn1" type="radio" class="btn-check" name="item8_bedroom5_btnradio" autocomplete="off"><label for="item8_bedroom5_btn1" class="btn btn-outline-primary">Oui</label>
+                                                            <input id="item8_bedroom5_btn2" type="radio" class="btn-check" name="item8_bedroom5_btnradio" autocomplete="off"><label for="item8_bedroom5_btn2" class="btn btn-outline-primary">Non</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <hr class="bg-dark border-top border-dark" />
+                                                <div class="row">
+                                                    <label for="item9_bedroom5" class="col-sm-4 col-form-label">Chauffage</label>
+                                                    <div class="col-sm-4">
+                                                        <div id="item9_bedroom5" class="btn-group w-100" role="group">
+                                                            <input id="item9_bedroom5_btn1" type="radio" class="btn-check" name="item9_bedroom5_btnradio" autocomplete="off"><label for="item9_bedroom5_btn1" class="btn btn-outline-primary">Oui</label>
+                                                            <input id="item9_bedroom5_btn2" type="radio" class="btn-check" name="item9_bedroom5_btnradio" autocomplete="off"><label for="item9_bedroom5_btn2" class="btn btn-outline-primary">Non</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <hr class="bg-dark border-top border-dark" />
+                                                <div class="row">
+                                                    <label for="item10_bedroom5" class="col-sm-4 col-form-label">Salle de bains privative</label>
+                                                    <div class="col-sm-4">
+                                                        <div id="item10_bedroom5" class="btn-group w-100" role="group">
+                                                            <input id="item10_bedroom5_btn1" type="radio" class="btn-check" name="item10_bedroom5_btnradio" autocomplete="off"><label for="item10_bedroom5_btn1" class="btn btn-outline-primary">Oui</label>
+                                                            <input id="item10_bedroom5_btn2" type="radio" class="btn-check" name="item10_bedroom5_btnradio" autocomplete="off"><label for="item10_bedroom5_btn2" class="btn btn-outline-primary">Non</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <hr class="bg-dark border-top border-dark" />
+                                                <div class="row">
+                                                    <label for="item11_bedroom5" class="col-sm-4 col-form-label">WC privatifs</label>
+                                                    <div class="col-sm-4">
+                                                        <div id="item11_bedroom5" class="btn-group w-100" role="group">
+                                                            <input id="item11_bedroom5_btn1" type="radio" class="btn-check" name="item11_bedroom5_btnradio" autocomplete="off"><label for="item11_bedroom5_btn1" class="btn btn-outline-primary">Oui</label>
+                                                            <input id="item11_bedroom5_btn2" type="radio" class="btn-check" name="item11_bedroom5_btnradio" autocomplete="off"><label for="item11_bedroom5_btn2" class="btn btn-outline-primary">Non</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <hr class="bg-dark border-top border-dark" />
+                                                <div class="row">
+                                                    <label for="item12_bedroom5" class="col-sm-4 col-form-label">Moustiquaire</label>
+                                                    <div class="col-sm-4">
+                                                        <div id="item12_bedroom5" class="btn-group w-100" role="group">
+                                                            <input id="item12_bedroom5_btn1" type="radio" class="btn-check" name="item12_bedroom5_btnradio" autocomplete="off"><label for="item12_bedroom5_btn1" class="btn btn-outline-primary">Oui</label>
+                                                            <input id="item12_bedroom5_btn2" type="radio" class="btn-check" name="item12_bedroom5_btnradio" autocomplete="off"><label for="item12_bedroom5_btn2" class="btn btn-outline-primary">Non</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <hr class="bg-dark border-top border-dark" />
+                                                <div class="row">
+                                                    <label for="item13_bedroom5" class="col-sm-4 col-form-label">Bureau</label>
+                                                    <div class="col-sm-4">
+                                                        <div id="item13_bedroom5" class="btn-group w-100" role="group">
+                                                            <input id="item13_bedroom5_btn1" type="radio" class="btn-check" name="item13_bedroom5_btnradio" autocomplete="off"><label for="item13_bedroom5_btn1" class="btn btn-outline-primary">Oui</label>
+                                                            <input id="item13_bedroom5_btn2" type="radio" class="btn-check" name="item13_bedroom5_btnradio" autocomplete="off"><label for="item13_bedroom5_btn2" class="btn btn-outline-primary">Non</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <hr class="bg-dark border-top border-dark" />
+                                                <div class="row">
+                                                    <label for="item14_bedroom5" class="col-sm-4 col-form-label">Prise près du lit</label>
+                                                    <div class="col-sm-4">
+                                                        <div id="item14_bedroom5" class="btn-group w-100" role="group">
+                                                            <input id="item14_bedroom5_btn1" type="radio" class="btn-check" name="item14_bedroom5_btnradio" autocomplete="off"><label for="item14_bedroom5_btn1" class="btn btn-outline-primary">Oui</label>
+                                                            <input id="item14_bedroom5_btn2" type="radio" class="btn-check" name="item14_bedroom5_btnradio" autocomplete="off"><label for="item14_bedroom5_btn2" class="btn btn-outline-primary">Non</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <hr class="bg-dark border-top border-dark" />
+                                                <div class="row">
+                                                    <label for="item15_bedroom5" class="col-sm-4 col-form-label">Purificateur d'air</label>
+                                                    <div class="col-sm-4">
+                                                        <div id="item15_bedroom5" class="btn-group w-100" role="group">
+                                                            <input id="item15_bedroom5_btn1" type="radio" class="btn-check" name="item15_bedroom5_btnradio" autocomplete="off"><label for="item15_bedroom5_btn1" class="btn btn-outline-primary">Oui</label>
+                                                            <input id="item15_bedroom5_btn2" type="radio" class="btn-check" name="item15_bedroom5_btnradio" autocomplete="off"><label for="item15_bedroom5_btn2" class="btn btn-outline-primary">Non</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="accordion-item">
+                                        <p class="accordion-header">
+                                            <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapse_bedroom6" aria-expanded="true" aria-controls="collapse_bedroom6" disabled>
+                                                <strong class="fs-5">Chambre n°7</strong>
+                                            </button>
+                                        </p>
+                                        <div id="collapse_bedroom6" class="accordion-collapse collapse show">
+                                            <div class="accordion-body mx-lg-5 mb-4">
+                                                <div class="row">
+                                                    <label for="item0_bedroom6" class="col-sm-4 col-form-label">Lit simple</label>
+                                                    <div class="col-sm-4">
+                                                        <div id="item0_bedroom6" class="btn-group w-100" role="group">
+                                                            <input id="item0_bedroom6_btn1" onchange="switch_item_indicator_display(0, 'bedroom6', 1)" type="radio" class="btn-check" name="item0_bedroom6_btn" autocomplete="off"><label for="item0_bedroom6_btn1" class="btn btn-outline-primary">Oui</label>
+                                                            <input id="item0_bedroom6_btn2" onchange="switch_item_indicator_display(0, 'bedroom6', 0)" type="radio" class="btn-check" name="item0_bedroom6_btn" autocomplete="off"><label for="item0_bedroom6_btn2" class="btn btn-outline-primary">Non</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div id="item0_bedroom6_indicator" class="row mt-2">
+                                                    <div class="col-sm-4"></div>
+                                                    <div class="col-sm-4">
+                                                        <p class="mb-1"><small>Précisez le nombre</small></p>
+                                                        <div class="btn-group btn-group-sm" role="group">
+                                                            <input class="btn-check" type="radio" name="item0_bedroom6_btnradio" id="item0_bedroom6_btnradio0" autocomplete="off" value="1"><label class="btn btn-outline-primary" for="item0_bedroom6_btnradio0">1</label>
+                                                            <input class="btn-check" type="radio" name="item0_bedroom6_btnradio" id="item0_bedroom6_btnradio1" autocomplete="off" value="2"><label class="btn btn-outline-primary" for="item0_bedroom6_btnradio1">2</label>
+                                                            <input class="btn-check" type="radio" name="item0_bedroom6_btnradio" id="item0_bedroom6_btnradio2" autocomplete="off" value="3"><label class="btn btn-outline-primary" for="item0_bedroom6_btnradio2">3</label>
+                                                            <input class="btn-check" type="radio" name="item0_bedroom6_btnradio" id="item0_bedroom6_btnradio3" autocomplete="off" value="4"><label class="btn btn-outline-primary" for="item0_bedroom6_btnradio3">4</label>
+                                                            <input class="btn-check" type="radio" name="item0_bedroom6_btnradio" id="item0_bedroom6_btnradio4" autocomplete="off" value="5"><label class="btn btn-outline-primary" for="item0_bedroom6_btnradio4">5</label>
+                                                            <input class="btn-check" type="radio" name="item0_bedroom6_btnradio" id="item0_bedroom6_btnradio5" autocomplete="off" value="6"><label class="btn btn-outline-primary" for="item0_bedroom6_btnradio5">6</label>
+                                                            <input class="btn-check" type="radio" name="item0_bedroom6_btnradio" id="item0_bedroom6_btnradio6" autocomplete="off" value="7"><label class="btn btn-outline-primary" for="item0_bedroom6_btnradio6">7</label>
+                                                            <input class="btn-check" type="radio" name="item0_bedroom6_btnradio" id="item0_bedroom6_btnradio7" autocomplete="off" value="8"><label class="btn btn-outline-primary" for="item0_bedroom6_btnradio7">8</label>
+                                                            <input class="btn-check" type="radio" name="item0_bedroom6_btnradio" id="item0_bedroom6_btnradio8" autocomplete="off" value="9"><label class="btn btn-outline-primary" for="item0_bedroom6_btnradio8">9</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <hr class="bg-dark border-top border-dark" />
+                                                <div class="row">
+                                                    <label for="item1_bedroom6" class="col-sm-4 col-form-label">Lit double</label>
+                                                    <div class="col-sm-4">
+                                                        <div id="item1_bedroom6" class="btn-group w-100" role="group">
+                                                            <input id="item1_bedroom6_btn1" onchange="switch_item_indicator_display(1, 'bedroom6', 1)" type="radio" class="btn-check" name="item1_bedroom6_btn" autocomplete="off"><label for="item1_bedroom6_btn1" class="btn btn-outline-primary">Oui</label>
+                                                            <input id="item1_bedroom6_btn2" onchange="switch_item_indicator_display(1, 'bedroom6', 0)" type="radio" class="btn-check" name="item1_bedroom6_btn" autocomplete="off"><label for="item1_bedroom6_btn2" class="btn btn-outline-primary">Non</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div id="item1_bedroom6_indicator" class="row mt-2">
+                                                    <div class="col-sm-4"></div>
+                                                    <div class="col-sm-4">
+                                                        <p class="mb-1"><small>Précisez le nombre</small></p>
+                                                        <div class="btn-group btn-group-sm" role="group">
+                                                            <input class="btn-check" type="radio" name="item1_bedroom6_btnradio" id="item1_bedroom6_btnradio0" autocomplete="off" value="1"><label class="btn btn-outline-primary" for="item1_bedroom6_btnradio0">1</label>
+                                                            <input class="btn-check" type="radio" name="item1_bedroom6_btnradio" id="item1_bedroom6_btnradio1" autocomplete="off" value="2"><label class="btn btn-outline-primary" for="item1_bedroom6_btnradio1">2</label>
+                                                            <input class="btn-check" type="radio" name="item1_bedroom6_btnradio" id="item1_bedroom6_btnradio2" autocomplete="off" value="3"><label class="btn btn-outline-primary" for="item1_bedroom6_btnradio2">3</label>
+                                                            <input class="btn-check" type="radio" name="item1_bedroom6_btnradio" id="item1_bedroom6_btnradio3" autocomplete="off" value="4"><label class="btn btn-outline-primary" for="item1_bedroom6_btnradio3">4</label>
+                                                            <input class="btn-check" type="radio" name="item1_bedroom6_btnradio" id="item1_bedroom6_btnradio4" autocomplete="off" value="5"><label class="btn btn-outline-primary" for="item1_bedroom6_btnradio4">5</label>
+                                                            <input class="btn-check" type="radio" name="item1_bedroom6_btnradio" id="item1_bedroom6_btnradio5" autocomplete="off" value="6"><label class="btn btn-outline-primary" for="item1_bedroom6_btnradio5">6</label>
+                                                            <input class="btn-check" type="radio" name="item1_bedroom6_btnradio" id="item1_bedroom6_btnradio6" autocomplete="off" value="7"><label class="btn btn-outline-primary" for="item1_bedroom6_btnradio6">7</label>
+                                                            <input class="btn-check" type="radio" name="item1_bedroom6_btnradio" id="item1_bedroom6_btnradio7" autocomplete="off" value="8"><label class="btn btn-outline-primary" for="item1_bedroom6_btnradio7">8</label>
+                                                            <input class="btn-check" type="radio" name="item1_bedroom6_btnradio" id="item1_bedroom6_btnradio8" autocomplete="off" value="9"><label class="btn btn-outline-primary" for="item1_bedroom6_btnradio8">9</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <hr class="bg-dark border-top border-dark" />
+                                                <div class="row">
+                                                    <label for="item2_bedroom6" class="col-sm-4 col-form-label">Lit superposé</label>
+                                                    <div class="col-sm-4">
+                                                        <div id="item2_bedroom6" class="btn-group w-100" role="group">
+                                                            <input id="item2_bedroom6_btn1" onchange="switch_item_indicator_display(2, 'bedroom6', 1)" type="radio" class="btn-check" name="item2_bedroom6_btn" autocomplete="off"><label for="item2_bedroom6_btn1" class="btn btn-outline-primary">Oui</label>
+                                                            <input id="item2_bedroom6_btn2" onchange="switch_item_indicator_display(2, 'bedroom6', 0)" type="radio" class="btn-check" name="item2_bedroom6_btn" autocomplete="off"><label for="item2_bedroom6_btn2" class="btn btn-outline-primary">Non</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div id="item2_bedroom6_indicator" class="row mt-2">
+                                                    <div class="col-sm-4"></div>
+                                                    <div class="col-sm-4">
+                                                        <p class="mb-1"><small>Précisez le nombre</small></p>
+                                                        <div class="btn-group btn-group-sm" role="group">
+                                                            <input class="btn-check" type="radio" name="item2_bedroom6_btnradio" id="item2_bedroom6_btnradio0" autocomplete="off" value="1"><label class="btn btn-outline-primary" for="item2_bedroom6_btnradio0">1</label>
+                                                            <input class="btn-check" type="radio" name="item2_bedroom6_btnradio" id="item2_bedroom6_btnradio1" autocomplete="off" value="2"><label class="btn btn-outline-primary" for="item2_bedroom6_btnradio1">2</label>
+                                                            <input class="btn-check" type="radio" name="item2_bedroom6_btnradio" id="item2_bedroom6_btnradio2" autocomplete="off" value="3"><label class="btn btn-outline-primary" for="item2_bedroom6_btnradio2">3</label>
+                                                            <input class="btn-check" type="radio" name="item2_bedroom6_btnradio" id="item2_bedroom6_btnradio3" autocomplete="off" value="4"><label class="btn btn-outline-primary" for="item2_bedroom6_btnradio3">4</label>
+                                                            <input class="btn-check" type="radio" name="item2_bedroom6_btnradio" id="item2_bedroom6_btnradio4" autocomplete="off" value="5"><label class="btn btn-outline-primary" for="item2_bedroom6_btnradio4">5</label>
+                                                            <input class="btn-check" type="radio" name="item2_bedroom6_btnradio" id="item2_bedroom6_btnradio5" autocomplete="off" value="6"><label class="btn btn-outline-primary" for="item2_bedroom6_btnradio5">6</label>
+                                                            <input class="btn-check" type="radio" name="item2_bedroom6_btnradio" id="item2_bedroom6_btnradio6" autocomplete="off" value="7"><label class="btn btn-outline-primary" for="item2_bedroom6_btnradio6">7</label>
+                                                            <input class="btn-check" type="radio" name="item2_bedroom6_btnradio" id="item2_bedroom6_btnradio7" autocomplete="off" value="8"><label class="btn btn-outline-primary" for="item2_bedroom6_btnradio7">8</label>
+                                                            <input class="btn-check" type="radio" name="item2_bedroom6_btnradio" id="item2_bedroom6_btnradio8" autocomplete="off" value="9"><label class="btn btn-outline-primary" for="item2_bedroom6_btnradio8">9</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <hr class="bg-dark border-top border-dark" />
+                                                <div class="row">
+                                                    <label for="item3_bedroom6" class="col-sm-4 col-form-label">Lit gigogne (contient 2 couchages)</label>
+                                                    <div class="col-sm-4">
+                                                        <div id="item3_bedroom6" class="btn-group w-100" role="group">
+                                                            <input id="item3_bedroom6_btn1" onchange="switch_item_indicator_display(3, 'bedroom6', 1)" type="radio" class="btn-check" name="item3_bedroom6_btn" autocomplete="off"><label for="item3_bedroom6_btn1" class="btn btn-outline-primary">Oui</label>
+                                                            <input id="item3_bedroom6_btn2" onchange="switch_item_indicator_display(3, 'bedroom6', 0)" type="radio" class="btn-check" name="item3_bedroom6_btn" autocomplete="off"><label for="item3_bedroom6_btn2" class="btn btn-outline-primary">Non</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div id="item3_bedroom6_indicator" class="row mt-2">
+                                                    <div class="col-sm-4"></div>
+                                                    <div class="col-sm-4">
+                                                        <p class="mb-1"><small>Précisez le nombre</small></p>
+                                                        <div class="btn-group btn-group-sm" role="group">
+                                                            <input class="btn-check" type="radio" name="item3_bedroom6_btnradio" id="item3_bedroom6_btnradio0" autocomplete="off" value="1"><label class="btn btn-outline-primary" for="item3_bedroom6_btnradio0">1</label>
+                                                            <input class="btn-check" type="radio" name="item3_bedroom6_btnradio" id="item3_bedroom6_btnradio1" autocomplete="off" value="2"><label class="btn btn-outline-primary" for="item3_bedroom6_btnradio1">2</label>
+                                                            <input class="btn-check" type="radio" name="item3_bedroom6_btnradio" id="item3_bedroom6_btnradio2" autocomplete="off" value="3"><label class="btn btn-outline-primary" for="item3_bedroom6_btnradio2">3</label>
+                                                            <input class="btn-check" type="radio" name="item3_bedroom6_btnradio" id="item3_bedroom6_btnradio3" autocomplete="off" value="4"><label class="btn btn-outline-primary" for="item3_bedroom6_btnradio3">4</label>
+                                                            <input class="btn-check" type="radio" name="item3_bedroom6_btnradio" id="item3_bedroom6_btnradio4" autocomplete="off" value="5"><label class="btn btn-outline-primary" for="item3_bedroom6_btnradio4">5</label>
+                                                            <input class="btn-check" type="radio" name="item3_bedroom6_btnradio" id="item3_bedroom6_btnradio5" autocomplete="off" value="6"><label class="btn btn-outline-primary" for="item3_bedroom6_btnradio5">6</label>
+                                                            <input class="btn-check" type="radio" name="item3_bedroom6_btnradio" id="item3_bedroom6_btnradio6" autocomplete="off" value="7"><label class="btn btn-outline-primary" for="item3_bedroom6_btnradio6">7</label>
+                                                            <input class="btn-check" type="radio" name="item3_bedroom6_btnradio" id="item3_bedroom6_btnradio7" autocomplete="off" value="8"><label class="btn btn-outline-primary" for="item3_bedroom6_btnradio7">8</label>
+                                                            <input class="btn-check" type="radio" name="item3_bedroom6_btnradio" id="item3_bedroom6_btnradio8" autocomplete="off" value="9"><label class="btn btn-outline-primary" for="item3_bedroom6_btnradio8">9</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <hr class="bg-dark border-top border-dark" />
+                                                <div class="row">
+                                                    <label for="item4_bedroom6" class="col-sm-4 col-form-label">Canapé-lit</label>
+                                                    <div class="col-sm-4">
+                                                        <div id="item4_bedroom6" class="btn-group w-100" role="group">
+                                                            <input id="item4_bedroom6_btn1" onchange="switch_item_indicator_display(4, 'bedroom6', 1)" type="radio" class="btn-check" name="item4_bedroom6_btn" autocomplete="off"><label for="item4_bedroom6_btn1" class="btn btn-outline-primary">Oui</label>
+                                                            <input id="item4_bedroom6_btn2" onchange="switch_item_indicator_display(4, 'bedroom6', 0)" type="radio" class="btn-check" name="item4_bedroom6_btn" autocomplete="off"><label for="item4_bedroom6_btn2" class="btn btn-outline-primary">Non</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div id="item4_bedroom6_indicator" class="row mt-2">
+                                                    <div class="col-sm-4"></div>
+                                                    <div class="col-sm-4">
+                                                        <p class="mb-1"><small>Précisez le nombre</small></p>
+                                                        <div class="btn-group btn-group-sm" role="group">
+                                                            <input class="btn-check" type="radio" name="item4_bedroom6_btnradio" id="item4_bedroom6_btnradio0" autocomplete="off" value="1"><label class="btn btn-outline-primary" for="item4_bedroom6_btnradio0">1</label>
+                                                            <input class="btn-check" type="radio" name="item4_bedroom6_btnradio" id="item4_bedroom6_btnradio1" autocomplete="off" value="2"><label class="btn btn-outline-primary" for="item4_bedroom6_btnradio1">2</label>
+                                                            <input class="btn-check" type="radio" name="item4_bedroom6_btnradio" id="item4_bedroom6_btnradio2" autocomplete="off" value="3"><label class="btn btn-outline-primary" for="item4_bedroom6_btnradio2">3</label>
+                                                            <input class="btn-check" type="radio" name="item4_bedroom6_btnradio" id="item4_bedroom6_btnradio3" autocomplete="off" value="4"><label class="btn btn-outline-primary" for="item4_bedroom6_btnradio3">4</label>
+                                                            <input class="btn-check" type="radio" name="item4_bedroom6_btnradio" id="item4_bedroom6_btnradio4" autocomplete="off" value="5"><label class="btn btn-outline-primary" for="item4_bedroom6_btnradio4">5</label>
+                                                            <input class="btn-check" type="radio" name="item4_bedroom6_btnradio" id="item4_bedroom6_btnradio5" autocomplete="off" value="6"><label class="btn btn-outline-primary" for="item4_bedroom6_btnradio5">6</label>
+                                                            <input class="btn-check" type="radio" name="item4_bedroom6_btnradio" id="item4_bedroom6_btnradio6" autocomplete="off" value="7"><label class="btn btn-outline-primary" for="item4_bedroom6_btnradio6">7</label>
+                                                            <input class="btn-check" type="radio" name="item4_bedroom6_btnradio" id="item4_bedroom6_btnradio7" autocomplete="off" value="8"><label class="btn btn-outline-primary" for="item4_bedroom6_btnradio7">8</label>
+                                                            <input class="btn-check" type="radio" name="item4_bedroom6_btnradio" id="item4_bedroom6_btnradio8" autocomplete="off" value="9"><label class="btn btn-outline-primary" for="item4_bedroom6_btnradio8">9</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <hr class="bg-dark border-top border-dark" />
+                                                <div class="row">
+                                                    <label for="item5_bedroom6" class="col-sm-4 col-form-label">Berceau</label>
+                                                    <div class="col-sm-4">
+                                                        <div id="item5_bedroom6" class="btn-group w-100" role="group">
+                                                            <input id="item5_bedroom6_btn1" onchange="switch_item_indicator_display(5, 'bedroom6', 1)" type="radio" class="btn-check" name="item5_bedroom6_btn" autocomplete="off"><label for="item5_bedroom6_btn1" class="btn btn-outline-primary">Oui</label>
+                                                            <input id="item5_bedroom6_btn2" onchange="switch_item_indicator_display(5, 'bedroom6', 0)" type="radio" class="btn-check" name="item5_bedroom6_btn" autocomplete="off"><label for="item5_bedroom6_btn2" class="btn btn-outline-primary">Non</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div id="item5_bedroom6_indicator" class="row mt-2">
+                                                    <div class="col-sm-4"></div>
+                                                    <div class="col-sm-4">
+                                                        <p class="mb-1"><small>Précisez le nombre</small></p>
+                                                        <div class="btn-group btn-group-sm" role="group">
+                                                            <input class="btn-check" type="radio" name="item5_bedroom6_btnradio" id="item5_bedroom6_btnradio0" autocomplete="off" value="1"><label class="btn btn-outline-primary" for="item5_bedroom6_btnradio0">1</label>
+                                                            <input class="btn-check" type="radio" name="item5_bedroom6_btnradio" id="item5_bedroom6_btnradio1" autocomplete="off" value="2"><label class="btn btn-outline-primary" for="item5_bedroom6_btnradio1">2</label>
+                                                            <input class="btn-check" type="radio" name="item5_bedroom6_btnradio" id="item5_bedroom6_btnradio2" autocomplete="off" value="3"><label class="btn btn-outline-primary" for="item5_bedroom6_btnradio2">3</label>
+                                                            <input class="btn-check" type="radio" name="item5_bedroom6_btnradio" id="item5_bedroom6_btnradio3" autocomplete="off" value="4"><label class="btn btn-outline-primary" for="item5_bedroom6_btnradio3">4</label>
+                                                            <input class="btn-check" type="radio" name="item5_bedroom6_btnradio" id="item5_bedroom6_btnradio4" autocomplete="off" value="5"><label class="btn btn-outline-primary" for="item5_bedroom6_btnradio4">5</label>
+                                                            <input class="btn-check" type="radio" name="item5_bedroom6_btnradio" id="item5_bedroom6_btnradio5" autocomplete="off" value="6"><label class="btn btn-outline-primary" for="item5_bedroom6_btnradio5">6</label>
+                                                            <input class="btn-check" type="radio" name="item5_bedroom6_btnradio" id="item5_bedroom6_btnradio6" autocomplete="off" value="7"><label class="btn btn-outline-primary" for="item5_bedroom6_btnradio6">7</label>
+                                                            <input class="btn-check" type="radio" name="item5_bedroom6_btnradio" id="item5_bedroom6_btnradio7" autocomplete="off" value="8"><label class="btn btn-outline-primary" for="item5_bedroom6_btnradio7">8</label>
+                                                            <input class="btn-check" type="radio" name="item5_bedroom6_btnradio" id="item5_bedroom6_btnradio8" autocomplete="off" value="9"><label class="btn btn-outline-primary" for="item5_bedroom6_btnradio8">9</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <hr class="bg-dark border-top border-dark" />
+                                                <div class="row">
+                                                    <label for="item6_bedroom6" class="col-sm-4 col-form-label">Ventilateur</label>
+                                                    <div class="col-sm-4">
+                                                        <div id="item6_bedroom6" class="btn-group w-100" role="group">
+                                                            <input id="item6_bedroom6_btn1" type="radio" class="btn-check" name="item6_bedroom6_btnradio" autocomplete="off"><label for="item6_bedroom6_btn1" class="btn btn-outline-primary">Oui</label>
+                                                            <input id="item6_bedroom6_btn2" type="radio" class="btn-check" name="item6_bedroom6_btnradio" autocomplete="off"><label for="item6_bedroom6_btn2" class="btn btn-outline-primary">Non</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <hr class="bg-dark border-top border-dark" />
+                                                <div class="row">
+                                                    <label for="item7_bedroom6" class="col-sm-4 col-form-label">Climatiseur</label>
+                                                    <div class="col-sm-4">
+                                                        <div id="item7_bedroom6" class="btn-group w-100" role="group">
+                                                            <input id="item7_bedroom6_btn1" type="radio" class="btn-check" name="item7_bedroom6_btnradio" autocomplete="off"><label for="item7_bedroom6_btn1" class="btn btn-outline-primary">Oui</label>
+                                                            <input id="item7_bedroom6_btn2" type="radio" class="btn-check" name="item7_bedroom6_btnradio" autocomplete="off"><label for="item7_bedroom6_btn2" class="btn btn-outline-primary">Non</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <hr class="bg-dark border-top border-dark" />
+                                                <div class="row">
+                                                    <label for="item8_bedroom6" class="col-sm-4 col-form-label">Armoire/penderie</label>
+                                                    <div class="col-sm-4">
+                                                        <div id="item8_bedroom6" class="btn-group w-100" role="group">
+                                                            <input id="item8_bedroom6_btn1" type="radio" class="btn-check" name="item8_bedroom6_btnradio" autocomplete="off"><label for="item8_bedroom6_btn1" class="btn btn-outline-primary">Oui</label>
+                                                            <input id="item8_bedroom6_btn2" type="radio" class="btn-check" name="item8_bedroom6_btnradio" autocomplete="off"><label for="item8_bedroom6_btn2" class="btn btn-outline-primary">Non</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <hr class="bg-dark border-top border-dark" />
+                                                <div class="row">
+                                                    <label for="item9_bedroom6" class="col-sm-4 col-form-label">Chauffage</label>
+                                                    <div class="col-sm-4">
+                                                        <div id="item9_bedroom6" class="btn-group w-100" role="group">
+                                                            <input id="item9_bedroom6_btn1" type="radio" class="btn-check" name="item9_bedroom6_btnradio" autocomplete="off"><label for="item9_bedroom6_btn1" class="btn btn-outline-primary">Oui</label>
+                                                            <input id="item9_bedroom6_btn2" type="radio" class="btn-check" name="item9_bedroom6_btnradio" autocomplete="off"><label for="item9_bedroom6_btn2" class="btn btn-outline-primary">Non</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <hr class="bg-dark border-top border-dark" />
+                                                <div class="row">
+                                                    <label for="item10_bedroom6" class="col-sm-4 col-form-label">Salle de bains privative</label>
+                                                    <div class="col-sm-4">
+                                                        <div id="item10_bedroom6" class="btn-group w-100" role="group">
+                                                            <input id="item10_bedroom6_btn1" type="radio" class="btn-check" name="item10_bedroom6_btnradio" autocomplete="off"><label for="item10_bedroom6_btn1" class="btn btn-outline-primary">Oui</label>
+                                                            <input id="item10_bedroom6_btn2" type="radio" class="btn-check" name="item10_bedroom6_btnradio" autocomplete="off"><label for="item10_bedroom6_btn2" class="btn btn-outline-primary">Non</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <hr class="bg-dark border-top border-dark" />
+                                                <div class="row">
+                                                    <label for="item11_bedroom6" class="col-sm-4 col-form-label">WC privatifs</label>
+                                                    <div class="col-sm-4">
+                                                        <div id="item11_bedroom6" class="btn-group w-100" role="group">
+                                                            <input id="item11_bedroom6_btn1" type="radio" class="btn-check" name="item11_bedroom6_btnradio" autocomplete="off"><label for="item11_bedroom6_btn1" class="btn btn-outline-primary">Oui</label>
+                                                            <input id="item11_bedroom6_btn2" type="radio" class="btn-check" name="item11_bedroom6_btnradio" autocomplete="off"><label for="item11_bedroom6_btn2" class="btn btn-outline-primary">Non</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <hr class="bg-dark border-top border-dark" />
+                                                <div class="row">
+                                                    <label for="item12_bedroom6" class="col-sm-4 col-form-label">Moustiquaire</label>
+                                                    <div class="col-sm-4">
+                                                        <div id="item12_bedroom6" class="btn-group w-100" role="group">
+                                                            <input id="item12_bedroom6_btn1" type="radio" class="btn-check" name="item12_bedroom6_btnradio" autocomplete="off"><label for="item12_bedroom6_btn1" class="btn btn-outline-primary">Oui</label>
+                                                            <input id="item12_bedroom6_btn2" type="radio" class="btn-check" name="item12_bedroom6_btnradio" autocomplete="off"><label for="item12_bedroom6_btn2" class="btn btn-outline-primary">Non</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <hr class="bg-dark border-top border-dark" />
+                                                <div class="row">
+                                                    <label for="item13_bedroom6" class="col-sm-4 col-form-label">Bureau</label>
+                                                    <div class="col-sm-4">
+                                                        <div id="item13_bedroom6" class="btn-group w-100" role="group">
+                                                            <input id="item13_bedroom6_btn1" type="radio" class="btn-check" name="item13_bedroom6_btnradio" autocomplete="off"><label for="item13_bedroom6_btn1" class="btn btn-outline-primary">Oui</label>
+                                                            <input id="item13_bedroom6_btn2" type="radio" class="btn-check" name="item13_bedroom6_btnradio" autocomplete="off"><label for="item13_bedroom6_btn2" class="btn btn-outline-primary">Non</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <hr class="bg-dark border-top border-dark" />
+                                                <div class="row">
+                                                    <label for="item14_bedroom6" class="col-sm-4 col-form-label">Prise près du lit</label>
+                                                    <div class="col-sm-4">
+                                                        <div id="item14_bedroom6" class="btn-group w-100" role="group">
+                                                            <input id="item14_bedroom6_btn1" type="radio" class="btn-check" name="item14_bedroom6_btnradio" autocomplete="off"><label for="item14_bedroom6_btn1" class="btn btn-outline-primary">Oui</label>
+                                                            <input id="item14_bedroom6_btn2" type="radio" class="btn-check" name="item14_bedroom6_btnradio" autocomplete="off"><label for="item14_bedroom6_btn2" class="btn btn-outline-primary">Non</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <hr class="bg-dark border-top border-dark" />
+                                                <div class="row">
+                                                    <label for="item15_bedroom6" class="col-sm-4 col-form-label">Purificateur d'air</label>
+                                                    <div class="col-sm-4">
+                                                        <div id="item15_bedroom6" class="btn-group w-100" role="group">
+                                                            <input id="item15_bedroom6_btn1" type="radio" class="btn-check" name="item15_bedroom6_btnradio" autocomplete="off"><label for="item15_bedroom6_btn1" class="btn btn-outline-primary">Oui</label>
+                                                            <input id="item15_bedroom6_btn2" type="radio" class="btn-check" name="item15_bedroom6_btnradio" autocomplete="off"><label for="item15_bedroom6_btn2" class="btn btn-outline-primary">Non</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="accordion-item">
+                                        <p class="accordion-header">
+                                            <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapse_bedroom7" aria-expanded="true" aria-controls="collapse_bedroom7" disabled>
+                                                <strong class="fs-5">Chambre n°8</strong>
+                                            </button>
+                                        </p>
+                                        <div id="collapse_bedroom7" class="accordion-collapse collapse show">
+                                            <div class="accordion-body mx-lg-5 mb-4">
+                                                <div class="row">
+                                                    <label for="item0_bedroom7" class="col-sm-4 col-form-label">Lit simple</label>
+                                                    <div class="col-sm-4">
+                                                        <div id="item0_bedroom7" class="btn-group w-100" role="group">
+                                                            <input id="item0_bedroom7_btn1" onchange="switch_item_indicator_display(0, 'bedroom7', 1)" type="radio" class="btn-check" name="item0_bedroom7_btn" autocomplete="off"><label for="item0_bedroom7_btn1" class="btn btn-outline-primary">Oui</label>
+                                                            <input id="item0_bedroom7_btn2" onchange="switch_item_indicator_display(0, 'bedroom7', 0)" type="radio" class="btn-check" name="item0_bedroom7_btn" autocomplete="off"><label for="item0_bedroom7_btn2" class="btn btn-outline-primary">Non</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div id="item0_bedroom7_indicator" class="row mt-2">
+                                                    <div class="col-sm-4"></div>
+                                                    <div class="col-sm-4">
+                                                        <p class="mb-1"><small>Précisez le nombre</small></p>
+                                                        <div class="btn-group btn-group-sm" role="group">
+                                                            <input class="btn-check" type="radio" name="item0_bedroom7_btnradio" id="item0_bedroom7_btnradio0" autocomplete="off" value="1"><label class="btn btn-outline-primary" for="item0_bedroom7_btnradio0">1</label>
+                                                            <input class="btn-check" type="radio" name="item0_bedroom7_btnradio" id="item0_bedroom7_btnradio1" autocomplete="off" value="2"><label class="btn btn-outline-primary" for="item0_bedroom7_btnradio1">2</label>
+                                                            <input class="btn-check" type="radio" name="item0_bedroom7_btnradio" id="item0_bedroom7_btnradio2" autocomplete="off" value="3"><label class="btn btn-outline-primary" for="item0_bedroom7_btnradio2">3</label>
+                                                            <input class="btn-check" type="radio" name="item0_bedroom7_btnradio" id="item0_bedroom7_btnradio3" autocomplete="off" value="4"><label class="btn btn-outline-primary" for="item0_bedroom7_btnradio3">4</label>
+                                                            <input class="btn-check" type="radio" name="item0_bedroom7_btnradio" id="item0_bedroom7_btnradio4" autocomplete="off" value="5"><label class="btn btn-outline-primary" for="item0_bedroom7_btnradio4">5</label>
+                                                            <input class="btn-check" type="radio" name="item0_bedroom7_btnradio" id="item0_bedroom7_btnradio5" autocomplete="off" value="6"><label class="btn btn-outline-primary" for="item0_bedroom7_btnradio5">6</label>
+                                                            <input class="btn-check" type="radio" name="item0_bedroom7_btnradio" id="item0_bedroom7_btnradio6" autocomplete="off" value="7"><label class="btn btn-outline-primary" for="item0_bedroom7_btnradio6">7</label>
+                                                            <input class="btn-check" type="radio" name="item0_bedroom7_btnradio" id="item0_bedroom7_btnradio7" autocomplete="off" value="8"><label class="btn btn-outline-primary" for="item0_bedroom7_btnradio7">8</label>
+                                                            <input class="btn-check" type="radio" name="item0_bedroom7_btnradio" id="item0_bedroom7_btnradio8" autocomplete="off" value="9"><label class="btn btn-outline-primary" for="item0_bedroom7_btnradio8">9</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <hr class="bg-dark border-top border-dark" />
+                                                <div class="row">
+                                                    <label for="item1_bedroom7" class="col-sm-4 col-form-label">Lit double</label>
+                                                    <div class="col-sm-4">
+                                                        <div id="item1_bedroom7" class="btn-group w-100" role="group">
+                                                            <input id="item1_bedroom7_btn1" onchange="switch_item_indicator_display(1, 'bedroom7', 1)" type="radio" class="btn-check" name="item1_bedroom7_btn" autocomplete="off"><label for="item1_bedroom7_btn1" class="btn btn-outline-primary">Oui</label>
+                                                            <input id="item1_bedroom7_btn2" onchange="switch_item_indicator_display(1, 'bedroom7', 0)" type="radio" class="btn-check" name="item1_bedroom7_btn" autocomplete="off"><label for="item1_bedroom7_btn2" class="btn btn-outline-primary">Non</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div id="item1_bedroom7_indicator" class="row mt-2">
+                                                    <div class="col-sm-4"></div>
+                                                    <div class="col-sm-4">
+                                                        <p class="mb-1"><small>Précisez le nombre</small></p>
+                                                        <div class="btn-group btn-group-sm" role="group">
+                                                            <input class="btn-check" type="radio" name="item1_bedroom7_btnradio" id="item1_bedroom7_btnradio0" autocomplete="off" value="1"><label class="btn btn-outline-primary" for="item1_bedroom7_btnradio0">1</label>
+                                                            <input class="btn-check" type="radio" name="item1_bedroom7_btnradio" id="item1_bedroom7_btnradio1" autocomplete="off" value="2"><label class="btn btn-outline-primary" for="item1_bedroom7_btnradio1">2</label>
+                                                            <input class="btn-check" type="radio" name="item1_bedroom7_btnradio" id="item1_bedroom7_btnradio2" autocomplete="off" value="3"><label class="btn btn-outline-primary" for="item1_bedroom7_btnradio2">3</label>
+                                                            <input class="btn-check" type="radio" name="item1_bedroom7_btnradio" id="item1_bedroom7_btnradio3" autocomplete="off" value="4"><label class="btn btn-outline-primary" for="item1_bedroom7_btnradio3">4</label>
+                                                            <input class="btn-check" type="radio" name="item1_bedroom7_btnradio" id="item1_bedroom7_btnradio4" autocomplete="off" value="5"><label class="btn btn-outline-primary" for="item1_bedroom7_btnradio4">5</label>
+                                                            <input class="btn-check" type="radio" name="item1_bedroom7_btnradio" id="item1_bedroom7_btnradio5" autocomplete="off" value="6"><label class="btn btn-outline-primary" for="item1_bedroom7_btnradio5">6</label>
+                                                            <input class="btn-check" type="radio" name="item1_bedroom7_btnradio" id="item1_bedroom7_btnradio6" autocomplete="off" value="7"><label class="btn btn-outline-primary" for="item1_bedroom7_btnradio6">7</label>
+                                                            <input class="btn-check" type="radio" name="item1_bedroom7_btnradio" id="item1_bedroom7_btnradio7" autocomplete="off" value="8"><label class="btn btn-outline-primary" for="item1_bedroom7_btnradio7">8</label>
+                                                            <input class="btn-check" type="radio" name="item1_bedroom7_btnradio" id="item1_bedroom7_btnradio8" autocomplete="off" value="9"><label class="btn btn-outline-primary" for="item1_bedroom7_btnradio8">9</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <hr class="bg-dark border-top border-dark" />
+                                                <div class="row">
+                                                    <label for="item2_bedroom7" class="col-sm-4 col-form-label">Lit superposé</label>
+                                                    <div class="col-sm-4">
+                                                        <div id="item2_bedroom7" class="btn-group w-100" role="group">
+                                                            <input id="item2_bedroom7_btn1" onchange="switch_item_indicator_display(2, 'bedroom7', 1)" type="radio" class="btn-check" name="item2_bedroom7_btn" autocomplete="off"><label for="item2_bedroom7_btn1" class="btn btn-outline-primary">Oui</label>
+                                                            <input id="item2_bedroom7_btn2" onchange="switch_item_indicator_display(2, 'bedroom7', 0)" type="radio" class="btn-check" name="item2_bedroom7_btn" autocomplete="off"><label for="item2_bedroom7_btn2" class="btn btn-outline-primary">Non</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div id="item2_bedroom7_indicator" class="row mt-2">
+                                                    <div class="col-sm-4"></div>
+                                                    <div class="col-sm-4">
+                                                        <p class="mb-1"><small>Précisez le nombre</small></p>
+                                                        <div class="btn-group btn-group-sm" role="group">
+                                                            <input class="btn-check" type="radio" name="item2_bedroom7_btnradio" id="item2_bedroom7_btnradio0" autocomplete="off" value="1"><label class="btn btn-outline-primary" for="item2_bedroom7_btnradio0">1</label>
+                                                            <input class="btn-check" type="radio" name="item2_bedroom7_btnradio" id="item2_bedroom7_btnradio1" autocomplete="off" value="2"><label class="btn btn-outline-primary" for="item2_bedroom7_btnradio1">2</label>
+                                                            <input class="btn-check" type="radio" name="item2_bedroom7_btnradio" id="item2_bedroom7_btnradio2" autocomplete="off" value="3"><label class="btn btn-outline-primary" for="item2_bedroom7_btnradio2">3</label>
+                                                            <input class="btn-check" type="radio" name="item2_bedroom7_btnradio" id="item2_bedroom7_btnradio3" autocomplete="off" value="4"><label class="btn btn-outline-primary" for="item2_bedroom7_btnradio3">4</label>
+                                                            <input class="btn-check" type="radio" name="item2_bedroom7_btnradio" id="item2_bedroom7_btnradio4" autocomplete="off" value="5"><label class="btn btn-outline-primary" for="item2_bedroom7_btnradio4">5</label>
+                                                            <input class="btn-check" type="radio" name="item2_bedroom7_btnradio" id="item2_bedroom7_btnradio5" autocomplete="off" value="6"><label class="btn btn-outline-primary" for="item2_bedroom7_btnradio5">6</label>
+                                                            <input class="btn-check" type="radio" name="item2_bedroom7_btnradio" id="item2_bedroom7_btnradio6" autocomplete="off" value="7"><label class="btn btn-outline-primary" for="item2_bedroom7_btnradio6">7</label>
+                                                            <input class="btn-check" type="radio" name="item2_bedroom7_btnradio" id="item2_bedroom7_btnradio7" autocomplete="off" value="8"><label class="btn btn-outline-primary" for="item2_bedroom7_btnradio7">8</label>
+                                                            <input class="btn-check" type="radio" name="item2_bedroom7_btnradio" id="item2_bedroom7_btnradio8" autocomplete="off" value="9"><label class="btn btn-outline-primary" for="item2_bedroom7_btnradio8">9</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <hr class="bg-dark border-top border-dark" />
+                                                <div class="row">
+                                                    <label for="item3_bedroom7" class="col-sm-4 col-form-label">Lit gigogne (contient 2 couchages)</label>
+                                                    <div class="col-sm-4">
+                                                        <div id="item3_bedroom7" class="btn-group w-100" role="group">
+                                                            <input id="item3_bedroom7_btn1" onchange="switch_item_indicator_display(3, 'bedroom7', 1)" type="radio" class="btn-check" name="item3_bedroom7_btn" autocomplete="off"><label for="item3_bedroom7_btn1" class="btn btn-outline-primary">Oui</label>
+                                                            <input id="item3_bedroom7_btn2" onchange="switch_item_indicator_display(3, 'bedroom7', 0)" type="radio" class="btn-check" name="item3_bedroom7_btn" autocomplete="off"><label for="item3_bedroom7_btn2" class="btn btn-outline-primary">Non</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div id="item3_bedroom7_indicator" class="row mt-2">
+                                                    <div class="col-sm-4"></div>
+                                                    <div class="col-sm-4">
+                                                        <p class="mb-1"><small>Précisez le nombre</small></p>
+                                                        <div class="btn-group btn-group-sm" role="group">
+                                                            <input class="btn-check" type="radio" name="item3_bedroom7_btnradio" id="item3_bedroom7_btnradio0" autocomplete="off" value="1"><label class="btn btn-outline-primary" for="item3_bedroom7_btnradio0">1</label>
+                                                            <input class="btn-check" type="radio" name="item3_bedroom7_btnradio" id="item3_bedroom7_btnradio1" autocomplete="off" value="2"><label class="btn btn-outline-primary" for="item3_bedroom7_btnradio1">2</label>
+                                                            <input class="btn-check" type="radio" name="item3_bedroom7_btnradio" id="item3_bedroom7_btnradio2" autocomplete="off" value="3"><label class="btn btn-outline-primary" for="item3_bedroom7_btnradio2">3</label>
+                                                            <input class="btn-check" type="radio" name="item3_bedroom7_btnradio" id="item3_bedroom7_btnradio3" autocomplete="off" value="4"><label class="btn btn-outline-primary" for="item3_bedroom7_btnradio3">4</label>
+                                                            <input class="btn-check" type="radio" name="item3_bedroom7_btnradio" id="item3_bedroom7_btnradio4" autocomplete="off" value="5"><label class="btn btn-outline-primary" for="item3_bedroom7_btnradio4">5</label>
+                                                            <input class="btn-check" type="radio" name="item3_bedroom7_btnradio" id="item3_bedroom7_btnradio5" autocomplete="off" value="6"><label class="btn btn-outline-primary" for="item3_bedroom7_btnradio5">6</label>
+                                                            <input class="btn-check" type="radio" name="item3_bedroom7_btnradio" id="item3_bedroom7_btnradio6" autocomplete="off" value="7"><label class="btn btn-outline-primary" for="item3_bedroom7_btnradio6">7</label>
+                                                            <input class="btn-check" type="radio" name="item3_bedroom7_btnradio" id="item3_bedroom7_btnradio7" autocomplete="off" value="8"><label class="btn btn-outline-primary" for="item3_bedroom7_btnradio7">8</label>
+                                                            <input class="btn-check" type="radio" name="item3_bedroom7_btnradio" id="item3_bedroom7_btnradio8" autocomplete="off" value="9"><label class="btn btn-outline-primary" for="item3_bedroom7_btnradio8">9</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <hr class="bg-dark border-top border-dark" />
+                                                <div class="row">
+                                                    <label for="item4_bedroom7" class="col-sm-4 col-form-label">Canapé-lit</label>
+                                                    <div class="col-sm-4">
+                                                        <div id="item4_bedroom7" class="btn-group w-100" role="group">
+                                                            <input id="item4_bedroom7_btn1" onchange="switch_item_indicator_display(4, 'bedroom7', 1)" type="radio" class="btn-check" name="item4_bedroom7_btn" autocomplete="off"><label for="item4_bedroom7_btn1" class="btn btn-outline-primary">Oui</label>
+                                                            <input id="item4_bedroom7_btn2" onchange="switch_item_indicator_display(4, 'bedroom7', 0)" type="radio" class="btn-check" name="item4_bedroom7_btn" autocomplete="off"><label for="item4_bedroom7_btn2" class="btn btn-outline-primary">Non</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div id="item4_bedroom7_indicator" class="row mt-2">
+                                                    <div class="col-sm-4"></div>
+                                                    <div class="col-sm-4">
+                                                        <p class="mb-1"><small>Précisez le nombre</small></p>
+                                                        <div class="btn-group btn-group-sm" role="group">
+                                                            <input class="btn-check" type="radio" name="item4_bedroom7_btnradio" id="item4_bedroom7_btnradio0" autocomplete="off" value="1"><label class="btn btn-outline-primary" for="item4_bedroom7_btnradio0">1</label>
+                                                            <input class="btn-check" type="radio" name="item4_bedroom7_btnradio" id="item4_bedroom7_btnradio1" autocomplete="off" value="2"><label class="btn btn-outline-primary" for="item4_bedroom7_btnradio1">2</label>
+                                                            <input class="btn-check" type="radio" name="item4_bedroom7_btnradio" id="item4_bedroom7_btnradio2" autocomplete="off" value="3"><label class="btn btn-outline-primary" for="item4_bedroom7_btnradio2">3</label>
+                                                            <input class="btn-check" type="radio" name="item4_bedroom7_btnradio" id="item4_bedroom7_btnradio3" autocomplete="off" value="4"><label class="btn btn-outline-primary" for="item4_bedroom7_btnradio3">4</label>
+                                                            <input class="btn-check" type="radio" name="item4_bedroom7_btnradio" id="item4_bedroom7_btnradio4" autocomplete="off" value="5"><label class="btn btn-outline-primary" for="item4_bedroom7_btnradio4">5</label>
+                                                            <input class="btn-check" type="radio" name="item4_bedroom7_btnradio" id="item4_bedroom7_btnradio5" autocomplete="off" value="6"><label class="btn btn-outline-primary" for="item4_bedroom7_btnradio5">6</label>
+                                                            <input class="btn-check" type="radio" name="item4_bedroom7_btnradio" id="item4_bedroom7_btnradio6" autocomplete="off" value="7"><label class="btn btn-outline-primary" for="item4_bedroom7_btnradio6">7</label>
+                                                            <input class="btn-check" type="radio" name="item4_bedroom7_btnradio" id="item4_bedroom7_btnradio7" autocomplete="off" value="8"><label class="btn btn-outline-primary" for="item4_bedroom7_btnradio7">8</label>
+                                                            <input class="btn-check" type="radio" name="item4_bedroom7_btnradio" id="item4_bedroom7_btnradio8" autocomplete="off" value="9"><label class="btn btn-outline-primary" for="item4_bedroom7_btnradio8">9</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <hr class="bg-dark border-top border-dark" />
+                                                <div class="row">
+                                                    <label for="item5_bedroom7" class="col-sm-4 col-form-label">Berceau</label>
+                                                    <div class="col-sm-4">
+                                                        <div id="item5_bedroom7" class="btn-group w-100" role="group">
+                                                            <input id="item5_bedroom7_btn1" onchange="switch_item_indicator_display(5, 'bedroom7', 1)" type="radio" class="btn-check" name="item5_bedroom7_btn" autocomplete="off"><label for="item5_bedroom7_btn1" class="btn btn-outline-primary">Oui</label>
+                                                            <input id="item5_bedroom7_btn2" onchange="switch_item_indicator_display(5, 'bedroom7', 0)" type="radio" class="btn-check" name="item5_bedroom7_btn" autocomplete="off"><label for="item5_bedroom7_btn2" class="btn btn-outline-primary">Non</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div id="item5_bedroom7_indicator" class="row mt-2">
+                                                    <div class="col-sm-4"></div>
+                                                    <div class="col-sm-4">
+                                                        <p class="mb-1"><small>Précisez le nombre</small></p>
+                                                        <div class="btn-group btn-group-sm" role="group">
+                                                            <input class="btn-check" type="radio" name="item5_bedroom7_btnradio" id="item5_bedroom7_btnradio0" autocomplete="off" value="1"><label class="btn btn-outline-primary" for="item5_bedroom7_btnradio0">1</label>
+                                                            <input class="btn-check" type="radio" name="item5_bedroom7_btnradio" id="item5_bedroom7_btnradio1" autocomplete="off" value="2"><label class="btn btn-outline-primary" for="item5_bedroom7_btnradio1">2</label>
+                                                            <input class="btn-check" type="radio" name="item5_bedroom7_btnradio" id="item5_bedroom7_btnradio2" autocomplete="off" value="3"><label class="btn btn-outline-primary" for="item5_bedroom7_btnradio2">3</label>
+                                                            <input class="btn-check" type="radio" name="item5_bedroom7_btnradio" id="item5_bedroom7_btnradio3" autocomplete="off" value="4"><label class="btn btn-outline-primary" for="item5_bedroom7_btnradio3">4</label>
+                                                            <input class="btn-check" type="radio" name="item5_bedroom7_btnradio" id="item5_bedroom7_btnradio4" autocomplete="off" value="5"><label class="btn btn-outline-primary" for="item5_bedroom7_btnradio4">5</label>
+                                                            <input class="btn-check" type="radio" name="item5_bedroom7_btnradio" id="item5_bedroom7_btnradio5" autocomplete="off" value="6"><label class="btn btn-outline-primary" for="item5_bedroom7_btnradio5">6</label>
+                                                            <input class="btn-check" type="radio" name="item5_bedroom7_btnradio" id="item5_bedroom7_btnradio6" autocomplete="off" value="7"><label class="btn btn-outline-primary" for="item5_bedroom7_btnradio6">7</label>
+                                                            <input class="btn-check" type="radio" name="item5_bedroom7_btnradio" id="item5_bedroom7_btnradio7" autocomplete="off" value="8"><label class="btn btn-outline-primary" for="item5_bedroom7_btnradio7">8</label>
+                                                            <input class="btn-check" type="radio" name="item5_bedroom7_btnradio" id="item5_bedroom7_btnradio8" autocomplete="off" value="9"><label class="btn btn-outline-primary" for="item5_bedroom7_btnradio8">9</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <hr class="bg-dark border-top border-dark" />
+                                                <div class="row">
+                                                    <label for="item6_bedroom7" class="col-sm-4 col-form-label">Ventilateur</label>
+                                                    <div class="col-sm-4">
+                                                        <div id="item6_bedroom7" class="btn-group w-100" role="group">
+                                                            <input id="item6_bedroom7_btn1" type="radio" class="btn-check" name="item6_bedroom7_btnradio" autocomplete="off"><label for="item6_bedroom7_btn1" class="btn btn-outline-primary">Oui</label>
+                                                            <input id="item6_bedroom7_btn2" type="radio" class="btn-check" name="item6_bedroom7_btnradio" autocomplete="off"><label for="item6_bedroom7_btn2" class="btn btn-outline-primary">Non</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <hr class="bg-dark border-top border-dark" />
+                                                <div class="row">
+                                                    <label for="item7_bedroom7" class="col-sm-4 col-form-label">Climatiseur</label>
+                                                    <div class="col-sm-4">
+                                                        <div id="item7_bedroom7" class="btn-group w-100" role="group">
+                                                            <input id="item7_bedroom7_btn1" type="radio" class="btn-check" name="item7_bedroom7_btnradio" autocomplete="off"><label for="item7_bedroom7_btn1" class="btn btn-outline-primary">Oui</label>
+                                                            <input id="item7_bedroom7_btn2" type="radio" class="btn-check" name="item7_bedroom7_btnradio" autocomplete="off"><label for="item7_bedroom7_btn2" class="btn btn-outline-primary">Non</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <hr class="bg-dark border-top border-dark" />
+                                                <div class="row">
+                                                    <label for="item8_bedroom7" class="col-sm-4 col-form-label">Armoire/penderie</label>
+                                                    <div class="col-sm-4">
+                                                        <div id="item8_bedroom7" class="btn-group w-100" role="group">
+                                                            <input id="item8_bedroom7_btn1" type="radio" class="btn-check" name="item8_bedroom7_btnradio" autocomplete="off"><label for="item8_bedroom7_btn1" class="btn btn-outline-primary">Oui</label>
+                                                            <input id="item8_bedroom7_btn2" type="radio" class="btn-check" name="item8_bedroom7_btnradio" autocomplete="off"><label for="item8_bedroom7_btn2" class="btn btn-outline-primary">Non</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <hr class="bg-dark border-top border-dark" />
+                                                <div class="row">
+                                                    <label for="item9_bedroom7" class="col-sm-4 col-form-label">Chauffage</label>
+                                                    <div class="col-sm-4">
+                                                        <div id="item9_bedroom7" class="btn-group w-100" role="group">
+                                                            <input id="item9_bedroom7_btn1" type="radio" class="btn-check" name="item9_bedroom7_btnradio" autocomplete="off"><label for="item9_bedroom7_btn1" class="btn btn-outline-primary">Oui</label>
+                                                            <input id="item9_bedroom7_btn2" type="radio" class="btn-check" name="item9_bedroom7_btnradio" autocomplete="off"><label for="item9_bedroom7_btn2" class="btn btn-outline-primary">Non</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <hr class="bg-dark border-top border-dark" />
+                                                <div class="row">
+                                                    <label for="item10_bedroom7" class="col-sm-4 col-form-label">Salle de bains privative</label>
+                                                    <div class="col-sm-4">
+                                                        <div id="item10_bedroom7" class="btn-group w-100" role="group">
+                                                            <input id="item10_bedroom7_btn1" type="radio" class="btn-check" name="item10_bedroom7_btnradio" autocomplete="off"><label for="item10_bedroom7_btn1" class="btn btn-outline-primary">Oui</label>
+                                                            <input id="item10_bedroom7_btn2" type="radio" class="btn-check" name="item10_bedroom7_btnradio" autocomplete="off"><label for="item10_bedroom7_btn2" class="btn btn-outline-primary">Non</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <hr class="bg-dark border-top border-dark" />
+                                                <div class="row">
+                                                    <label for="item11_bedroom7" class="col-sm-4 col-form-label">WC privatifs</label>
+                                                    <div class="col-sm-4">
+                                                        <div id="item11_bedroom7" class="btn-group w-100" role="group">
+                                                            <input id="item11_bedroom7_btn1" type="radio" class="btn-check" name="item11_bedroom7_btnradio" autocomplete="off"><label for="item11_bedroom7_btn1" class="btn btn-outline-primary">Oui</label>
+                                                            <input id="item11_bedroom7_btn2" type="radio" class="btn-check" name="item11_bedroom7_btnradio" autocomplete="off"><label for="item11_bedroom7_btn2" class="btn btn-outline-primary">Non</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <hr class="bg-dark border-top border-dark" />
+                                                <div class="row">
+                                                    <label for="item12_bedroom7" class="col-sm-4 col-form-label">Moustiquaire</label>
+                                                    <div class="col-sm-4">
+                                                        <div id="item12_bedroom7" class="btn-group w-100" role="group">
+                                                            <input id="item12_bedroom7_btn1" type="radio" class="btn-check" name="item12_bedroom7_btnradio" autocomplete="off"><label for="item12_bedroom7_btn1" class="btn btn-outline-primary">Oui</label>
+                                                            <input id="item12_bedroom7_btn2" type="radio" class="btn-check" name="item12_bedroom7_btnradio" autocomplete="off"><label for="item12_bedroom7_btn2" class="btn btn-outline-primary">Non</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <hr class="bg-dark border-top border-dark" />
+                                                <div class="row">
+                                                    <label for="item13_bedroom7" class="col-sm-4 col-form-label">Bureau</label>
+                                                    <div class="col-sm-4">
+                                                        <div id="item13_bedroom7" class="btn-group w-100" role="group">
+                                                            <input id="item13_bedroom7_btn1" type="radio" class="btn-check" name="item13_bedroom7_btnradio" autocomplete="off"><label for="item13_bedroom7_btn1" class="btn btn-outline-primary">Oui</label>
+                                                            <input id="item13_bedroom7_btn2" type="radio" class="btn-check" name="item13_bedroom7_btnradio" autocomplete="off"><label for="item13_bedroom7_btn2" class="btn btn-outline-primary">Non</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <hr class="bg-dark border-top border-dark" />
+                                                <div class="row">
+                                                    <label for="item14_bedroom7" class="col-sm-4 col-form-label">Prise près du lit</label>
+                                                    <div class="col-sm-4">
+                                                        <div id="item14_bedroom7" class="btn-group w-100" role="group">
+                                                            <input id="item14_bedroom7_btn1" type="radio" class="btn-check" name="item14_bedroom7_btnradio" autocomplete="off"><label for="item14_bedroom7_btn1" class="btn btn-outline-primary">Oui</label>
+                                                            <input id="item14_bedroom7_btn2" type="radio" class="btn-check" name="item14_bedroom7_btnradio" autocomplete="off"><label for="item14_bedroom7_btn2" class="btn btn-outline-primary">Non</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <hr class="bg-dark border-top border-dark" />
+                                                <div class="row">
+                                                    <label for="item15_bedroom7" class="col-sm-4 col-form-label">Purificateur d'air</label>
+                                                    <div class="col-sm-4">
+                                                        <div id="item15_bedroom7" class="btn-group w-100" role="group">
+                                                            <input id="item15_bedroom7_btn1" type="radio" class="btn-check" name="item15_bedroom7_btnradio" autocomplete="off"><label for="item15_bedroom7_btn1" class="btn btn-outline-primary">Oui</label>
+                                                            <input id="item15_bedroom7_btn2" type="radio" class="btn-check" name="item15_bedroom7_btnradio" autocomplete="off"><label for="item15_bedroom7_btn2" class="btn btn-outline-primary">Non</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="accordion-item">
+                                        <p class="accordion-header">
+                                            <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapse_bedroom8" aria-expanded="true" aria-controls="collapse_bedroom8" disabled>
+                                                <strong class="fs-5">Chambre n°9</strong>
+                                            </button>
+                                        </p>
+                                        <div id="collapse_bedroom8" class="accordion-collapse collapse show">
+                                            <div class="accordion-body mx-lg-5 mb-4">
+                                                <div class="row">
+                                                    <label for="item0_bedroom8" class="col-sm-4 col-form-label">Lit simple</label>
+                                                    <div class="col-sm-4">
+                                                        <div id="item0_bedroom8" class="btn-group w-100" role="group">
+                                                            <input id="item0_bedroom8_btn1" onchange="switch_item_indicator_display(0, 'bedroom8', 1)" type="radio" class="btn-check" name="item0_bedroom8_btn" autocomplete="off"><label for="item0_bedroom8_btn1" class="btn btn-outline-primary">Oui</label>
+                                                            <input id="item0_bedroom8_btn2" onchange="switch_item_indicator_display(0, 'bedroom8', 0)" type="radio" class="btn-check" name="item0_bedroom8_btn" autocomplete="off"><label for="item0_bedroom8_btn2" class="btn btn-outline-primary">Non</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div id="item0_bedroom8_indicator" class="row mt-2">
+                                                    <div class="col-sm-4"></div>
+                                                    <div class="col-sm-4">
+                                                        <p class="mb-1"><small>Précisez le nombre</small></p>
+                                                        <div class="btn-group btn-group-sm" role="group">
+                                                            <input class="btn-check" type="radio" name="item0_bedroom8_btnradio" id="item0_bedroom8_btnradio0" autocomplete="off" value="1"><label class="btn btn-outline-primary" for="item0_bedroom8_btnradio0">1</label>
+                                                            <input class="btn-check" type="radio" name="item0_bedroom8_btnradio" id="item0_bedroom8_btnradio1" autocomplete="off" value="2"><label class="btn btn-outline-primary" for="item0_bedroom8_btnradio1">2</label>
+                                                            <input class="btn-check" type="radio" name="item0_bedroom8_btnradio" id="item0_bedroom8_btnradio2" autocomplete="off" value="3"><label class="btn btn-outline-primary" for="item0_bedroom8_btnradio2">3</label>
+                                                            <input class="btn-check" type="radio" name="item0_bedroom8_btnradio" id="item0_bedroom8_btnradio3" autocomplete="off" value="4"><label class="btn btn-outline-primary" for="item0_bedroom8_btnradio3">4</label>
+                                                            <input class="btn-check" type="radio" name="item0_bedroom8_btnradio" id="item0_bedroom8_btnradio4" autocomplete="off" value="5"><label class="btn btn-outline-primary" for="item0_bedroom8_btnradio4">5</label>
+                                                            <input class="btn-check" type="radio" name="item0_bedroom8_btnradio" id="item0_bedroom8_btnradio5" autocomplete="off" value="6"><label class="btn btn-outline-primary" for="item0_bedroom8_btnradio5">6</label>
+                                                            <input class="btn-check" type="radio" name="item0_bedroom8_btnradio" id="item0_bedroom8_btnradio6" autocomplete="off" value="7"><label class="btn btn-outline-primary" for="item0_bedroom8_btnradio6">7</label>
+                                                            <input class="btn-check" type="radio" name="item0_bedroom8_btnradio" id="item0_bedroom8_btnradio7" autocomplete="off" value="8"><label class="btn btn-outline-primary" for="item0_bedroom8_btnradio7">8</label>
+                                                            <input class="btn-check" type="radio" name="item0_bedroom8_btnradio" id="item0_bedroom8_btnradio8" autocomplete="off" value="9"><label class="btn btn-outline-primary" for="item0_bedroom8_btnradio8">9</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <hr class="bg-dark border-top border-dark" />
+                                                <div class="row">
+                                                    <label for="item1_bedroom8" class="col-sm-4 col-form-label">Lit double</label>
+                                                    <div class="col-sm-4">
+                                                        <div id="item1_bedroom8" class="btn-group w-100" role="group">
+                                                            <input id="item1_bedroom8_btn1" onchange="switch_item_indicator_display(1, 'bedroom8', 1)" type="radio" class="btn-check" name="item1_bedroom8_btn" autocomplete="off"><label for="item1_bedroom8_btn1" class="btn btn-outline-primary">Oui</label>
+                                                            <input id="item1_bedroom8_btn2" onchange="switch_item_indicator_display(1, 'bedroom8', 0)" type="radio" class="btn-check" name="item1_bedroom8_btn" autocomplete="off"><label for="item1_bedroom8_btn2" class="btn btn-outline-primary">Non</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div id="item1_bedroom8_indicator" class="row mt-2">
+                                                    <div class="col-sm-4"></div>
+                                                    <div class="col-sm-4">
+                                                        <p class="mb-1"><small>Précisez le nombre</small></p>
+                                                        <div class="btn-group btn-group-sm" role="group">
+                                                            <input class="btn-check" type="radio" name="item1_bedroom8_btnradio" id="item1_bedroom8_btnradio0" autocomplete="off" value="1"><label class="btn btn-outline-primary" for="item1_bedroom8_btnradio0">1</label>
+                                                            <input class="btn-check" type="radio" name="item1_bedroom8_btnradio" id="item1_bedroom8_btnradio1" autocomplete="off" value="2"><label class="btn btn-outline-primary" for="item1_bedroom8_btnradio1">2</label>
+                                                            <input class="btn-check" type="radio" name="item1_bedroom8_btnradio" id="item1_bedroom8_btnradio2" autocomplete="off" value="3"><label class="btn btn-outline-primary" for="item1_bedroom8_btnradio2">3</label>
+                                                            <input class="btn-check" type="radio" name="item1_bedroom8_btnradio" id="item1_bedroom8_btnradio3" autocomplete="off" value="4"><label class="btn btn-outline-primary" for="item1_bedroom8_btnradio3">4</label>
+                                                            <input class="btn-check" type="radio" name="item1_bedroom8_btnradio" id="item1_bedroom8_btnradio4" autocomplete="off" value="5"><label class="btn btn-outline-primary" for="item1_bedroom8_btnradio4">5</label>
+                                                            <input class="btn-check" type="radio" name="item1_bedroom8_btnradio" id="item1_bedroom8_btnradio5" autocomplete="off" value="6"><label class="btn btn-outline-primary" for="item1_bedroom8_btnradio5">6</label>
+                                                            <input class="btn-check" type="radio" name="item1_bedroom8_btnradio" id="item1_bedroom8_btnradio6" autocomplete="off" value="7"><label class="btn btn-outline-primary" for="item1_bedroom8_btnradio6">7</label>
+                                                            <input class="btn-check" type="radio" name="item1_bedroom8_btnradio" id="item1_bedroom8_btnradio7" autocomplete="off" value="8"><label class="btn btn-outline-primary" for="item1_bedroom8_btnradio7">8</label>
+                                                            <input class="btn-check" type="radio" name="item1_bedroom8_btnradio" id="item1_bedroom8_btnradio8" autocomplete="off" value="9"><label class="btn btn-outline-primary" for="item1_bedroom8_btnradio8">9</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <hr class="bg-dark border-top border-dark" />
+                                                <div class="row">
+                                                    <label for="item2_bedroom8" class="col-sm-4 col-form-label">Lit superposé</label>
+                                                    <div class="col-sm-4">
+                                                        <div id="item2_bedroom8" class="btn-group w-100" role="group">
+                                                            <input id="item2_bedroom8_btn1" onchange="switch_item_indicator_display(2, 'bedroom8', 1)" type="radio" class="btn-check" name="item2_bedroom8_btn" autocomplete="off"><label for="item2_bedroom8_btn1" class="btn btn-outline-primary">Oui</label>
+                                                            <input id="item2_bedroom8_btn2" onchange="switch_item_indicator_display(2, 'bedroom8', 0)" type="radio" class="btn-check" name="item2_bedroom8_btn" autocomplete="off"><label for="item2_bedroom8_btn2" class="btn btn-outline-primary">Non</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div id="item2_bedroom8_indicator" class="row mt-2">
+                                                    <div class="col-sm-4"></div>
+                                                    <div class="col-sm-4">
+                                                        <p class="mb-1"><small>Précisez le nombre</small></p>
+                                                        <div class="btn-group btn-group-sm" role="group">
+                                                            <input class="btn-check" type="radio" name="item2_bedroom8_btnradio" id="item2_bedroom8_btnradio0" autocomplete="off" value="1"><label class="btn btn-outline-primary" for="item2_bedroom8_btnradio0">1</label>
+                                                            <input class="btn-check" type="radio" name="item2_bedroom8_btnradio" id="item2_bedroom8_btnradio1" autocomplete="off" value="2"><label class="btn btn-outline-primary" for="item2_bedroom8_btnradio1">2</label>
+                                                            <input class="btn-check" type="radio" name="item2_bedroom8_btnradio" id="item2_bedroom8_btnradio2" autocomplete="off" value="3"><label class="btn btn-outline-primary" for="item2_bedroom8_btnradio2">3</label>
+                                                            <input class="btn-check" type="radio" name="item2_bedroom8_btnradio" id="item2_bedroom8_btnradio3" autocomplete="off" value="4"><label class="btn btn-outline-primary" for="item2_bedroom8_btnradio3">4</label>
+                                                            <input class="btn-check" type="radio" name="item2_bedroom8_btnradio" id="item2_bedroom8_btnradio4" autocomplete="off" value="5"><label class="btn btn-outline-primary" for="item2_bedroom8_btnradio4">5</label>
+                                                            <input class="btn-check" type="radio" name="item2_bedroom8_btnradio" id="item2_bedroom8_btnradio5" autocomplete="off" value="6"><label class="btn btn-outline-primary" for="item2_bedroom8_btnradio5">6</label>
+                                                            <input class="btn-check" type="radio" name="item2_bedroom8_btnradio" id="item2_bedroom8_btnradio6" autocomplete="off" value="7"><label class="btn btn-outline-primary" for="item2_bedroom8_btnradio6">7</label>
+                                                            <input class="btn-check" type="radio" name="item2_bedroom8_btnradio" id="item2_bedroom8_btnradio7" autocomplete="off" value="8"><label class="btn btn-outline-primary" for="item2_bedroom8_btnradio7">8</label>
+                                                            <input class="btn-check" type="radio" name="item2_bedroom8_btnradio" id="item2_bedroom8_btnradio8" autocomplete="off" value="9"><label class="btn btn-outline-primary" for="item2_bedroom8_btnradio8">9</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <hr class="bg-dark border-top border-dark" />
+                                                <div class="row">
+                                                    <label for="item3_bedroom8" class="col-sm-4 col-form-label">Lit gigogne (contient 2 couchages)</label>
+                                                    <div class="col-sm-4">
+                                                        <div id="item3_bedroom8" class="btn-group w-100" role="group">
+                                                            <input id="item3_bedroom8_btn1" onchange="switch_item_indicator_display(3, 'bedroom8', 1)" type="radio" class="btn-check" name="item3_bedroom8_btn" autocomplete="off"><label for="item3_bedroom8_btn1" class="btn btn-outline-primary">Oui</label>
+                                                            <input id="item3_bedroom8_btn2" onchange="switch_item_indicator_display(3, 'bedroom8', 0)" type="radio" class="btn-check" name="item3_bedroom8_btn" autocomplete="off"><label for="item3_bedroom8_btn2" class="btn btn-outline-primary">Non</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div id="item3_bedroom8_indicator" class="row mt-2">
+                                                    <div class="col-sm-4"></div>
+                                                    <div class="col-sm-4">
+                                                        <p class="mb-1"><small>Précisez le nombre</small></p>
+                                                        <div class="btn-group btn-group-sm" role="group">
+                                                            <input class="btn-check" type="radio" name="item3_bedroom8_btnradio" id="item3_bedroom8_btnradio0" autocomplete="off" value="1"><label class="btn btn-outline-primary" for="item3_bedroom8_btnradio0">1</label>
+                                                            <input class="btn-check" type="radio" name="item3_bedroom8_btnradio" id="item3_bedroom8_btnradio1" autocomplete="off" value="2"><label class="btn btn-outline-primary" for="item3_bedroom8_btnradio1">2</label>
+                                                            <input class="btn-check" type="radio" name="item3_bedroom8_btnradio" id="item3_bedroom8_btnradio2" autocomplete="off" value="3"><label class="btn btn-outline-primary" for="item3_bedroom8_btnradio2">3</label>
+                                                            <input class="btn-check" type="radio" name="item3_bedroom8_btnradio" id="item3_bedroom8_btnradio3" autocomplete="off" value="4"><label class="btn btn-outline-primary" for="item3_bedroom8_btnradio3">4</label>
+                                                            <input class="btn-check" type="radio" name="item3_bedroom8_btnradio" id="item3_bedroom8_btnradio4" autocomplete="off" value="5"><label class="btn btn-outline-primary" for="item3_bedroom8_btnradio4">5</label>
+                                                            <input class="btn-check" type="radio" name="item3_bedroom8_btnradio" id="item3_bedroom8_btnradio5" autocomplete="off" value="6"><label class="btn btn-outline-primary" for="item3_bedroom8_btnradio5">6</label>
+                                                            <input class="btn-check" type="radio" name="item3_bedroom8_btnradio" id="item3_bedroom8_btnradio6" autocomplete="off" value="7"><label class="btn btn-outline-primary" for="item3_bedroom8_btnradio6">7</label>
+                                                            <input class="btn-check" type="radio" name="item3_bedroom8_btnradio" id="item3_bedroom8_btnradio7" autocomplete="off" value="8"><label class="btn btn-outline-primary" for="item3_bedroom8_btnradio7">8</label>
+                                                            <input class="btn-check" type="radio" name="item3_bedroom8_btnradio" id="item3_bedroom8_btnradio8" autocomplete="off" value="9"><label class="btn btn-outline-primary" for="item3_bedroom8_btnradio8">9</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <hr class="bg-dark border-top border-dark" />
+                                                <div class="row">
+                                                    <label for="item4_bedroom8" class="col-sm-4 col-form-label">Canapé-lit</label>
+                                                    <div class="col-sm-4">
+                                                        <div id="item4_bedroom8" class="btn-group w-100" role="group">
+                                                            <input id="item4_bedroom8_btn1" onchange="switch_item_indicator_display(4, 'bedroom8', 1)" type="radio" class="btn-check" name="item4_bedroom8_btn" autocomplete="off"><label for="item4_bedroom8_btn1" class="btn btn-outline-primary">Oui</label>
+                                                            <input id="item4_bedroom8_btn2" onchange="switch_item_indicator_display(4, 'bedroom8', 0)" type="radio" class="btn-check" name="item4_bedroom8_btn" autocomplete="off"><label for="item4_bedroom8_btn2" class="btn btn-outline-primary">Non</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div id="item4_bedroom8_indicator" class="row mt-2">
+                                                    <div class="col-sm-4"></div>
+                                                    <div class="col-sm-4">
+                                                        <p class="mb-1"><small>Précisez le nombre</small></p>
+                                                        <div class="btn-group btn-group-sm" role="group">
+                                                            <input class="btn-check" type="radio" name="item4_bedroom8_btnradio" id="item4_bedroom8_btnradio0" autocomplete="off" value="1"><label class="btn btn-outline-primary" for="item4_bedroom8_btnradio0">1</label>
+                                                            <input class="btn-check" type="radio" name="item4_bedroom8_btnradio" id="item4_bedroom8_btnradio1" autocomplete="off" value="2"><label class="btn btn-outline-primary" for="item4_bedroom8_btnradio1">2</label>
+                                                            <input class="btn-check" type="radio" name="item4_bedroom8_btnradio" id="item4_bedroom8_btnradio2" autocomplete="off" value="3"><label class="btn btn-outline-primary" for="item4_bedroom8_btnradio2">3</label>
+                                                            <input class="btn-check" type="radio" name="item4_bedroom8_btnradio" id="item4_bedroom8_btnradio3" autocomplete="off" value="4"><label class="btn btn-outline-primary" for="item4_bedroom8_btnradio3">4</label>
+                                                            <input class="btn-check" type="radio" name="item4_bedroom8_btnradio" id="item4_bedroom8_btnradio4" autocomplete="off" value="5"><label class="btn btn-outline-primary" for="item4_bedroom8_btnradio4">5</label>
+                                                            <input class="btn-check" type="radio" name="item4_bedroom8_btnradio" id="item4_bedroom8_btnradio5" autocomplete="off" value="6"><label class="btn btn-outline-primary" for="item4_bedroom8_btnradio5">6</label>
+                                                            <input class="btn-check" type="radio" name="item4_bedroom8_btnradio" id="item4_bedroom8_btnradio6" autocomplete="off" value="7"><label class="btn btn-outline-primary" for="item4_bedroom8_btnradio6">7</label>
+                                                            <input class="btn-check" type="radio" name="item4_bedroom8_btnradio" id="item4_bedroom8_btnradio7" autocomplete="off" value="8"><label class="btn btn-outline-primary" for="item4_bedroom8_btnradio7">8</label>
+                                                            <input class="btn-check" type="radio" name="item4_bedroom8_btnradio" id="item4_bedroom8_btnradio8" autocomplete="off" value="9"><label class="btn btn-outline-primary" for="item4_bedroom8_btnradio8">9</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <hr class="bg-dark border-top border-dark" />
+                                                <div class="row">
+                                                    <label for="item5_bedroom8" class="col-sm-4 col-form-label">Berceau</label>
+                                                    <div class="col-sm-4">
+                                                        <div id="item5_bedroom8" class="btn-group w-100" role="group">
+                                                            <input id="item5_bedroom8_btn1" onchange="switch_item_indicator_display(5, 'bedroom8', 1)" type="radio" class="btn-check" name="item5_bedroom8_btn" autocomplete="off"><label for="item5_bedroom8_btn1" class="btn btn-outline-primary">Oui</label>
+                                                            <input id="item5_bedroom8_btn2" onchange="switch_item_indicator_display(5, 'bedroom8', 0)" type="radio" class="btn-check" name="item5_bedroom8_btn" autocomplete="off"><label for="item5_bedroom8_btn2" class="btn btn-outline-primary">Non</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div id="item5_bedroom8_indicator" class="row mt-2">
+                                                    <div class="col-sm-4"></div>
+                                                    <div class="col-sm-4">
+                                                        <p class="mb-1"><small>Précisez le nombre</small></p>
+                                                        <div class="btn-group btn-group-sm" role="group">
+                                                            <input class="btn-check" type="radio" name="item5_bedroom8_btnradio" id="item5_bedroom8_btnradio0" autocomplete="off" value="1"><label class="btn btn-outline-primary" for="item5_bedroom8_btnradio0">1</label>
+                                                            <input class="btn-check" type="radio" name="item5_bedroom8_btnradio" id="item5_bedroom8_btnradio1" autocomplete="off" value="2"><label class="btn btn-outline-primary" for="item5_bedroom8_btnradio1">2</label>
+                                                            <input class="btn-check" type="radio" name="item5_bedroom8_btnradio" id="item5_bedroom8_btnradio2" autocomplete="off" value="3"><label class="btn btn-outline-primary" for="item5_bedroom8_btnradio2">3</label>
+                                                            <input class="btn-check" type="radio" name="item5_bedroom8_btnradio" id="item5_bedroom8_btnradio3" autocomplete="off" value="4"><label class="btn btn-outline-primary" for="item5_bedroom8_btnradio3">4</label>
+                                                            <input class="btn-check" type="radio" name="item5_bedroom8_btnradio" id="item5_bedroom8_btnradio4" autocomplete="off" value="5"><label class="btn btn-outline-primary" for="item5_bedroom8_btnradio4">5</label>
+                                                            <input class="btn-check" type="radio" name="item5_bedroom8_btnradio" id="item5_bedroom8_btnradio5" autocomplete="off" value="6"><label class="btn btn-outline-primary" for="item5_bedroom8_btnradio5">6</label>
+                                                            <input class="btn-check" type="radio" name="item5_bedroom8_btnradio" id="item5_bedroom8_btnradio6" autocomplete="off" value="7"><label class="btn btn-outline-primary" for="item5_bedroom8_btnradio6">7</label>
+                                                            <input class="btn-check" type="radio" name="item5_bedroom8_btnradio" id="item5_bedroom8_btnradio7" autocomplete="off" value="8"><label class="btn btn-outline-primary" for="item5_bedroom8_btnradio7">8</label>
+                                                            <input class="btn-check" type="radio" name="item5_bedroom8_btnradio" id="item5_bedroom8_btnradio8" autocomplete="off" value="9"><label class="btn btn-outline-primary" for="item5_bedroom8_btnradio8">9</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <hr class="bg-dark border-top border-dark" />
+                                                <div class="row">
+                                                    <label for="item6_bedroom8" class="col-sm-4 col-form-label">Ventilateur</label>
+                                                    <div class="col-sm-4">
+                                                        <div id="item6_bedroom8" class="btn-group w-100" role="group">
+                                                            <input id="item6_bedroom8_btn1" type="radio" class="btn-check" name="item6_bedroom8_btnradio" autocomplete="off"><label for="item6_bedroom8_btn1" class="btn btn-outline-primary">Oui</label>
+                                                            <input id="item6_bedroom8_btn2" type="radio" class="btn-check" name="item6_bedroom8_btnradio" autocomplete="off"><label for="item6_bedroom8_btn2" class="btn btn-outline-primary">Non</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <hr class="bg-dark border-top border-dark" />
+                                                <div class="row">
+                                                    <label for="item7_bedroom8" class="col-sm-4 col-form-label">Climatiseur</label>
+                                                    <div class="col-sm-4">
+                                                        <div id="item7_bedroom8" class="btn-group w-100" role="group">
+                                                            <input id="item7_bedroom8_btn1" type="radio" class="btn-check" name="item7_bedroom8_btnradio" autocomplete="off"><label for="item7_bedroom8_btn1" class="btn btn-outline-primary">Oui</label>
+                                                            <input id="item7_bedroom8_btn2" type="radio" class="btn-check" name="item7_bedroom8_btnradio" autocomplete="off"><label for="item7_bedroom8_btn2" class="btn btn-outline-primary">Non</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <hr class="bg-dark border-top border-dark" />
+                                                <div class="row">
+                                                    <label for="item8_bedroom8" class="col-sm-4 col-form-label">Armoire/penderie</label>
+                                                    <div class="col-sm-4">
+                                                        <div id="item8_bedroom8" class="btn-group w-100" role="group">
+                                                            <input id="item8_bedroom8_btn1" type="radio" class="btn-check" name="item8_bedroom8_btnradio" autocomplete="off"><label for="item8_bedroom8_btn1" class="btn btn-outline-primary">Oui</label>
+                                                            <input id="item8_bedroom8_btn2" type="radio" class="btn-check" name="item8_bedroom8_btnradio" autocomplete="off"><label for="item8_bedroom8_btn2" class="btn btn-outline-primary">Non</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <hr class="bg-dark border-top border-dark" />
+                                                <div class="row">
+                                                    <label for="item9_bedroom8" class="col-sm-4 col-form-label">Chauffage</label>
+                                                    <div class="col-sm-4">
+                                                        <div id="item9_bedroom8" class="btn-group w-100" role="group">
+                                                            <input id="item9_bedroom8_btn1" type="radio" class="btn-check" name="item9_bedroom8_btnradio" autocomplete="off"><label for="item9_bedroom8_btn1" class="btn btn-outline-primary">Oui</label>
+                                                            <input id="item9_bedroom8_btn2" type="radio" class="btn-check" name="item9_bedroom8_btnradio" autocomplete="off"><label for="item9_bedroom8_btn2" class="btn btn-outline-primary">Non</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <hr class="bg-dark border-top border-dark" />
+                                                <div class="row">
+                                                    <label for="item10_bedroom8" class="col-sm-4 col-form-label">Salle de bains privative</label>
+                                                    <div class="col-sm-4">
+                                                        <div id="item10_bedroom8" class="btn-group w-100" role="group">
+                                                            <input id="item10_bedroom8_btn1" type="radio" class="btn-check" name="item10_bedroom8_btnradio" autocomplete="off"><label for="item10_bedroom8_btn1" class="btn btn-outline-primary">Oui</label>
+                                                            <input id="item10_bedroom8_btn2" type="radio" class="btn-check" name="item10_bedroom8_btnradio" autocomplete="off"><label for="item10_bedroom8_btn2" class="btn btn-outline-primary">Non</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <hr class="bg-dark border-top border-dark" />
+                                                <div class="row">
+                                                    <label for="item11_bedroom8" class="col-sm-4 col-form-label">WC privatifs</label>
+                                                    <div class="col-sm-4">
+                                                        <div id="item11_bedroom8" class="btn-group w-100" role="group">
+                                                            <input id="item11_bedroom8_btn1" type="radio" class="btn-check" name="item11_bedroom8_btnradio" autocomplete="off"><label for="item11_bedroom8_btn1" class="btn btn-outline-primary">Oui</label>
+                                                            <input id="item11_bedroom8_btn2" type="radio" class="btn-check" name="item11_bedroom8_btnradio" autocomplete="off"><label for="item11_bedroom8_btn2" class="btn btn-outline-primary">Non</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <hr class="bg-dark border-top border-dark" />
+                                                <div class="row">
+                                                    <label for="item12_bedroom8" class="col-sm-4 col-form-label">Moustiquaire</label>
+                                                    <div class="col-sm-4">
+                                                        <div id="item12_bedroom8" class="btn-group w-100" role="group">
+                                                            <input id="item12_bedroom8_btn1" type="radio" class="btn-check" name="item12_bedroom8_btnradio" autocomplete="off"><label for="item12_bedroom8_btn1" class="btn btn-outline-primary">Oui</label>
+                                                            <input id="item12_bedroom8_btn2" type="radio" class="btn-check" name="item12_bedroom8_btnradio" autocomplete="off"><label for="item12_bedroom8_btn2" class="btn btn-outline-primary">Non</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <hr class="bg-dark border-top border-dark" />
+                                                <div class="row">
+                                                    <label for="item13_bedroom8" class="col-sm-4 col-form-label">Bureau</label>
+                                                    <div class="col-sm-4">
+                                                        <div id="item13_bedroom8" class="btn-group w-100" role="group">
+                                                            <input id="item13_bedroom8_btn1" type="radio" class="btn-check" name="item13_bedroom8_btnradio" autocomplete="off"><label for="item13_bedroom8_btn1" class="btn btn-outline-primary">Oui</label>
+                                                            <input id="item13_bedroom8_btn2" type="radio" class="btn-check" name="item13_bedroom8_btnradio" autocomplete="off"><label for="item13_bedroom8_btn2" class="btn btn-outline-primary">Non</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <hr class="bg-dark border-top border-dark" />
+                                                <div class="row">
+                                                    <label for="item14_bedroom8" class="col-sm-4 col-form-label">Prise près du lit</label>
+                                                    <div class="col-sm-4">
+                                                        <div id="item14_bedroom8" class="btn-group w-100" role="group">
+                                                            <input id="item14_bedroom8_btn1" type="radio" class="btn-check" name="item14_bedroom8_btnradio" autocomplete="off"><label for="item14_bedroom8_btn1" class="btn btn-outline-primary">Oui</label>
+                                                            <input id="item14_bedroom8_btn2" type="radio" class="btn-check" name="item14_bedroom8_btnradio" autocomplete="off"><label for="item14_bedroom8_btn2" class="btn btn-outline-primary">Non</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <hr class="bg-dark border-top border-dark" />
+                                                <div class="row">
+                                                    <label for="item15_bedroom8" class="col-sm-4 col-form-label">Purificateur d'air</label>
+                                                    <div class="col-sm-4">
+                                                        <div id="item15_bedroom8" class="btn-group w-100" role="group">
+                                                            <input id="item15_bedroom8_btn1" type="radio" class="btn-check" name="item15_bedroom8_btnradio" autocomplete="off"><label for="item15_bedroom8_btn1" class="btn btn-outline-primary">Oui</label>
+                                                            <input id="item15_bedroom8_btn2" type="radio" class="btn-check" name="item15_bedroom8_btnradio" autocomplete="off"><label for="item15_bedroom8_btn2" class="btn btn-outline-primary">Non</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                </div>
+
+                                <div id="kitchen_accordion" class="accordion mx-lg-5 mt-5 mb-3">
+
+                                    <div class="accordion-item">
+                                        <p class="accordion-header">
+                                            <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapse_kitchen0" aria-expanded="true" aria-controls="collapse_kitchen0" disabled>
+                                                <strong class="fs-5">Cuisine n°1</strong>
+                                            </button>
+                                        </p>
+                                        <div id="collapse_kitchen0" class="accordion-collapse collapse show">
+                                            <div class="accordion-body mx-lg-5 mb-4">
+                                                <div class="row">
+                                                    <label for="item0_kitchen0" class="col-sm-4 col-form-label">Table à manger</label>
+                                                    <div class="col-sm-4">
+                                                        <div id="item0_kitchen0" class="btn-group w-100" role="group">
+                                                            <input id="item0_kitchen0_btn1" type="radio" class="btn-check" name="btnradio0_kitchen0" autocomplete="off"><label for="item0_kitchen0_btn1" class="btn btn-outline-primary">Oui</label>
+                                                            <input id="item0_kitchen0_btn2" type="radio" class="btn-check" name="btnradio0_kitchen0" autocomplete="off"><label for="item0_kitchen0_btn2" class="btn btn-outline-primary">Non</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <hr class="bg-dark border-top border-dark" />
+                                                <div class="row">
+                                                    <label for="item1_kitchen0" class="col-sm-4 col-form-label">Verres à vin</label>
+                                                    <div class="col-sm-4">
+                                                        <div id="item1_kitchen0" class="btn-group w-100" role="group">
+                                                            <input id="item1_kitchen0_btn1" type="radio" class="btn-check" name="btnradio1_kitchen0" autocomplete="off"><label for="item1_kitchen0_btn1" class="btn btn-outline-primary">Oui</label>
+                                                            <input id="item1_kitchen0_btn2" type="radio" class="btn-check" name="btnradio1_kitchen0" autocomplete="off"><label for="item1_kitchen0_btn2" class="btn btn-outline-primary">Non</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <hr class="bg-dark border-top border-dark" />
+                                                <div class="row">
+                                                    <label for="item2_kitchen0" class="col-sm-4 col-form-label">Four</label>
+                                                    <div class="col-sm-4">
+                                                        <div id="item2_kitchen0" class="btn-group w-100" role="group">
+                                                            <input id="item2_kitchen0_btn1" type="radio" class="btn-check" name="btnradio2_kitchen0" autocomplete="off"><label for="item2_kitchen0_btn1" class="btn btn-outline-primary">Oui</label>
+                                                            <input id="item2_kitchen0_btn2" type="radio" class="btn-check" name="btnradio2_kitchen0" autocomplete="off"><label for="item2_kitchen0_btn2" class="btn btn-outline-primary">Non</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <hr class="bg-dark border-top border-dark" />
+                                                <div class="row">
+                                                    <label for="item3_kitchen0" class="col-sm-4 col-form-label">Plaque de cuisson</label>
+                                                    <div class="col-sm-4">
+                                                        <div id="item3_kitchen0" class="btn-group w-100" role="group">
+                                                            <input id="item3_kitchen0_btn1" type="radio" class="btn-check" name="btnradio3_kitchen0" autocomplete="off"><label for="item3_kitchen0_btn1" class="btn btn-outline-primary">Oui</label>
+                                                            <input id="item3_kitchen0_btn2" type="radio" class="btn-check" name="btnradio3_kitchen0" autocomplete="off"><label for="item3_kitchen0_btn2" class="btn btn-outline-primary">Non</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <hr class="bg-dark border-top border-dark" />
+                                                <div class="row">
+                                                    <label for="item4_kitchen0" class="col-sm-4 col-form-label">Grille-pain</label>
+                                                    <div class="col-sm-4">
+                                                        <div id="item4_kitchen0" class="btn-group w-100" role="group">
+                                                            <input id="item4_kitchen0_btn1" type="radio" class="btn-check" name="btnradio4_kitchen0" autocomplete="off"><label for="item4_kitchen0_btn1" class="btn btn-outline-primary">Oui</label>
+                                                            <input id="item4_kitchen0_btn2" type="radio" class="btn-check" name="btnradio4_kitchen0" autocomplete="off"><label for="item4_kitchen0_btn2" class="btn btn-outline-primary">Non</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <hr class="bg-dark border-top border-dark" />
+                                                <div class="row">
+                                                    <label for="item5_kitchen0" class="col-sm-4 col-form-label">Lave-vaisselle</label>
+                                                    <div class="col-sm-4">
+                                                        <div id="item5_kitchen0" class="btn-group w-100" role="group">
+                                                            <input id="item5_kitchen0_btn1" type="radio" class="btn-check" name="btnradio5_kitchen0" autocomplete="off"><label for="item5_kitchen0_btn1" class="btn btn-outline-primary">Oui</label>
+                                                            <input id="item5_kitchen0_btn2" type="radio" class="btn-check" name="btnradio5_kitchen0" autocomplete="off"><label for="item5_kitchen0_btn2" class="btn btn-outline-primary">Non</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <hr class="bg-dark border-top border-dark" />
+                                                <div class="row">
+                                                    <label for="item6_kitchen0" class="col-sm-4 col-form-label">Bouilloire électrique</label>
+                                                    <div class="col-sm-4">
+                                                        <div id="item6_kitchen0" class="btn-group w-100" role="group">
+                                                            <input id="item6_kitchen0_btn1" type="radio" class="btn-check" name="btnradio6_kitchen0" autocomplete="off"><label for="item6_kitchen0_btn1" class="btn btn-outline-primary">Oui</label>
+                                                            <input id="item6_kitchen0_btn2" type="radio" class="btn-check" name="btnradio6_kitchen0" autocomplete="off"><label for="item6_kitchen0_btn2" class="btn btn-outline-primary">Non</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <hr class="bg-dark border-top border-dark" />
+                                                <div class="row">
+                                                    <label for="item7_kitchen0" class="col-sm-4 col-form-label">Minibar</label>
+                                                    <div class="col-sm-4">
+                                                        <div id="item7_kitchen0" class="btn-group w-100" role="group">
+                                                            <input id="item7_kitchen0_btn1" type="radio" class="btn-check" name="btnradio7_kitchen0" autocomplete="off"><label for="item7_kitchen0_btn1" class="btn btn-outline-primary">Oui</label>
+                                                            <input id="item7_kitchen0_btn2" type="radio" class="btn-check" name="btnradio7_kitchen0" autocomplete="off"><label for="item7_kitchen0_btn2" class="btn btn-outline-primary">Non</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <hr class="bg-dark border-top border-dark" />
+                                                <div class="row">
+                                                    <label for="item8_kitchen0" class="col-sm-4 col-form-label">Ustensiles de cuisine</label>
+                                                    <div class="col-sm-4">
+                                                        <div id="item8_kitchen0" class="btn-group w-100" role="group">
+                                                            <input id="item8_kitchen0_btn1" type="radio" class="btn-check" name="btnradio8_kitchen0" autocomplete="off"><label for="item8_kitchen0_btn1" class="btn btn-outline-primary">Oui</label>
+                                                            <input id="item8_kitchen0_btn2" type="radio" class="btn-check" name="btnradio8_kitchen0" autocomplete="off"><label for="item8_kitchen0_btn2" class="btn btn-outline-primary">Non</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <hr class="bg-dark border-top border-dark" />
+                                                <div class="row">
+                                                    <label for="item9_kitchen0" class="col-sm-4 col-form-label">Micro-ondes</label>
+                                                    <div class="col-sm-4">
+                                                        <div id="item9_kitchen0" class="btn-group w-100" role="group">
+                                                            <input id="item9_kitchen0_btn1" type="radio" class="btn-check" name="btnradio9_kitchen0" autocomplete="off"><label for="item9_kitchen0_btn1" class="btn btn-outline-primary">Oui</label>
+                                                            <input id="item9_kitchen0_btn2" type="radio" class="btn-check" name="btnradio9_kitchen0" autocomplete="off"><label for="item9_kitchen0_btn2" class="btn btn-outline-primary">Non</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <hr class="bg-dark border-top border-dark" />
+                                                <div class="row">
+                                                    <label for="item10_kitchen0" class="col-sm-4 col-form-label">Réfrigérateur</label>
+                                                    <div class="col-sm-4">
+                                                        <div id="item10_kitchen0" class="btn-group w-100" role="group">
+                                                            <input id="item10_kitchen0_btn1" type="radio" class="btn-check" name="btnradio10_kitchen0" autocomplete="off"><label for="item10_kitchen0_btn1" class="btn btn-outline-primary">Oui</label>
+                                                            <input id="item10_kitchen0_btn2" type="radio" class="btn-check" name="btnradio10_kitchen0" autocomplete="off"><label for="item10_kitchen0_btn2" class="btn btn-outline-primary">Non</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <hr class="bg-dark border-top border-dark" />
+                                                <div class="row">
+                                                    <label for="item11_kitchen0" class="col-sm-4 col-form-label">Machine à café</label>
+                                                    <div class="col-sm-4">
+                                                        <div id="item11_kitchen0" class="btn-group w-100" role="group">
+                                                            <input id="item11_kitchen0_btn1" type="radio" class="btn-check" name="btnradio11_kitchen0" autocomplete="off"><label for="item11_kitchen0_btn1" class="btn btn-outline-primary">Oui</label>
+                                                            <input id="item11_kitchen0_btn2" type="radio" class="btn-check" name="btnradio11_kitchen0" autocomplete="off"><label for="item11_kitchen0_btn2" class="btn btn-outline-primary">Non</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <hr class="bg-dark border-top border-dark" />
+                                                <div class="row">
+                                                    <label for="item12_kitchen0" class="col-sm-4 col-form-label">Chaise haute pour enfants</label>
+                                                    <div class="col-sm-4">
+                                                        <div id="item12_kitchen0" class="btn-group w-100" role="group">
+                                                            <input id="item12_kitchen0_btn1" type="radio" class="btn-check" name="btnradio12_kitchen0" autocomplete="off"><label for="item12_kitchen0_btn1" class="btn btn-outline-primary">Oui</label>
+                                                            <input id="item12_kitchen0_btn2" type="radio" class="btn-check" name="btnradio12_kitchen0" autocomplete="off"><label for="item12_kitchen0_btn2" class="btn btn-outline-primary">Non</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="accordion-item">
+                                        <p class="accordion-header">
+                                            <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapse_kitchen1" aria-expanded="true" aria-controls="collapse_kitchen1" disabled>
+                                                <strong class="fs-5">Cuisine n°2</strong>
+                                            </button>
+                                        </p>
+                                        <div id="collapse_kitchen1" class="accordion-collapse collapse show">
+                                            <div class="accordion-body mx-lg-5 mb-4">
+                                                <div class="row">
+                                                    <label for="item0_kitchen1" class="col-sm-4 col-form-label">Table à manger</label>
+                                                    <div class="col-sm-4">
+                                                        <div id="item0_kitchen1" class="btn-group w-100" role="group">
+                                                            <input id="item0_kitchen1_btn1" type="radio" class="btn-check" name="btnradio0_kitchen1" autocomplete="off"><label for="item0_kitchen1_btn1" class="btn btn-outline-primary">Oui</label>
+                                                            <input id="item0_kitchen1_btn2" type="radio" class="btn-check" name="btnradio0_kitchen1" autocomplete="off"><label for="item0_kitchen1_btn2" class="btn btn-outline-primary">Non</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <hr class="bg-dark border-top border-dark" />
+                                                <div class="row">
+                                                    <label for="item1_kitchen1" class="col-sm-4 col-form-label">Verres à vin</label>
+                                                    <div class="col-sm-4">
+                                                        <div id="item1_kitchen1" class="btn-group w-100" role="group">
+                                                            <input id="item1_kitchen1_btn1" type="radio" class="btn-check" name="btnradio1_kitchen1" autocomplete="off"><label for="item1_kitchen1_btn1" class="btn btn-outline-primary">Oui</label>
+                                                            <input id="item1_kitchen1_btn2" type="radio" class="btn-check" name="btnradio1_kitchen1" autocomplete="off"><label for="item1_kitchen1_btn2" class="btn btn-outline-primary">Non</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <hr class="bg-dark border-top border-dark" />
+                                                <div class="row">
+                                                    <label for="item2_kitchen1" class="col-sm-4 col-form-label">Four</label>
+                                                    <div class="col-sm-4">
+                                                        <div id="item2_kitchen1" class="btn-group w-100" role="group">
+                                                            <input id="item2_kitchen1_btn1" type="radio" class="btn-check" name="btnradio2_kitchen1" autocomplete="off"><label for="item2_kitchen1_btn1" class="btn btn-outline-primary">Oui</label>
+                                                            <input id="item2_kitchen1_btn2" type="radio" class="btn-check" name="btnradio2_kitchen1" autocomplete="off"><label for="item2_kitchen1_btn2" class="btn btn-outline-primary">Non</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <hr class="bg-dark border-top border-dark" />
+                                                <div class="row">
+                                                    <label for="item3_kitchen1" class="col-sm-4 col-form-label">Plaque de cuisson</label>
+                                                    <div class="col-sm-4">
+                                                        <div id="item3_kitchen1" class="btn-group w-100" role="group">
+                                                            <input id="item3_kitchen1_btn1" type="radio" class="btn-check" name="btnradio3_kitchen1" autocomplete="off"><label for="item3_kitchen1_btn1" class="btn btn-outline-primary">Oui</label>
+                                                            <input id="item3_kitchen1_btn2" type="radio" class="btn-check" name="btnradio3_kitchen1" autocomplete="off"><label for="item3_kitchen1_btn2" class="btn btn-outline-primary">Non</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <hr class="bg-dark border-top border-dark" />
+                                                <div class="row">
+                                                    <label for="item4_kitchen1" class="col-sm-4 col-form-label">Grille-pain</label>
+                                                    <div class="col-sm-4">
+                                                        <div id="item4_kitchen1" class="btn-group w-100" role="group">
+                                                            <input id="item4_kitchen1_btn1" type="radio" class="btn-check" name="btnradio4_kitchen1" autocomplete="off"><label for="item4_kitchen1_btn1" class="btn btn-outline-primary">Oui</label>
+                                                            <input id="item4_kitchen1_btn2" type="radio" class="btn-check" name="btnradio4_kitchen1" autocomplete="off"><label for="item4_kitchen1_btn2" class="btn btn-outline-primary">Non</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <hr class="bg-dark border-top border-dark" />
+                                                <div class="row">
+                                                    <label for="item5_kitchen1" class="col-sm-4 col-form-label">Lave-vaisselle</label>
+                                                    <div class="col-sm-4">
+                                                        <div id="item5_kitchen1" class="btn-group w-100" role="group">
+                                                            <input id="item5_kitchen1_btn1" type="radio" class="btn-check" name="btnradio5_kitchen1" autocomplete="off"><label for="item5_kitchen1_btn1" class="btn btn-outline-primary">Oui</label>
+                                                            <input id="item5_kitchen1_btn2" type="radio" class="btn-check" name="btnradio5_kitchen1" autocomplete="off"><label for="item5_kitchen1_btn2" class="btn btn-outline-primary">Non</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <hr class="bg-dark border-top border-dark" />
+                                                <div class="row">
+                                                    <label for="item6_kitchen1" class="col-sm-4 col-form-label">Bouilloire électrique</label>
+                                                    <div class="col-sm-4">
+                                                        <div id="item6_kitchen1" class="btn-group w-100" role="group">
+                                                            <input id="item6_kitchen1_btn1" type="radio" class="btn-check" name="btnradio6_kitchen1" autocomplete="off"><label for="item6_kitchen1_btn1" class="btn btn-outline-primary">Oui</label>
+                                                            <input id="item6_kitchen1_btn2" type="radio" class="btn-check" name="btnradio6_kitchen1" autocomplete="off"><label for="item6_kitchen1_btn2" class="btn btn-outline-primary">Non</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <hr class="bg-dark border-top border-dark" />
+                                                <div class="row">
+                                                    <label for="item7_kitchen1" class="col-sm-4 col-form-label">Minibar</label>
+                                                    <div class="col-sm-4">
+                                                        <div id="item7_kitchen1" class="btn-group w-100" role="group">
+                                                            <input id="item7_kitchen1_btn1" type="radio" class="btn-check" name="btnradio7_kitchen1" autocomplete="off"><label for="item7_kitchen1_btn1" class="btn btn-outline-primary">Oui</label>
+                                                            <input id="item7_kitchen1_btn2" type="radio" class="btn-check" name="btnradio7_kitchen1" autocomplete="off"><label for="item7_kitchen1_btn2" class="btn btn-outline-primary">Non</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <hr class="bg-dark border-top border-dark" />
+                                                <div class="row">
+                                                    <label for="item8_kitchen1" class="col-sm-4 col-form-label">Ustensiles de cuisine</label>
+                                                    <div class="col-sm-4">
+                                                        <div id="item8_kitchen1" class="btn-group w-100" role="group">
+                                                            <input id="item8_kitchen1_btn1" type="radio" class="btn-check" name="btnradio8_kitchen1" autocomplete="off"><label for="item8_kitchen1_btn1" class="btn btn-outline-primary">Oui</label>
+                                                            <input id="item8_kitchen1_btn2" type="radio" class="btn-check" name="btnradio8_kitchen1" autocomplete="off"><label for="item8_kitchen1_btn2" class="btn btn-outline-primary">Non</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <hr class="bg-dark border-top border-dark" />
+                                                <div class="row">
+                                                    <label for="item9_kitchen1" class="col-sm-4 col-form-label">Micro-ondes</label>
+                                                    <div class="col-sm-4">
+                                                        <div id="item9_kitchen1" class="btn-group w-100" role="group">
+                                                            <input id="item9_kitchen1_btn1" type="radio" class="btn-check" name="btnradio9_kitchen1" autocomplete="off"><label for="item9_kitchen1_btn1" class="btn btn-outline-primary">Oui</label>
+                                                            <input id="item9_kitchen1_btn2" type="radio" class="btn-check" name="btnradio9_kitchen1" autocomplete="off"><label for="item9_kitchen1_btn2" class="btn btn-outline-primary">Non</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <hr class="bg-dark border-top border-dark" />
+                                                <div class="row">
+                                                    <label for="item10_kitchen1" class="col-sm-4 col-form-label">Réfrigérateur</label>
+                                                    <div class="col-sm-4">
+                                                        <div id="item10_kitchen1" class="btn-group w-100" role="group">
+                                                            <input id="item10_kitchen1_btn1" type="radio" class="btn-check" name="btnradio10_kitchen1" autocomplete="off"><label for="item10_kitchen1_btn1" class="btn btn-outline-primary">Oui</label>
+                                                            <input id="item10_kitchen1_btn2" type="radio" class="btn-check" name="btnradio10_kitchen1" autocomplete="off"><label for="item10_kitchen1_btn2" class="btn btn-outline-primary">Non</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <hr class="bg-dark border-top border-dark" />
+                                                <div class="row">
+                                                    <label for="item11_kitchen1" class="col-sm-4 col-form-label">Machine à café</label>
+                                                    <div class="col-sm-4">
+                                                        <div id="item11_kitchen1" class="btn-group w-100" role="group">
+                                                            <input id="item11_kitchen1_btn1" type="radio" class="btn-check" name="btnradio11_kitchen1" autocomplete="off"><label for="item11_kitchen1_btn1" class="btn btn-outline-primary">Oui</label>
+                                                            <input id="item11_kitchen1_btn2" type="radio" class="btn-check" name="btnradio11_kitchen1" autocomplete="off"><label for="item11_kitchen1_btn2" class="btn btn-outline-primary">Non</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <hr class="bg-dark border-top border-dark" />
+                                                <div class="row">
+                                                    <label for="item12_kitchen1" class="col-sm-4 col-form-label">Chaise haute pour enfants</label>
+                                                    <div class="col-sm-4">
+                                                        <div id="item12_kitchen1" class="btn-group w-100" role="group">
+                                                            <input id="item12_kitchen1_btn1" type="radio" class="btn-check" name="btnradio12_kitchen1" autocomplete="off"><label for="item12_kitchen1_btn1" class="btn btn-outline-primary">Oui</label>
+                                                            <input id="item12_kitchen1_btn2" type="radio" class="btn-check" name="btnradio12_kitchen1" autocomplete="off"><label for="item12_kitchen1_btn2" class="btn btn-outline-primary">Non</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="accordion-item">
+                                        <p class="accordion-header">
+                                            <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapse_kitchen2" aria-expanded="true" aria-controls="collapse_kitchen2" disabled>
+                                                <strong class="fs-5">Cuisine n°3</strong>
+                                            </button>
+                                        </p>
+                                        <div id="collapse_kitchen2" class="accordion-collapse collapse show">
+                                            <div class="accordion-body mx-lg-5 mb-4">
+                                                <div class="row">
+                                                    <label for="item0_kitchen2" class="col-sm-4 col-form-label">Table à manger</label>
+                                                    <div class="col-sm-4">
+                                                        <div id="item0_kitchen2" class="btn-group w-100" role="group">
+                                                            <input id="item0_kitchen2_btn1" type="radio" class="btn-check" name="btnradio0_kitchen2" autocomplete="off"><label for="item0_kitchen2_btn1" class="btn btn-outline-primary">Oui</label>
+                                                            <input id="item0_kitchen2_btn2" type="radio" class="btn-check" name="btnradio0_kitchen2" autocomplete="off"><label for="item0_kitchen2_btn2" class="btn btn-outline-primary">Non</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <hr class="bg-dark border-top border-dark" />
+                                                <div class="row">
+                                                    <label for="item1_kitchen2" class="col-sm-4 col-form-label">Verres à vin</label>
+                                                    <div class="col-sm-4">
+                                                        <div id="item1_kitchen2" class="btn-group w-100" role="group">
+                                                            <input id="item1_kitchen2_btn1" type="radio" class="btn-check" name="btnradio1_kitchen2" autocomplete="off"><label for="item1_kitchen2_btn1" class="btn btn-outline-primary">Oui</label>
+                                                            <input id="item1_kitchen2_btn2" type="radio" class="btn-check" name="btnradio1_kitchen2" autocomplete="off"><label for="item1_kitchen2_btn2" class="btn btn-outline-primary">Non</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <hr class="bg-dark border-top border-dark" />
+                                                <div class="row">
+                                                    <label for="item2_kitchen2" class="col-sm-4 col-form-label">Four</label>
+                                                    <div class="col-sm-4">
+                                                        <div id="item2_kitchen2" class="btn-group w-100" role="group">
+                                                            <input id="item2_kitchen2_btn1" type="radio" class="btn-check" name="btnradio2_kitchen2" autocomplete="off"><label for="item2_kitchen2_btn1" class="btn btn-outline-primary">Oui</label>
+                                                            <input id="item2_kitchen2_btn2" type="radio" class="btn-check" name="btnradio2_kitchen2" autocomplete="off"><label for="item2_kitchen2_btn2" class="btn btn-outline-primary">Non</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <hr class="bg-dark border-top border-dark" />
+                                                <div class="row">
+                                                    <label for="item3_kitchen2" class="col-sm-4 col-form-label">Plaque de cuisson</label>
+                                                    <div class="col-sm-4">
+                                                        <div id="item3_kitchen2" class="btn-group w-100" role="group">
+                                                            <input id="item3_kitchen2_btn1" type="radio" class="btn-check" name="btnradio3_kitchen2" autocomplete="off"><label for="item3_kitchen2_btn1" class="btn btn-outline-primary">Oui</label>
+                                                            <input id="item3_kitchen2_btn2" type="radio" class="btn-check" name="btnradio3_kitchen2" autocomplete="off"><label for="item3_kitchen2_btn2" class="btn btn-outline-primary">Non</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <hr class="bg-dark border-top border-dark" />
+                                                <div class="row">
+                                                    <label for="item4_kitchen2" class="col-sm-4 col-form-label">Grille-pain</label>
+                                                    <div class="col-sm-4">
+                                                        <div id="item4_kitchen2" class="btn-group w-100" role="group">
+                                                            <input id="item4_kitchen2_btn1" type="radio" class="btn-check" name="btnradio4_kitchen2" autocomplete="off"><label for="item4_kitchen2_btn1" class="btn btn-outline-primary">Oui</label>
+                                                            <input id="item4_kitchen2_btn2" type="radio" class="btn-check" name="btnradio4_kitchen2" autocomplete="off"><label for="item4_kitchen2_btn2" class="btn btn-outline-primary">Non</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <hr class="bg-dark border-top border-dark" />
+                                                <div class="row">
+                                                    <label for="item5_kitchen2" class="col-sm-4 col-form-label">Lave-vaisselle</label>
+                                                    <div class="col-sm-4">
+                                                        <div id="item5_kitchen2" class="btn-group w-100" role="group">
+                                                            <input id="item5_kitchen2_btn1" type="radio" class="btn-check" name="btnradio5_kitchen2" autocomplete="off"><label for="item5_kitchen2_btn1" class="btn btn-outline-primary">Oui</label>
+                                                            <input id="item5_kitchen2_btn2" type="radio" class="btn-check" name="btnradio5_kitchen2" autocomplete="off"><label for="item5_kitchen2_btn2" class="btn btn-outline-primary">Non</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <hr class="bg-dark border-top border-dark" />
+                                                <div class="row">
+                                                    <label for="item6_kitchen2" class="col-sm-4 col-form-label">Bouilloire électrique</label>
+                                                    <div class="col-sm-4">
+                                                        <div id="item6_kitchen2" class="btn-group w-100" role="group">
+                                                            <input id="item6_kitchen2_btn1" type="radio" class="btn-check" name="btnradio6_kitchen2" autocomplete="off"><label for="item6_kitchen2_btn1" class="btn btn-outline-primary">Oui</label>
+                                                            <input id="item6_kitchen2_btn2" type="radio" class="btn-check" name="btnradio6_kitchen2" autocomplete="off"><label for="item6_kitchen2_btn2" class="btn btn-outline-primary">Non</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <hr class="bg-dark border-top border-dark" />
+                                                <div class="row">
+                                                    <label for="item7_kitchen2" class="col-sm-4 col-form-label">Minibar</label>
+                                                    <div class="col-sm-4">
+                                                        <div id="item7_kitchen2" class="btn-group w-100" role="group">
+                                                            <input id="item7_kitchen2_btn1" type="radio" class="btn-check" name="btnradio7_kitchen2" autocomplete="off"><label for="item7_kitchen2_btn1" class="btn btn-outline-primary">Oui</label>
+                                                            <input id="item7_kitchen2_btn2" type="radio" class="btn-check" name="btnradio7_kitchen2" autocomplete="off"><label for="item7_kitchen2_btn2" class="btn btn-outline-primary">Non</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <hr class="bg-dark border-top border-dark" />
+                                                <div class="row">
+                                                    <label for="item8_kitchen2" class="col-sm-4 col-form-label">Ustensiles de cuisine</label>
+                                                    <div class="col-sm-4">
+                                                        <div id="item8_kitchen2" class="btn-group w-100" role="group">
+                                                            <input id="item8_kitchen2_btn1" type="radio" class="btn-check" name="btnradio8_kitchen2" autocomplete="off"><label for="item8_kitchen2_btn1" class="btn btn-outline-primary">Oui</label>
+                                                            <input id="item8_kitchen2_btn2" type="radio" class="btn-check" name="btnradio8_kitchen2" autocomplete="off"><label for="item8_kitchen2_btn2" class="btn btn-outline-primary">Non</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <hr class="bg-dark border-top border-dark" />
+                                                <div class="row">
+                                                    <label for="item9_kitchen2" class="col-sm-4 col-form-label">Micro-ondes</label>
+                                                    <div class="col-sm-4">
+                                                        <div id="item9_kitchen2" class="btn-group w-100" role="group">
+                                                            <input id="item9_kitchen2_btn1" type="radio" class="btn-check" name="btnradio9_kitchen2" autocomplete="off"><label for="item9_kitchen2_btn1" class="btn btn-outline-primary">Oui</label>
+                                                            <input id="item9_kitchen2_btn2" type="radio" class="btn-check" name="btnradio9_kitchen2" autocomplete="off"><label for="item9_kitchen2_btn2" class="btn btn-outline-primary">Non</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <hr class="bg-dark border-top border-dark" />
+                                                <div class="row">
+                                                    <label for="item10_kitchen2" class="col-sm-4 col-form-label">Réfrigérateur</label>
+                                                    <div class="col-sm-4">
+                                                        <div id="item10_kitchen2" class="btn-group w-100" role="group">
+                                                            <input id="item10_kitchen2_btn1" type="radio" class="btn-check" name="btnradio10_kitchen2" autocomplete="off"><label for="item10_kitchen2_btn1" class="btn btn-outline-primary">Oui</label>
+                                                            <input id="item10_kitchen2_btn2" type="radio" class="btn-check" name="btnradio10_kitchen2" autocomplete="off"><label for="item10_kitchen2_btn2" class="btn btn-outline-primary">Non</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <hr class="bg-dark border-top border-dark" />
+                                                <div class="row">
+                                                    <label for="item11_kitchen2" class="col-sm-4 col-form-label">Machine à café</label>
+                                                    <div class="col-sm-4">
+                                                        <div id="item11_kitchen2" class="btn-group w-100" role="group">
+                                                            <input id="item11_kitchen2_btn1" type="radio" class="btn-check" name="btnradio11_kitchen2" autocomplete="off"><label for="item11_kitchen2_btn1" class="btn btn-outline-primary">Oui</label>
+                                                            <input id="item11_kitchen2_btn2" type="radio" class="btn-check" name="btnradio11_kitchen2" autocomplete="off"><label for="item11_kitchen2_btn2" class="btn btn-outline-primary">Non</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <hr class="bg-dark border-top border-dark" />
+                                                <div class="row">
+                                                    <label for="item12_kitchen2" class="col-sm-4 col-form-label">Chaise haute pour enfants</label>
+                                                    <div class="col-sm-4">
+                                                        <div id="item12_kitchen2" class="btn-group w-100" role="group">
+                                                            <input id="item12_kitchen2_btn1" type="radio" class="btn-check" name="btnradio12_kitchen2" autocomplete="off"><label for="item12_kitchen2_btn1" class="btn btn-outline-primary">Oui</label>
+                                                            <input id="item12_kitchen2_btn2" type="radio" class="btn-check" name="btnradio12_kitchen2" autocomplete="off"><label for="item12_kitchen2_btn2" class="btn btn-outline-primary">Non</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="accordion-item">
+                                        <p class="accordion-header">
+                                            <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapse_kitchen3" aria-expanded="true" aria-controls="collapse_kitchen3" disabled>
+                                                <strong class="fs-5">Cuisine n°4</strong>
+                                            </button>
+                                        </p>
+                                        <div id="collapse_kitchen3" class="accordion-collapse collapse show">
+                                            <div class="accordion-body mx-lg-5 mb-4">
+                                                <div class="row">
+                                                    <label for="item0_kitchen3" class="col-sm-4 col-form-label">Table à manger</label>
+                                                    <div class="col-sm-4">
+                                                        <div id="item0_kitchen3" class="btn-group w-100" role="group">
+                                                            <input id="item0_kitchen3_btn1" type="radio" class="btn-check" name="btnradio0_kitchen3" autocomplete="off"><label for="item0_kitchen3_btn1" class="btn btn-outline-primary">Oui</label>
+                                                            <input id="item0_kitchen3_btn2" type="radio" class="btn-check" name="btnradio0_kitchen3" autocomplete="off"><label for="item0_kitchen3_btn2" class="btn btn-outline-primary">Non</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <hr class="bg-dark border-top border-dark" />
+                                                <div class="row">
+                                                    <label for="item1_kitchen3" class="col-sm-4 col-form-label">Verres à vin</label>
+                                                    <div class="col-sm-4">
+                                                        <div id="item1_kitchen3" class="btn-group w-100" role="group">
+                                                            <input id="item1_kitchen3_btn1" type="radio" class="btn-check" name="btnradio1_kitchen3" autocomplete="off"><label for="item1_kitchen3_btn1" class="btn btn-outline-primary">Oui</label>
+                                                            <input id="item1_kitchen3_btn2" type="radio" class="btn-check" name="btnradio1_kitchen3" autocomplete="off"><label for="item1_kitchen3_btn2" class="btn btn-outline-primary">Non</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <hr class="bg-dark border-top border-dark" />
+                                                <div class="row">
+                                                    <label for="item2_kitchen3" class="col-sm-4 col-form-label">Four</label>
+                                                    <div class="col-sm-4">
+                                                        <div id="item2_kitchen3" class="btn-group w-100" role="group">
+                                                            <input id="item2_kitchen3_btn1" type="radio" class="btn-check" name="btnradio2_kitchen3" autocomplete="off"><label for="item2_kitchen3_btn1" class="btn btn-outline-primary">Oui</label>
+                                                            <input id="item2_kitchen3_btn2" type="radio" class="btn-check" name="btnradio2_kitchen3" autocomplete="off"><label for="item2_kitchen3_btn2" class="btn btn-outline-primary">Non</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <hr class="bg-dark border-top border-dark" />
+                                                <div class="row">
+                                                    <label for="item3_kitchen3" class="col-sm-4 col-form-label">Plaque de cuisson</label>
+                                                    <div class="col-sm-4">
+                                                        <div id="item3_kitchen3" class="btn-group w-100" role="group">
+                                                            <input id="item3_kitchen3_btn1" type="radio" class="btn-check" name="btnradio3_kitchen3" autocomplete="off"><label for="item3_kitchen3_btn1" class="btn btn-outline-primary">Oui</label>
+                                                            <input id="item3_kitchen3_btn2" type="radio" class="btn-check" name="btnradio3_kitchen3" autocomplete="off"><label for="item3_kitchen3_btn2" class="btn btn-outline-primary">Non</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <hr class="bg-dark border-top border-dark" />
+                                                <div class="row">
+                                                    <label for="item4_kitchen3" class="col-sm-4 col-form-label">Grille-pain</label>
+                                                    <div class="col-sm-4">
+                                                        <div id="item4_kitchen3" class="btn-group w-100" role="group">
+                                                            <input id="item4_kitchen3_btn1" type="radio" class="btn-check" name="btnradio4_kitchen3" autocomplete="off"><label for="item4_kitchen3_btn1" class="btn btn-outline-primary">Oui</label>
+                                                            <input id="item4_kitchen3_btn2" type="radio" class="btn-check" name="btnradio4_kitchen3" autocomplete="off"><label for="item4_kitchen3_btn2" class="btn btn-outline-primary">Non</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <hr class="bg-dark border-top border-dark" />
+                                                <div class="row">
+                                                    <label for="item5_kitchen3" class="col-sm-4 col-form-label">Lave-vaisselle</label>
+                                                    <div class="col-sm-4">
+                                                        <div id="item5_kitchen3" class="btn-group w-100" role="group">
+                                                            <input id="item5_kitchen3_btn1" type="radio" class="btn-check" name="btnradio5_kitchen3" autocomplete="off"><label for="item5_kitchen3_btn1" class="btn btn-outline-primary">Oui</label>
+                                                            <input id="item5_kitchen3_btn2" type="radio" class="btn-check" name="btnradio5_kitchen3" autocomplete="off"><label for="item5_kitchen3_btn2" class="btn btn-outline-primary">Non</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <hr class="bg-dark border-top border-dark" />
+                                                <div class="row">
+                                                    <label for="item6_kitchen3" class="col-sm-4 col-form-label">Bouilloire électrique</label>
+                                                    <div class="col-sm-4">
+                                                        <div id="item6_kitchen3" class="btn-group w-100" role="group">
+                                                            <input id="item6_kitchen3_btn1" type="radio" class="btn-check" name="btnradio6_kitchen3" autocomplete="off"><label for="item6_kitchen3_btn1" class="btn btn-outline-primary">Oui</label>
+                                                            <input id="item6_kitchen3_btn2" type="radio" class="btn-check" name="btnradio6_kitchen3" autocomplete="off"><label for="item6_kitchen3_btn2" class="btn btn-outline-primary">Non</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <hr class="bg-dark border-top border-dark" />
+                                                <div class="row">
+                                                    <label for="item7_kitchen3" class="col-sm-4 col-form-label">Minibar</label>
+                                                    <div class="col-sm-4">
+                                                        <div id="item7_kitchen3" class="btn-group w-100" role="group">
+                                                            <input id="item7_kitchen3_btn1" type="radio" class="btn-check" name="btnradio7_kitchen3" autocomplete="off"><label for="item7_kitchen3_btn1" class="btn btn-outline-primary">Oui</label>
+                                                            <input id="item7_kitchen3_btn2" type="radio" class="btn-check" name="btnradio7_kitchen3" autocomplete="off"><label for="item7_kitchen3_btn2" class="btn btn-outline-primary">Non</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <hr class="bg-dark border-top border-dark" />
+                                                <div class="row">
+                                                    <label for="item8_kitchen3" class="col-sm-4 col-form-label">Ustensiles de cuisine</label>
+                                                    <div class="col-sm-4">
+                                                        <div id="item8_kitchen3" class="btn-group w-100" role="group">
+                                                            <input id="item8_kitchen3_btn1" type="radio" class="btn-check" name="btnradio8_kitchen3" autocomplete="off"><label for="item8_kitchen3_btn1" class="btn btn-outline-primary">Oui</label>
+                                                            <input id="item8_kitchen3_btn2" type="radio" class="btn-check" name="btnradio8_kitchen3" autocomplete="off"><label for="item8_kitchen3_btn2" class="btn btn-outline-primary">Non</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <hr class="bg-dark border-top border-dark" />
+                                                <div class="row">
+                                                    <label for="item9_kitchen3" class="col-sm-4 col-form-label">Micro-ondes</label>
+                                                    <div class="col-sm-4">
+                                                        <div id="item9_kitchen3" class="btn-group w-100" role="group">
+                                                            <input id="item9_kitchen3_btn1" type="radio" class="btn-check" name="btnradio9_kitchen3" autocomplete="off"><label for="item9_kitchen3_btn1" class="btn btn-outline-primary">Oui</label>
+                                                            <input id="item9_kitchen3_btn2" type="radio" class="btn-check" name="btnradio9_kitchen3" autocomplete="off"><label for="item9_kitchen3_btn2" class="btn btn-outline-primary">Non</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <hr class="bg-dark border-top border-dark" />
+                                                <div class="row">
+                                                    <label for="item10_kitchen3" class="col-sm-4 col-form-label">Réfrigérateur</label>
+                                                    <div class="col-sm-4">
+                                                        <div id="item10_kitchen3" class="btn-group w-100" role="group">
+                                                            <input id="item10_kitchen3_btn1" type="radio" class="btn-check" name="btnradio10_kitchen3" autocomplete="off"><label for="item10_kitchen3_btn1" class="btn btn-outline-primary">Oui</label>
+                                                            <input id="item10_kitchen3_btn2" type="radio" class="btn-check" name="btnradio10_kitchen3" autocomplete="off"><label for="item10_kitchen3_btn2" class="btn btn-outline-primary">Non</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <hr class="bg-dark border-top border-dark" />
+                                                <div class="row">
+                                                    <label for="item11_kitchen3" class="col-sm-4 col-form-label">Machine à café</label>
+                                                    <div class="col-sm-4">
+                                                        <div id="item11_kitchen3" class="btn-group w-100" role="group">
+                                                            <input id="item11_kitchen3_btn1" type="radio" class="btn-check" name="btnradio11_kitchen3" autocomplete="off"><label for="item11_kitchen3_btn1" class="btn btn-outline-primary">Oui</label>
+                                                            <input id="item11_kitchen3_btn2" type="radio" class="btn-check" name="btnradio11_kitchen3" autocomplete="off"><label for="item11_kitchen3_btn2" class="btn btn-outline-primary">Non</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <hr class="bg-dark border-top border-dark" />
+                                                <div class="row">
+                                                    <label for="item12_kitchen3" class="col-sm-4 col-form-label">Chaise haute pour enfants</label>
+                                                    <div class="col-sm-4">
+                                                        <div id="item12_kitchen3" class="btn-group w-100" role="group">
+                                                            <input id="item12_kitchen3_btn1" type="radio" class="btn-check" name="btnradio12_kitchen3" autocomplete="off"><label for="item12_kitchen3_btn1" class="btn btn-outline-primary">Oui</label>
+                                                            <input id="item12_kitchen3_btn2" type="radio" class="btn-check" name="btnradio12_kitchen3" autocomplete="off"><label for="item12_kitchen3_btn2" class="btn btn-outline-primary">Non</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="accordion-item">
+                                        <p class="accordion-header">
+                                            <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapse_kitchen4" aria-expanded="true" aria-controls="collapse_kitchen4" disabled>
+                                                <strong class="fs-5">Cuisine n°5</strong>
+                                            </button>
+                                        </p>
+                                        <div id="collapse_kitchen4" class="accordion-collapse collapse show">
+                                            <div class="accordion-body mx-lg-5 mb-4">
+                                                <div class="row">
+                                                    <label for="item0_kitchen4" class="col-sm-4 col-form-label">Table à manger</label>
+                                                    <div class="col-sm-4">
+                                                        <div id="item0_kitchen4" class="btn-group w-100" role="group">
+                                                            <input id="item0_kitchen4_btn1" type="radio" class="btn-check" name="btnradio0_kitchen4" autocomplete="off"><label for="item0_kitchen4_btn1" class="btn btn-outline-primary">Oui</label>
+                                                            <input id="item0_kitchen4_btn2" type="radio" class="btn-check" name="btnradio0_kitchen4" autocomplete="off"><label for="item0_kitchen4_btn2" class="btn btn-outline-primary">Non</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <hr class="bg-dark border-top border-dark" />
+                                                <div class="row">
+                                                    <label for="item1_kitchen4" class="col-sm-4 col-form-label">Verres à vin</label>
+                                                    <div class="col-sm-4">
+                                                        <div id="item1_kitchen4" class="btn-group w-100" role="group">
+                                                            <input id="item1_kitchen4_btn1" type="radio" class="btn-check" name="btnradio1_kitchen4" autocomplete="off"><label for="item1_kitchen4_btn1" class="btn btn-outline-primary">Oui</label>
+                                                            <input id="item1_kitchen4_btn2" type="radio" class="btn-check" name="btnradio1_kitchen4" autocomplete="off"><label for="item1_kitchen4_btn2" class="btn btn-outline-primary">Non</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <hr class="bg-dark border-top border-dark" />
+                                                <div class="row">
+                                                    <label for="item2_kitchen4" class="col-sm-4 col-form-label">Four</label>
+                                                    <div class="col-sm-4">
+                                                        <div id="item2_kitchen4" class="btn-group w-100" role="group">
+                                                            <input id="item2_kitchen4_btn1" type="radio" class="btn-check" name="btnradio2_kitchen4" autocomplete="off"><label for="item2_kitchen4_btn1" class="btn btn-outline-primary">Oui</label>
+                                                            <input id="item2_kitchen4_btn2" type="radio" class="btn-check" name="btnradio2_kitchen4" autocomplete="off"><label for="item2_kitchen4_btn2" class="btn btn-outline-primary">Non</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <hr class="bg-dark border-top border-dark" />
+                                                <div class="row">
+                                                    <label for="item3_kitchen4" class="col-sm-4 col-form-label">Plaque de cuisson</label>
+                                                    <div class="col-sm-4">
+                                                        <div id="item3_kitchen4" class="btn-group w-100" role="group">
+                                                            <input id="item3_kitchen4_btn1" type="radio" class="btn-check" name="btnradio3_kitchen4" autocomplete="off"><label for="item3_kitchen4_btn1" class="btn btn-outline-primary">Oui</label>
+                                                            <input id="item3_kitchen4_btn2" type="radio" class="btn-check" name="btnradio3_kitchen4" autocomplete="off"><label for="item3_kitchen4_btn2" class="btn btn-outline-primary">Non</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <hr class="bg-dark border-top border-dark" />
+                                                <div class="row">
+                                                    <label for="item4_kitchen4" class="col-sm-4 col-form-label">Grille-pain</label>
+                                                    <div class="col-sm-4">
+                                                        <div id="item4_kitchen4" class="btn-group w-100" role="group">
+                                                            <input id="item4_kitchen4_btn1" type="radio" class="btn-check" name="btnradio4_kitchen4" autocomplete="off"><label for="item4_kitchen4_btn1" class="btn btn-outline-primary">Oui</label>
+                                                            <input id="item4_kitchen4_btn2" type="radio" class="btn-check" name="btnradio4_kitchen4" autocomplete="off"><label for="item4_kitchen4_btn2" class="btn btn-outline-primary">Non</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <hr class="bg-dark border-top border-dark" />
+                                                <div class="row">
+                                                    <label for="item5_kitchen4" class="col-sm-4 col-form-label">Lave-vaisselle</label>
+                                                    <div class="col-sm-4">
+                                                        <div id="item5_kitchen4" class="btn-group w-100" role="group">
+                                                            <input id="item5_kitchen4_btn1" type="radio" class="btn-check" name="btnradio5_kitchen4" autocomplete="off"><label for="item5_kitchen4_btn1" class="btn btn-outline-primary">Oui</label>
+                                                            <input id="item5_kitchen4_btn2" type="radio" class="btn-check" name="btnradio5_kitchen4" autocomplete="off"><label for="item5_kitchen4_btn2" class="btn btn-outline-primary">Non</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <hr class="bg-dark border-top border-dark" />
+                                                <div class="row">
+                                                    <label for="item6_kitchen4" class="col-sm-4 col-form-label">Bouilloire électrique</label>
+                                                    <div class="col-sm-4">
+                                                        <div id="item6_kitchen4" class="btn-group w-100" role="group">
+                                                            <input id="item6_kitchen4_btn1" type="radio" class="btn-check" name="btnradio6_kitchen4" autocomplete="off"><label for="item6_kitchen4_btn1" class="btn btn-outline-primary">Oui</label>
+                                                            <input id="item6_kitchen4_btn2" type="radio" class="btn-check" name="btnradio6_kitchen4" autocomplete="off"><label for="item6_kitchen4_btn2" class="btn btn-outline-primary">Non</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <hr class="bg-dark border-top border-dark" />
+                                                <div class="row">
+                                                    <label for="item7_kitchen4" class="col-sm-4 col-form-label">Minibar</label>
+                                                    <div class="col-sm-4">
+                                                        <div id="item7_kitchen4" class="btn-group w-100" role="group">
+                                                            <input id="item7_kitchen4_btn1" type="radio" class="btn-check" name="btnradio7_kitchen4" autocomplete="off"><label for="item7_kitchen4_btn1" class="btn btn-outline-primary">Oui</label>
+                                                            <input id="item7_kitchen4_btn2" type="radio" class="btn-check" name="btnradio7_kitchen4" autocomplete="off"><label for="item7_kitchen4_btn2" class="btn btn-outline-primary">Non</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <hr class="bg-dark border-top border-dark" />
+                                                <div class="row">
+                                                    <label for="item8_kitchen4" class="col-sm-4 col-form-label">Ustensiles de cuisine</label>
+                                                    <div class="col-sm-4">
+                                                        <div id="item8_kitchen4" class="btn-group w-100" role="group">
+                                                            <input id="item8_kitchen4_btn1" type="radio" class="btn-check" name="btnradio8_kitchen4" autocomplete="off"><label for="item8_kitchen4_btn1" class="btn btn-outline-primary">Oui</label>
+                                                            <input id="item8_kitchen4_btn2" type="radio" class="btn-check" name="btnradio8_kitchen4" autocomplete="off"><label for="item8_kitchen4_btn2" class="btn btn-outline-primary">Non</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <hr class="bg-dark border-top border-dark" />
+                                                <div class="row">
+                                                    <label for="item9_kitchen4" class="col-sm-4 col-form-label">Micro-ondes</label>
+                                                    <div class="col-sm-4">
+                                                        <div id="item9_kitchen4" class="btn-group w-100" role="group">
+                                                            <input id="item9_kitchen4_btn1" type="radio" class="btn-check" name="btnradio9_kitchen4" autocomplete="off"><label for="item9_kitchen4_btn1" class="btn btn-outline-primary">Oui</label>
+                                                            <input id="item9_kitchen4_btn2" type="radio" class="btn-check" name="btnradio9_kitchen4" autocomplete="off"><label for="item9_kitchen4_btn2" class="btn btn-outline-primary">Non</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <hr class="bg-dark border-top border-dark" />
+                                                <div class="row">
+                                                    <label for="item10_kitchen4" class="col-sm-4 col-form-label">Réfrigérateur</label>
+                                                    <div class="col-sm-4">
+                                                        <div id="item10_kitchen4" class="btn-group w-100" role="group">
+                                                            <input id="item10_kitchen4_btn1" type="radio" class="btn-check" name="btnradio10_kitchen4" autocomplete="off"><label for="item10_kitchen4_btn1" class="btn btn-outline-primary">Oui</label>
+                                                            <input id="item10_kitchen4_btn2" type="radio" class="btn-check" name="btnradio10_kitchen4" autocomplete="off"><label for="item10_kitchen4_btn2" class="btn btn-outline-primary">Non</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <hr class="bg-dark border-top border-dark" />
+                                                <div class="row">
+                                                    <label for="item11_kitchen4" class="col-sm-4 col-form-label">Machine à café</label>
+                                                    <div class="col-sm-4">
+                                                        <div id="item11_kitchen4" class="btn-group w-100" role="group">
+                                                            <input id="item11_kitchen4_btn1" type="radio" class="btn-check" name="btnradio11_kitchen4" autocomplete="off"><label for="item11_kitchen4_btn1" class="btn btn-outline-primary">Oui</label>
+                                                            <input id="item11_kitchen4_btn2" type="radio" class="btn-check" name="btnradio11_kitchen4" autocomplete="off"><label for="item11_kitchen4_btn2" class="btn btn-outline-primary">Non</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <hr class="bg-dark border-top border-dark" />
+                                                <div class="row">
+                                                    <label for="item12_kitchen4" class="col-sm-4 col-form-label">Chaise haute pour enfants</label>
+                                                    <div class="col-sm-4">
+                                                        <div id="item12_kitchen4" class="btn-group w-100" role="group">
+                                                            <input id="item12_kitchen4_btn1" type="radio" class="btn-check" name="btnradio12_kitchen4" autocomplete="off"><label for="item12_kitchen4_btn1" class="btn btn-outline-primary">Oui</label>
+                                                            <input id="item12_kitchen4_btn2" type="radio" class="btn-check" name="btnradio12_kitchen4" autocomplete="off"><label for="item12_kitchen4_btn2" class="btn btn-outline-primary">Non</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                </div>
+
+                                <div id="bathroom_accordion" class="accordion mx-lg-5 mt-5 mb-3">
+
+                                    <div class="accordion-item">
+                                        <p class="accordion-header">
+                                            <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapse_bathroom0" aria-expanded="true" aria-controls="collapse_bathroom0" disabled>
+                                                <strong class="fs-5">Salle de bains n°1</strong>
+                                            </button>
+                                        </p>
+                                        <div id="collapse_bathroom0" class="accordion-collapse collapse show">
+                                            <div class="accordion-body mx-lg-5 mb-4">
+                                                <div class="row">
+                                                    <label for="item0_bathroom0" class="col-sm-4 col-form-label">Baignoire</label>
+                                                    <div class="col-sm-4">
+                                                        <div id="item0_bathroom0" class="btn-group w-100" role="group">
+                                                            <input id="item0_bathroom0_btn1" type="radio" class="btn-check" name="btnradio0_bathroom0" autocomplete="off"><label for="item0_bathroom0_btn1" class="btn btn-outline-primary">Oui</label>
+                                                            <input id="item0_bathroom0_btn2" type="radio" class="btn-check" name="btnradio0_bathroom0" autocomplete="off"><label for="item0_bathroom0_btn2" class="btn btn-outline-primary">Non</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <hr class="bg-dark border-top border-dark" />
+                                                <div class="row">
+                                                    <label for="item1_bathroom0" class="col-sm-4 col-form-label">Bidet</label>
+                                                    <div class="col-sm-4">
+                                                        <div id="item1_bathroom0" class="btn-group w-100" role="group">
+                                                            <input id="item1_bathroom0_btn1" type="radio" class="btn-check" name="btnradio1_bathroom0" autocomplete="off"><label for="item1_bathroom0_btn1" class="btn btn-outline-primary">Oui</label>
+                                                            <input id="item1_bathroom0_btn2" type="radio" class="btn-check" name="btnradio1_bathroom0" autocomplete="off"><label for="item1_bathroom0_btn2" class="btn btn-outline-primary">Non</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <hr class="bg-dark border-top border-dark" />
+                                                <div class="row">
+                                                    <label for="item2_bathroom0" class="col-sm-4 col-form-label">WC intégrés</label>
+                                                    <div class="col-sm-4">
+                                                        <div id="item2_bathroom0" class="btn-group w-100" role="group">
+                                                            <input id="item2_bathroom0_btn1" type="radio" class="btn-check" name="btnradio2_bathroom0" autocomplete="off"><label for="item2_bathroom0_btn1" class="btn btn-outline-primary">Oui</label>
+                                                            <input id="item2_bathroom0_btn2" type="radio" class="btn-check" name="btnradio2_bathroom0" autocomplete="off"><label for="item2_bathroom0_btn2" class="btn btn-outline-primary">Non</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <hr class="bg-dark border-top border-dark" />
+                                                <div class="row">
+                                                    <label for="item3_bathroom0" class="col-sm-4 col-form-label">Sèche-cheveux</label>
+                                                    <div class="col-sm-4">
+                                                        <div id="item3_bathroom0" class="btn-group w-100" role="group">
+                                                            <input id="item3_bathroom0_btn1" type="radio" class="btn-check" name="btnradio3_bathroom0" autocomplete="off"><label for="item3_bathroom0_btn1" class="btn btn-outline-primary">Oui</label>
+                                                            <input id="item3_bathroom0_btn2" type="radio" class="btn-check" name="btnradio3_bathroom0" autocomplete="off"><label for="item3_bathroom0_btn2" class="btn btn-outline-primary">Non</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <hr class="bg-dark border-top border-dark" />
+                                                <div class="row">
+                                                    <label for="item4_bathroom0" class="col-sm-4 col-form-label">Baignoire balnéo</label>
+                                                    <div class="col-sm-4">
+                                                        <div id="item4_bathroom0" class="btn-group w-100" role="group">
+                                                            <input id="item4_bathroom0_btn1" type="radio" class="btn-check" name="btnradio4_bathroom0" autocomplete="off"><label for="item4_bathroom0_btn1" class="btn btn-outline-primary">Oui</label>
+                                                            <input id="item4_bathroom0_btn2" type="radio" class="btn-check" name="btnradio4_bathroom0" autocomplete="off"><label for="item4_bathroom0_btn2" class="btn btn-outline-primary">Non</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <hr class="bg-dark border-top border-dark" />
+                                                <div class="row">
+                                                    <label for="item5_bathroom0" class="col-sm-4 col-form-label">Sauna</label>
+                                                    <div class="col-sm-4">
+                                                        <div id="item5_bathroom0" class="btn-group w-100" role="group">
+                                                            <input id="item5_bathroom0_btn1" type="radio" class="btn-check" name="btnradio5_bathroom0" autocomplete="off"><label for="item5_bathroom0_btn1" class="btn btn-outline-primary">Oui</label>
+                                                            <input id="item5_bathroom0_btn2" type="radio" class="btn-check" name="btnradio5_bathroom0" autocomplete="off"><label for="item5_bathroom0_btn2" class="btn btn-outline-primary">Non</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <hr class="bg-dark border-top border-dark" />
+                                                <div class="row">
+                                                    <label for="item6_bathroom0" class="col-sm-4 col-form-label">Douche</label>
+                                                    <div class="col-sm-4">
+                                                        <div id="item6_bathroom0" class="btn-group w-100" role="group">
+                                                            <input id="item6_bathroom0_btn1" type="radio" class="btn-check" name="btnradio6_bathroom0" autocomplete="off"><label for="item6_bathroom0_btn1" class="btn btn-outline-primary">Oui</label>
+                                                            <input id="item6_bathroom0_btn2" type="radio" class="btn-check" name="btnradio6_bathroom0" autocomplete="off"><label for="item6_bathroom0_btn2" class="btn btn-outline-primary">Non</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <hr class="bg-dark border-top border-dark" />
+                                                <div class="row">
+                                                    <label for="item7_bathroom0" class="col-sm-4 col-form-label">Savon</label>
+                                                    <div class="col-sm-4">
+                                                        <div id="item7_bathroom0" class="btn-group w-100" role="group">
+                                                            <input id="item7_bathroom0_btn1" type="radio" class="btn-check" name="btnradio7_bathroom0" autocomplete="off"><label for="item7_bathroom0_btn1" class="btn btn-outline-primary">Oui</label>
+                                                            <input id="item7_bathroom0_btn2" type="radio" class="btn-check" name="btnradio7_bathroom0" autocomplete="off"><label for="item7_bathroom0_btn2" class="btn btn-outline-primary">Non</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <hr class="bg-dark border-top border-dark" />
+                                                <div class="row">
+                                                    <label for="item8_bathroom0" class="col-sm-4 col-form-label">Shampoing</label>
+                                                    <div class="col-sm-4">
+                                                        <div id="item8_bathroom0" class="btn-group w-100" role="group">
+                                                            <input id="item8_bathroom0_btn1" type="radio" class="btn-check" name="btnradio8_bathroom0" autocomplete="off"><label for="item8_bathroom0_btn1" class="btn btn-outline-primary">Oui</label>
+                                                            <input id="item8_bathroom0_btn2" type="radio" class="btn-check" name="btnradio8_bathroom0" autocomplete="off"><label for="item8_bathroom0_btn2" class="btn btn-outline-primary">Non</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="accordion-item">
+                                        <p class="accordion-header">
+                                            <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapse_bathroom1" aria-expanded="true" aria-controls="collapse_bathroom1" disabled>
+                                                <strong class="fs-5">Salle de bains n°2</strong>
+                                            </button>
+                                        </p>
+                                        <div id="collapse_bathroom1" class="accordion-collapse collapse show">
+                                            <div class="accordion-body mx-lg-5 mb-4">
+                                                <div class="row">
+                                                    <label for="item0_bathroom1" class="col-sm-4 col-form-label">Baignoire</label>
+                                                    <div class="col-sm-4">
+                                                        <div id="item0_bathroom1" class="btn-group w-100" role="group">
+                                                            <input id="item0_bathroom1_btn1" type="radio" class="btn-check" name="btnradio0_bathroom1" autocomplete="off"><label for="item0_bathroom1_btn1" class="btn btn-outline-primary">Oui</label>
+                                                            <input id="item0_bathroom1_btn2" type="radio" class="btn-check" name="btnradio0_bathroom1" autocomplete="off"><label for="item0_bathroom1_btn2" class="btn btn-outline-primary">Non</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <hr class="bg-dark border-top border-dark" />
+                                                <div class="row">
+                                                    <label for="item1_bathroom1" class="col-sm-4 col-form-label">Bidet</label>
+                                                    <div class="col-sm-4">
+                                                        <div id="item1_bathroom1" class="btn-group w-100" role="group">
+                                                            <input id="item1_bathroom1_btn1" type="radio" class="btn-check" name="btnradio1_bathroom1" autocomplete="off"><label for="item1_bathroom1_btn1" class="btn btn-outline-primary">Oui</label>
+                                                            <input id="item1_bathroom1_btn2" type="radio" class="btn-check" name="btnradio1_bathroom1" autocomplete="off"><label for="item1_bathroom1_btn2" class="btn btn-outline-primary">Non</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <hr class="bg-dark border-top border-dark" />
+                                                <div class="row">
+                                                    <label for="item2_bathroom1" class="col-sm-4 col-form-label">WC intégrés</label>
+                                                    <div class="col-sm-4">
+                                                        <div id="item2_bathroom1" class="btn-group w-100" role="group">
+                                                            <input id="item2_bathroom1_btn1" type="radio" class="btn-check" name="btnradio2_bathroom1" autocomplete="off"><label for="item2_bathroom1_btn1" class="btn btn-outline-primary">Oui</label>
+                                                            <input id="item2_bathroom1_btn2" type="radio" class="btn-check" name="btnradio2_bathroom1" autocomplete="off"><label for="item2_bathroom1_btn2" class="btn btn-outline-primary">Non</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <hr class="bg-dark border-top border-dark" />
+                                                <div class="row">
+                                                    <label for="item3_bathroom1" class="col-sm-4 col-form-label">Sèche-cheveux</label>
+                                                    <div class="col-sm-4">
+                                                        <div id="item3_bathroom1" class="btn-group w-100" role="group">
+                                                            <input id="item3_bathroom1_btn1" type="radio" class="btn-check" name="btnradio3_bathroom1" autocomplete="off"><label for="item3_bathroom1_btn1" class="btn btn-outline-primary">Oui</label>
+                                                            <input id="item3_bathroom1_btn2" type="radio" class="btn-check" name="btnradio3_bathroom1" autocomplete="off"><label for="item3_bathroom1_btn2" class="btn btn-outline-primary">Non</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <hr class="bg-dark border-top border-dark" />
+                                                <div class="row">
+                                                    <label for="item4_bathroom1" class="col-sm-4 col-form-label">Baignoire balnéo</label>
+                                                    <div class="col-sm-4">
+                                                        <div id="item4_bathroom1" class="btn-group w-100" role="group">
+                                                            <input id="item4_bathroom1_btn1" type="radio" class="btn-check" name="btnradio4_bathroom1" autocomplete="off"><label for="item4_bathroom1_btn1" class="btn btn-outline-primary">Oui</label>
+                                                            <input id="item4_bathroom1_btn2" type="radio" class="btn-check" name="btnradio4_bathroom1" autocomplete="off"><label for="item4_bathroom1_btn2" class="btn btn-outline-primary">Non</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <hr class="bg-dark border-top border-dark" />
+                                                <div class="row">
+                                                    <label for="item5_bathroom1" class="col-sm-4 col-form-label">Sauna</label>
+                                                    <div class="col-sm-4">
+                                                        <div id="item5_bathroom1" class="btn-group w-100" role="group">
+                                                            <input id="item5_bathroom1_btn1" type="radio" class="btn-check" name="btnradio5_bathroom1" autocomplete="off"><label for="item5_bathroom1_btn1" class="btn btn-outline-primary">Oui</label>
+                                                            <input id="item5_bathroom1_btn2" type="radio" class="btn-check" name="btnradio5_bathroom1" autocomplete="off"><label for="item5_bathroom1_btn2" class="btn btn-outline-primary">Non</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <hr class="bg-dark border-top border-dark" />
+                                                <div class="row">
+                                                    <label for="item6_bathroom1" class="col-sm-4 col-form-label">Douche</label>
+                                                    <div class="col-sm-4">
+                                                        <div id="item6_bathroom1" class="btn-group w-100" role="group">
+                                                            <input id="item6_bathroom1_btn1" type="radio" class="btn-check" name="btnradio6_bathroom1" autocomplete="off"><label for="item6_bathroom1_btn1" class="btn btn-outline-primary">Oui</label>
+                                                            <input id="item6_bathroom1_btn2" type="radio" class="btn-check" name="btnradio6_bathroom1" autocomplete="off"><label for="item6_bathroom1_btn2" class="btn btn-outline-primary">Non</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <hr class="bg-dark border-top border-dark" />
+                                                <div class="row">
+                                                    <label for="item7_bathroom1" class="col-sm-4 col-form-label">Savon</label>
+                                                    <div class="col-sm-4">
+                                                        <div id="item7_bathroom1" class="btn-group w-100" role="group">
+                                                            <input id="item7_bathroom1_btn1" type="radio" class="btn-check" name="btnradio7_bathroom1" autocomplete="off"><label for="item7_bathroom1_btn1" class="btn btn-outline-primary">Oui</label>
+                                                            <input id="item7_bathroom1_btn2" type="radio" class="btn-check" name="btnradio7_bathroom1" autocomplete="off"><label for="item7_bathroom1_btn2" class="btn btn-outline-primary">Non</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <hr class="bg-dark border-top border-dark" />
+                                                <div class="row">
+                                                    <label for="item8_bathroom1" class="col-sm-4 col-form-label">Shampoing</label>
+                                                    <div class="col-sm-4">
+                                                        <div id="item8_bathroom1" class="btn-group w-100" role="group">
+                                                            <input id="item8_bathroom1_btn1" type="radio" class="btn-check" name="btnradio8_bathroom1" autocomplete="off"><label for="item8_bathroom1_btn1" class="btn btn-outline-primary">Oui</label>
+                                                            <input id="item8_bathroom1_btn2" type="radio" class="btn-check" name="btnradio8_bathroom1" autocomplete="off"><label for="item8_bathroom1_btn2" class="btn btn-outline-primary">Non</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="accordion-item">
+                                        <p class="accordion-header">
+                                            <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapse_bathroom2" aria-expanded="true" aria-controls="collapse_bathroom2" disabled>
+                                                <strong class="fs-5">Salle de bains n°3</strong>
+                                            </button>
+                                        </p>
+                                        <div id="collapse_bathroom2" class="accordion-collapse collapse show">
+                                            <div class="accordion-body mx-lg-5 mb-4">
+                                                <div class="row">
+                                                    <label for="item0_bathroom2" class="col-sm-4 col-form-label">Baignoire</label>
+                                                    <div class="col-sm-4">
+                                                        <div id="item0_bathroom2" class="btn-group w-100" role="group">
+                                                            <input id="item0_bathroom2_btn1" type="radio" class="btn-check" name="btnradio0_bathroom2" autocomplete="off"><label for="item0_bathroom2_btn1" class="btn btn-outline-primary">Oui</label>
+                                                            <input id="item0_bathroom2_btn2" type="radio" class="btn-check" name="btnradio0_bathroom2" autocomplete="off"><label for="item0_bathroom2_btn2" class="btn btn-outline-primary">Non</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <hr class="bg-dark border-top border-dark" />
+                                                <div class="row">
+                                                    <label for="item1_bathroom2" class="col-sm-4 col-form-label">Bidet</label>
+                                                    <div class="col-sm-4">
+                                                        <div id="item1_bathroom2" class="btn-group w-100" role="group">
+                                                            <input id="item1_bathroom2_btn1" type="radio" class="btn-check" name="btnradio1_bathroom2" autocomplete="off"><label for="item1_bathroom2_btn1" class="btn btn-outline-primary">Oui</label>
+                                                            <input id="item1_bathroom2_btn2" type="radio" class="btn-check" name="btnradio1_bathroom2" autocomplete="off"><label for="item1_bathroom2_btn2" class="btn btn-outline-primary">Non</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <hr class="bg-dark border-top border-dark" />
+                                                <div class="row">
+                                                    <label for="item2_bathroom2" class="col-sm-4 col-form-label">WC intégrés</label>
+                                                    <div class="col-sm-4">
+                                                        <div id="item2_bathroom2" class="btn-group w-100" role="group">
+                                                            <input id="item2_bathroom2_btn1" type="radio" class="btn-check" name="btnradio2_bathroom2" autocomplete="off"><label for="item2_bathroom2_btn1" class="btn btn-outline-primary">Oui</label>
+                                                            <input id="item2_bathroom2_btn2" type="radio" class="btn-check" name="btnradio2_bathroom2" autocomplete="off"><label for="item2_bathroom2_btn2" class="btn btn-outline-primary">Non</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <hr class="bg-dark border-top border-dark" />
+                                                <div class="row">
+                                                    <label for="item3_bathroom2" class="col-sm-4 col-form-label">Sèche-cheveux</label>
+                                                    <div class="col-sm-4">
+                                                        <div id="item3_bathroom2" class="btn-group w-100" role="group">
+                                                            <input id="item3_bathroom2_btn1" type="radio" class="btn-check" name="btnradio3_bathroom2" autocomplete="off"><label for="item3_bathroom2_btn1" class="btn btn-outline-primary">Oui</label>
+                                                            <input id="item3_bathroom2_btn2" type="radio" class="btn-check" name="btnradio3_bathroom2" autocomplete="off"><label for="item3_bathroom2_btn2" class="btn btn-outline-primary">Non</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <hr class="bg-dark border-top border-dark" />
+                                                <div class="row">
+                                                    <label for="item4_bathroom2" class="col-sm-4 col-form-label">Baignoire balnéo</label>
+                                                    <div class="col-sm-4">
+                                                        <div id="item4_bathroom2" class="btn-group w-100" role="group">
+                                                            <input id="item4_bathroom2_btn1" type="radio" class="btn-check" name="btnradio4_bathroom2" autocomplete="off"><label for="item4_bathroom2_btn1" class="btn btn-outline-primary">Oui</label>
+                                                            <input id="item4_bathroom2_btn2" type="radio" class="btn-check" name="btnradio4_bathroom2" autocomplete="off"><label for="item4_bathroom2_btn2" class="btn btn-outline-primary">Non</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <hr class="bg-dark border-top border-dark" />
+                                                <div class="row">
+                                                    <label for="item5_bathroom2" class="col-sm-4 col-form-label">Sauna</label>
+                                                    <div class="col-sm-4">
+                                                        <div id="item5_bathroom2" class="btn-group w-100" role="group">
+                                                            <input id="item5_bathroom2_btn1" type="radio" class="btn-check" name="btnradio5_bathroom2" autocomplete="off"><label for="item5_bathroom2_btn1" class="btn btn-outline-primary">Oui</label>
+                                                            <input id="item5_bathroom2_btn2" type="radio" class="btn-check" name="btnradio5_bathroom2" autocomplete="off"><label for="item5_bathroom2_btn2" class="btn btn-outline-primary">Non</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <hr class="bg-dark border-top border-dark" />
+                                                <div class="row">
+                                                    <label for="item6_bathroom2" class="col-sm-4 col-form-label">Douche</label>
+                                                    <div class="col-sm-4">
+                                                        <div id="item6_bathroom2" class="btn-group w-100" role="group">
+                                                            <input id="item6_bathroom2_btn1" type="radio" class="btn-check" name="btnradio6_bathroom2" autocomplete="off"><label for="item6_bathroom2_btn1" class="btn btn-outline-primary">Oui</label>
+                                                            <input id="item6_bathroom2_btn2" type="radio" class="btn-check" name="btnradio6_bathroom2" autocomplete="off"><label for="item6_bathroom2_btn2" class="btn btn-outline-primary">Non</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <hr class="bg-dark border-top border-dark" />
+                                                <div class="row">
+                                                    <label for="item7_bathroom2" class="col-sm-4 col-form-label">Savon</label>
+                                                    <div class="col-sm-4">
+                                                        <div id="item7_bathroom2" class="btn-group w-100" role="group">
+                                                            <input id="item7_bathroom2_btn1" type="radio" class="btn-check" name="btnradio7_bathroom2" autocomplete="off"><label for="item7_bathroom2_btn1" class="btn btn-outline-primary">Oui</label>
+                                                            <input id="item7_bathroom2_btn2" type="radio" class="btn-check" name="btnradio7_bathroom2" autocomplete="off"><label for="item7_bathroom2_btn2" class="btn btn-outline-primary">Non</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <hr class="bg-dark border-top border-dark" />
+                                                <div class="row">
+                                                    <label for="item8_bathroom2" class="col-sm-4 col-form-label">Shampoing</label>
+                                                    <div class="col-sm-4">
+                                                        <div id="item8_bathroom2" class="btn-group w-100" role="group">
+                                                            <input id="item8_bathroom2_btn1" type="radio" class="btn-check" name="btnradio8_bathroom2" autocomplete="off"><label for="item8_bathroom2_btn1" class="btn btn-outline-primary">Oui</label>
+                                                            <input id="item8_bathroom2_btn2" type="radio" class="btn-check" name="btnradio8_bathroom2" autocomplete="off"><label for="item8_bathroom2_btn2" class="btn btn-outline-primary">Non</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="accordion-item">
+                                        <p class="accordion-header">
+                                            <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapse_bathroom3" aria-expanded="true" aria-controls="collapse_bathroom3" disabled>
+                                                <strong class="fs-5">Salle de bains n°4</strong>
+                                            </button>
+                                        </p>
+                                        <div id="collapse_bathroom3" class="accordion-collapse collapse show">
+                                            <div class="accordion-body mx-lg-5 mb-4">
+                                                <div class="row">
+                                                    <label for="item0_bathroom3" class="col-sm-4 col-form-label">Baignoire</label>
+                                                    <div class="col-sm-4">
+                                                        <div id="item0_bathroom3" class="btn-group w-100" role="group">
+                                                            <input id="item0_bathroom3_btn1" type="radio" class="btn-check" name="btnradio0_bathroom3" autocomplete="off"><label for="item0_bathroom3_btn1" class="btn btn-outline-primary">Oui</label>
+                                                            <input id="item0_bathroom3_btn2" type="radio" class="btn-check" name="btnradio0_bathroom3" autocomplete="off"><label for="item0_bathroom3_btn2" class="btn btn-outline-primary">Non</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <hr class="bg-dark border-top border-dark" />
+                                                <div class="row">
+                                                    <label for="item1_bathroom3" class="col-sm-4 col-form-label">Bidet</label>
+                                                    <div class="col-sm-4">
+                                                        <div id="item1_bathroom3" class="btn-group w-100" role="group">
+                                                            <input id="item1_bathroom3_btn1" type="radio" class="btn-check" name="btnradio1_bathroom3" autocomplete="off"><label for="item1_bathroom3_btn1" class="btn btn-outline-primary">Oui</label>
+                                                            <input id="item1_bathroom3_btn2" type="radio" class="btn-check" name="btnradio1_bathroom3" autocomplete="off"><label for="item1_bathroom3_btn2" class="btn btn-outline-primary">Non</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <hr class="bg-dark border-top border-dark" />
+                                                <div class="row">
+                                                    <label for="item2_bathroom3" class="col-sm-4 col-form-label">WC intégrés</label>
+                                                    <div class="col-sm-4">
+                                                        <div id="item2_bathroom3" class="btn-group w-100" role="group">
+                                                            <input id="item2_bathroom3_btn1" type="radio" class="btn-check" name="btnradio2_bathroom3" autocomplete="off"><label for="item2_bathroom3_btn1" class="btn btn-outline-primary">Oui</label>
+                                                            <input id="item2_bathroom3_btn2" type="radio" class="btn-check" name="btnradio2_bathroom3" autocomplete="off"><label for="item2_bathroom3_btn2" class="btn btn-outline-primary">Non</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <hr class="bg-dark border-top border-dark" />
+                                                <div class="row">
+                                                    <label for="item3_bathroom3" class="col-sm-4 col-form-label">Sèche-cheveux</label>
+                                                    <div class="col-sm-4">
+                                                        <div id="item3_bathroom3" class="btn-group w-100" role="group">
+                                                            <input id="item3_bathroom3_btn1" type="radio" class="btn-check" name="btnradio3_bathroom3" autocomplete="off"><label for="item3_bathroom3_btn1" class="btn btn-outline-primary">Oui</label>
+                                                            <input id="item3_bathroom3_btn2" type="radio" class="btn-check" name="btnradio3_bathroom3" autocomplete="off"><label for="item3_bathroom3_btn2" class="btn btn-outline-primary">Non</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <hr class="bg-dark border-top border-dark" />
+                                                <div class="row">
+                                                    <label for="item4_bathroom3" class="col-sm-4 col-form-label">Baignoire balnéo</label>
+                                                    <div class="col-sm-4">
+                                                        <div id="item4_bathroom3" class="btn-group w-100" role="group">
+                                                            <input id="item4_bathroom3_btn1" type="radio" class="btn-check" name="btnradio4_bathroom3" autocomplete="off"><label for="item4_bathroom3_btn1" class="btn btn-outline-primary">Oui</label>
+                                                            <input id="item4_bathroom3_btn2" type="radio" class="btn-check" name="btnradio4_bathroom3" autocomplete="off"><label for="item4_bathroom3_btn2" class="btn btn-outline-primary">Non</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <hr class="bg-dark border-top border-dark" />
+                                                <div class="row">
+                                                    <label for="item5_bathroom3" class="col-sm-4 col-form-label">Sauna</label>
+                                                    <div class="col-sm-4">
+                                                        <div id="item5_bathroom3" class="btn-group w-100" role="group">
+                                                            <input id="item5_bathroom3_btn1" type="radio" class="btn-check" name="btnradio5_bathroom3" autocomplete="off"><label for="item5_bathroom3_btn1" class="btn btn-outline-primary">Oui</label>
+                                                            <input id="item5_bathroom3_btn2" type="radio" class="btn-check" name="btnradio5_bathroom3" autocomplete="off"><label for="item5_bathroom3_btn2" class="btn btn-outline-primary">Non</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <hr class="bg-dark border-top border-dark" />
+                                                <div class="row">
+                                                    <label for="item6_bathroom3" class="col-sm-4 col-form-label">Douche</label>
+                                                    <div class="col-sm-4">
+                                                        <div id="item6_bathroom3" class="btn-group w-100" role="group">
+                                                            <input id="item6_bathroom3_btn1" type="radio" class="btn-check" name="btnradio6_bathroom3" autocomplete="off"><label for="item6_bathroom3_btn1" class="btn btn-outline-primary">Oui</label>
+                                                            <input id="item6_bathroom3_btn2" type="radio" class="btn-check" name="btnradio6_bathroom3" autocomplete="off"><label for="item6_bathroom3_btn2" class="btn btn-outline-primary">Non</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <hr class="bg-dark border-top border-dark" />
+                                                <div class="row">
+                                                    <label for="item7_bathroom3" class="col-sm-4 col-form-label">Savon</label>
+                                                    <div class="col-sm-4">
+                                                        <div id="item7_bathroom3" class="btn-group w-100" role="group">
+                                                            <input id="item7_bathroom3_btn1" type="radio" class="btn-check" name="btnradio7_bathroom3" autocomplete="off"><label for="item7_bathroom3_btn1" class="btn btn-outline-primary">Oui</label>
+                                                            <input id="item7_bathroom3_btn2" type="radio" class="btn-check" name="btnradio7_bathroom3" autocomplete="off"><label for="item7_bathroom3_btn2" class="btn btn-outline-primary">Non</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <hr class="bg-dark border-top border-dark" />
+                                                <div class="row">
+                                                    <label for="item8_bathroom3" class="col-sm-4 col-form-label">Shampoing</label>
+                                                    <div class="col-sm-4">
+                                                        <div id="item8_bathroom3" class="btn-group w-100" role="group">
+                                                            <input id="item8_bathroom3_btn1" type="radio" class="btn-check" name="btnradio8_bathroom3" autocomplete="off"><label for="item8_bathroom3_btn1" class="btn btn-outline-primary">Oui</label>
+                                                            <input id="item8_bathroom3_btn2" type="radio" class="btn-check" name="btnradio8_bathroom3" autocomplete="off"><label for="item8_bathroom3_btn2" class="btn btn-outline-primary">Non</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="accordion-item">
+                                        <p class="accordion-header">
+                                            <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapse_bathroom4" aria-expanded="true" aria-controls="collapse_bathroom4" disabled>
+                                                <strong class="fs-5">Salle de bains n°5</strong>
+                                            </button>
+                                        </p>
+                                        <div id="collapse_bathroom4" class="accordion-collapse collapse show">
+                                            <div class="accordion-body mx-lg-5 mb-4">
+                                                <div class="row">
+                                                    <label for="item0_bathroom4" class="col-sm-4 col-form-label">Baignoire</label>
+                                                    <div class="col-sm-4">
+                                                        <div id="item0_bathroom4" class="btn-group w-100" role="group">
+                                                            <input id="item0_bathroom4_btn1" type="radio" class="btn-check" name="btnradio0_bathroom4" autocomplete="off"><label for="item0_bathroom4_btn1" class="btn btn-outline-primary">Oui</label>
+                                                            <input id="item0_bathroom4_btn2" type="radio" class="btn-check" name="btnradio0_bathroom4" autocomplete="off"><label for="item0_bathroom4_btn2" class="btn btn-outline-primary">Non</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <hr class="bg-dark border-top border-dark" />
+                                                <div class="row">
+                                                    <label for="item1_bathroom4" class="col-sm-4 col-form-label">Bidet</label>
+                                                    <div class="col-sm-4">
+                                                        <div id="item1_bathroom4" class="btn-group w-100" role="group">
+                                                            <input id="item1_bathroom4_btn1" type="radio" class="btn-check" name="btnradio1_bathroom4" autocomplete="off"><label for="item1_bathroom4_btn1" class="btn btn-outline-primary">Oui</label>
+                                                            <input id="item1_bathroom4_btn2" type="radio" class="btn-check" name="btnradio1_bathroom4" autocomplete="off"><label for="item1_bathroom4_btn2" class="btn btn-outline-primary">Non</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <hr class="bg-dark border-top border-dark" />
+                                                <div class="row">
+                                                    <label for="item2_bathroom4" class="col-sm-4 col-form-label">WC intégrés</label>
+                                                    <div class="col-sm-4">
+                                                        <div id="item2_bathroom4" class="btn-group w-100" role="group">
+                                                            <input id="item2_bathroom4_btn1" type="radio" class="btn-check" name="btnradio2_bathroom4" autocomplete="off"><label for="item2_bathroom4_btn1" class="btn btn-outline-primary">Oui</label>
+                                                            <input id="item2_bathroom4_btn2" type="radio" class="btn-check" name="btnradio2_bathroom4" autocomplete="off"><label for="item2_bathroom4_btn2" class="btn btn-outline-primary">Non</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <hr class="bg-dark border-top border-dark" />
+                                                <div class="row">
+                                                    <label for="item3_bathroom4" class="col-sm-4 col-form-label">Sèche-cheveux</label>
+                                                    <div class="col-sm-4">
+                                                        <div id="item3_bathroom4" class="btn-group w-100" role="group">
+                                                            <input id="item3_bathroom4_btn1" type="radio" class="btn-check" name="btnradio3_bathroom4" autocomplete="off"><label for="item3_bathroom4_btn1" class="btn btn-outline-primary">Oui</label>
+                                                            <input id="item3_bathroom4_btn2" type="radio" class="btn-check" name="btnradio3_bathroom4" autocomplete="off"><label for="item3_bathroom4_btn2" class="btn btn-outline-primary">Non</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <hr class="bg-dark border-top border-dark" />
+                                                <div class="row">
+                                                    <label for="item4_bathroom4" class="col-sm-4 col-form-label">Baignoire balnéo</label>
+                                                    <div class="col-sm-4">
+                                                        <div id="item4_bathroom4" class="btn-group w-100" role="group">
+                                                            <input id="item4_bathroom4_btn1" type="radio" class="btn-check" name="btnradio4_bathroom4" autocomplete="off"><label for="item4_bathroom4_btn1" class="btn btn-outline-primary">Oui</label>
+                                                            <input id="item4_bathroom4_btn2" type="radio" class="btn-check" name="btnradio4_bathroom4" autocomplete="off"><label for="item4_bathroom4_btn2" class="btn btn-outline-primary">Non</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <hr class="bg-dark border-top border-dark" />
+                                                <div class="row">
+                                                    <label for="item5_bathroom4" class="col-sm-4 col-form-label">Sauna</label>
+                                                    <div class="col-sm-4">
+                                                        <div id="item5_bathroom4" class="btn-group w-100" role="group">
+                                                            <input id="item5_bathroom4_btn1" type="radio" class="btn-check" name="btnradio5_bathroom4" autocomplete="off"><label for="item5_bathroom4_btn1" class="btn btn-outline-primary">Oui</label>
+                                                            <input id="item5_bathroom4_btn2" type="radio" class="btn-check" name="btnradio5_bathroom4" autocomplete="off"><label for="item5_bathroom4_btn2" class="btn btn-outline-primary">Non</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <hr class="bg-dark border-top border-dark" />
+                                                <div class="row">
+                                                    <label for="item6_bathroom4" class="col-sm-4 col-form-label">Douche</label>
+                                                    <div class="col-sm-4">
+                                                        <div id="item6_bathroom4" class="btn-group w-100" role="group">
+                                                            <input id="item6_bathroom4_btn1" type="radio" class="btn-check" name="btnradio6_bathroom4" autocomplete="off"><label for="item6_bathroom4_btn1" class="btn btn-outline-primary">Oui</label>
+                                                            <input id="item6_bathroom4_btn2" type="radio" class="btn-check" name="btnradio6_bathroom4" autocomplete="off"><label for="item6_bathroom4_btn2" class="btn btn-outline-primary">Non</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <hr class="bg-dark border-top border-dark" />
+                                                <div class="row">
+                                                    <label for="item7_bathroom4" class="col-sm-4 col-form-label">Savon</label>
+                                                    <div class="col-sm-4">
+                                                        <div id="item7_bathroom4" class="btn-group w-100" role="group">
+                                                            <input id="item7_bathroom4_btn1" type="radio" class="btn-check" name="btnradio7_bathroom4" autocomplete="off"><label for="item7_bathroom4_btn1" class="btn btn-outline-primary">Oui</label>
+                                                            <input id="item7_bathroom4_btn2" type="radio" class="btn-check" name="btnradio7_bathroom4" autocomplete="off"><label for="item7_bathroom4_btn2" class="btn btn-outline-primary">Non</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <hr class="bg-dark border-top border-dark" />
+                                                <div class="row">
+                                                    <label for="item8_bathroom4" class="col-sm-4 col-form-label">Shampoing</label>
+                                                    <div class="col-sm-4">
+                                                        <div id="item8_bathroom4" class="btn-group w-100" role="group">
+                                                            <input id="item8_bathroom4_btn1" type="radio" class="btn-check" name="btnradio8_bathroom4" autocomplete="off"><label for="item8_bathroom4_btn1" class="btn btn-outline-primary">Oui</label>
+                                                            <input id="item8_bathroom4_btn2" type="radio" class="btn-check" name="btnradio8_bathroom4" autocomplete="off"><label for="item8_bathroom4_btn2" class="btn btn-outline-primary">Non</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                </div>
+
+                                <div id="outdoor_accordion" class="accordion mx-lg-5 mt-5 mb-3">
+                                    <div class="accordion-item">
+                                        <p class="accordion-header">
+                                            <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapse_outdoor0" aria-expanded="true" aria-controls="collapse_outdoor0" disabled>
+                                                <strong class="fs-5">Espace extérieur</strong>
+                                            </button>
+                                        </p>
+                                        <div id="collapse_outdoor0" class="accordion-collapse collapse show">
+                                            <div class="accordion-body mx-lg-5 mb-4">
+                                                <div class="row">
+                                                    <label for="item0_outdoor0" class="col-sm-4 col-form-label">Bassin profond</label>
+                                                    <div class="col-sm-4">
+                                                        <div id="item0_outdoor0" class="btn-group w-100" role="group">
+                                                            <input id="item0_outdoor0_btn1" type="radio" class="btn-check" name="btnradio0_outdoor0" autocomplete="off"><label for="item0_outdoor0_btn1" class="btn btn-outline-primary">Oui</label>
+                                                            <input id="item0_outdoor0_btn2" type="radio" class="btn-check" name="btnradio0_outdoor0" autocomplete="off"><label for="item0_outdoor0_btn2" class="btn btn-outline-primary">Non</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <hr class="bg-dark border-top border-dark" />
+                                                <div class="row">
+                                                    <label for="item1_outdoor0" class="col-sm-4 col-form-label">Jardin</label>
+                                                    <div class="col-sm-4">
+                                                        <div id="item1_outdoor0" class="btn-group w-100" role="group">
+                                                            <input id="item1_outdoor0_btn1" type="radio" class="btn-check" name="btnradio1_outdoor0" autocomplete="off"><label for="item1_outdoor0_btn1" class="btn btn-outline-primary">Oui</label>
+                                                            <input id="item1_outdoor0_btn2" type="radio" class="btn-check" name="btnradio1_outdoor0" autocomplete="off"><label for="item1_outdoor0_btn2" class="btn btn-outline-primary">Non</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <hr class="bg-dark border-top border-dark" />
+                                                <div class="row">
+                                                    <label for="item2_outdoor0" class="col-sm-4 col-form-label">Terrasse</label>
+                                                    <div class="col-sm-4">
+                                                        <div id="item2_outdoor0" class="btn-group w-100" role="group">
+                                                            <input id="item2_outdoor0_btn1" type="radio" class="btn-check" name="btnradio2_outdoor0" autocomplete="off"><label for="item2_outdoor0_btn1" class="btn btn-outline-primary">Oui</label>
+                                                            <input id="item2_outdoor0_btn2" type="radio" class="btn-check" name="btnradio2_outdoor0" autocomplete="off"><label for="item2_outdoor0_btn2" class="btn btn-outline-primary">Non</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <hr class="bg-dark border-top border-dark" />
+                                                <div class="row">
+                                                    <label for="item3_outdoor0" class="col-sm-4 col-form-label">Barbecue</label>
+                                                    <div class="col-sm-4">
+                                                        <div id="item3_outdoor0" class="btn-group w-100" role="group">
+                                                            <input id="item3_outdoor0_btn1" type="radio" class="btn-check" name="btnradio3_outdoor0" autocomplete="off"><label for="item3_outdoor0_btn1" class="btn btn-outline-primary">Oui</label>
+                                                            <input id="item3_outdoor0_btn2" type="radio" class="btn-check" name="btnradio3_outdoor0" autocomplete="off"><label for="item3_outdoor0_btn2" class="btn btn-outline-primary">Non</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <hr class="bg-dark border-top border-dark" />
+                                                <div class="row">
+                                                    <label for="item4_outdoor0" class="col-sm-4 col-form-label">Espace repas</label>
+                                                    <div class="col-sm-4">
+                                                        <div id="item4_outdoor0" class="btn-group w-100" role="group">
+                                                            <input id="item4_outdoor0_btn1" type="radio" class="btn-check" name="btnradio4_outdoor0" autocomplete="off"><label for="item4_outdoor0_btn1" class="btn btn-outline-primary">Oui</label>
+                                                            <input id="item4_outdoor0_btn2" type="radio" class="btn-check" name="btnradio4_outdoor0" autocomplete="off"><label for="item4_outdoor0_btn2" class="btn btn-outline-primary">Non</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div id="laundry_accordion" class="accordion mx-lg-5 mt-5 mb-3">
+                                    <div class="accordion-item">
+                                        <p class="accordion-header">
+                                            <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapse_laundry0" aria-expanded="true" aria-controls="collapse_laundry0" disabled>
+                                                <strong class="fs-5">Linge de maison</strong>
+                                            </button>
+                                        </p>
+                                        <div id="collapse_laundry0" class="accordion-collapse collapse show">
+                                            <div class="accordion-body mx-lg-5 mb-4">
+                                                <div class="row">
+                                                    <label for="item0_laundry0" class="col-sm-4 col-form-label">Draps-housses</label>
+                                                    <div class="col-sm-4">
+                                                        <div id="item0_laundry0" class="btn-group w-100" role="group">
+                                                            <input id="item0_laundry0_btn1" type="radio" class="btn-check" name="btnradio0_laundry0" autocomplete="off"><label for="item0_laundry0_btn1" class="btn btn-outline-primary">Oui</label>
+                                                            <input id="item0_laundry0_btn2" type="radio" class="btn-check" name="btnradio0_laundry0" autocomplete="off"><label for="item0_laundry0_btn2" class="btn btn-outline-primary">Non</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <hr class="bg-dark border-top border-dark" />
+                                                <div class="row">
+                                                    <label for="item1_laundry0" class="col-sm-4 col-form-label">Draps</label>
+                                                    <div class="col-sm-4">
+                                                        <div id="item1_laundry0" class="btn-group w-100" role="group">
+                                                            <input id="item1_laundry0_btn1" type="radio" class="btn-check" name="btnradio1_laundry0" autocomplete="off"><label for="item1_laundry0_btn1" class="btn btn-outline-primary">Oui</label>
+                                                            <input id="item1_laundry0_btn2" type="radio" class="btn-check" name="btnradio1_laundry0" autocomplete="off"><label for="item1_laundry0_btn2" class="btn btn-outline-primary">Non</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <hr class="bg-dark border-top border-dark" />
+                                                <div class="row">
+                                                    <label for="item2_laundry0" class="col-sm-4 col-form-label">Couvertures</label>
+                                                    <div class="col-sm-4">
+                                                        <div id="item2_laundry0" class="btn-group w-100" role="group">
+                                                            <input id="item2_laundry0_btn1" type="radio" class="btn-check" name="btnradio2_laundry0" autocomplete="off"><label for="item2_laundry0_btn1" class="btn btn-outline-primary">Oui</label>
+                                                            <input id="item2_laundry0_btn2" type="radio" class="btn-check" name="btnradio2_laundry0" autocomplete="off"><label for="item2_laundry0_btn2" class="btn btn-outline-primary">Non</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <hr class="bg-dark border-top border-dark" />
+                                                <div class="row">
+                                                    <label for="item3_laundry0" class="col-sm-4 col-form-label">Couvertures supplémentaires</label>
+                                                    <div class="col-sm-4">
+                                                        <div id="item3_laundry0" class="btn-group w-100" role="group">
+                                                            <input id="item3_laundry0_btn1" type="radio" class="btn-check" name="btnradio3_laundry0" autocomplete="off"><label for="item3_laundry0_btn1" class="btn btn-outline-primary">Oui</label>
+                                                            <input id="item3_laundry0_btn2" type="radio" class="btn-check" name="btnradio3_laundry0" autocomplete="off"><label for="item3_laundry0_btn2" class="btn btn-outline-primary">Non</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <hr class="bg-dark border-top border-dark" />
+                                                <div class="row">
+                                                    <label for="item4_laundry0" class="col-sm-4 col-form-label">Oreillers</label>
+                                                    <div class="col-sm-4">
+                                                        <div id="item4_laundry0" class="btn-group w-100" role="group">
+                                                            <input id="item4_laundry0_btn1" type="radio" class="btn-check" name="btnradio4_laundry0" autocomplete="off"><label for="item4_laundry0_btn1" class="btn btn-outline-primary">Oui</label>
+                                                            <input id="item4_laundry0_btn2" type="radio" class="btn-check" name="btnradio4_laundry0" autocomplete="off"><label for="item4_laundry0_btn2" class="btn btn-outline-primary">Non</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <hr class="bg-dark border-top border-dark" />
+                                                <div class="row">
+                                                    <label for="item5_laundry0" class="col-sm-4 col-form-label">Protèges-matelas</label>
+                                                    <div class="col-sm-4">
+                                                        <div id="item5_laundry0" class="btn-group w-100" role="group">
+                                                            <input id="item5_laundry0_btn1" type="radio" class="btn-check" name="btnradio5_laundry0" autocomplete="off"><label for="item5_laundry0_btn1" class="btn btn-outline-primary">Oui</label>
+                                                            <input id="item5_laundry0_btn2" type="radio" class="btn-check" name="btnradio5_laundry0" autocomplete="off"><label for="item5_laundry0_btn2" class="btn btn-outline-primary">Non</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <hr class="bg-dark border-top border-dark" />
+                                                <div class="row">
+                                                    <label for="item6_laundry0" class="col-sm-4 col-form-label">Serviettes de toilette</label>
+                                                    <div class="col-sm-4">
+                                                        <div id="item6_laundry0" class="btn-group w-100" role="group">
+                                                            <input id="item6_laundry0_btn1" type="radio" class="btn-check" name="btnradio6_laundry0" autocomplete="off"><label for="item6_laundry0_btn1" class="btn btn-outline-primary">Oui</label>
+                                                            <input id="item6_laundry0_btn2" type="radio" class="btn-check" name="btnradio6_laundry0" autocomplete="off"><label for="item6_laundry0_btn2" class="btn btn-outline-primary">Non</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <hr class="bg-dark border-top border-dark" />
+                                                <div class="row">
+                                                    <label for="item7_laundry0" class="col-sm-4 col-form-label">Serviettes de piscine</label>
+                                                    <div class="col-sm-4">
+                                                        <div id="item7_laundry0" class="btn-group w-100" role="group">
+                                                            <input id="item7_laundry0_btn1" type="radio" class="btn-check" name="btnradio7_laundry0" autocomplete="off"><label for="item7_laundry0_btn1" class="btn btn-outline-primary">Oui</label>
+                                                            <input id="item7_laundry0_btn2" type="radio" class="btn-check" name="btnradio7_laundry0" autocomplete="off"><label for="item7_laundry0_btn2" class="btn btn-outline-primary">Non</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <hr class="bg-dark border-top border-dark" />
+                                                <div class="row">
+                                                    <label for="item8_laundry0" class="col-sm-4 col-form-label">Lits faits à l'arrivée</label>
+                                                    <div class="col-sm-4">
+                                                        <div id="item8_laundry0" class="btn-group w-100" role="group">
+                                                            <input id="item8_laundry0_btn1" type="radio" class="btn-check" name="btnradio8_laundry0" autocomplete="off"><label for="item8_laundry0_btn1" class="btn btn-outline-primary">Oui</label>
+                                                            <input id="item8_laundry0_btn2" type="radio" class="btn-check" name="btnradio8_laundry0" autocomplete="off"><label for="item8_laundry0_btn2" class="btn btn-outline-primary">Non</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div id="accessibility_accordion" class="accordion mx-lg-5 mt-5 mb-3">
+                                    <div class="accordion-item">
+                                        <p class="accordion-header">
+                                            <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapse_accessibility0" aria-expanded="true" aria-controls="collapse_accessibility0" disabled>
+                                                <strong class="fs-5">Accessibilité</strong>
+                                            </button>
+                                        </p>
+                                        <div id="collapse_accessibility0" class="accordion-collapse collapse show">
+                                            <div class="accordion-body mx-lg-5 mb-4">
+                                                <div class="row">
+                                                    <label for="item0_accessibility0" class="col-sm-4 col-form-label">Accessible par ascenseur</label>
+                                                    <div class="col-sm-4">
+                                                        <div id="item0_accessibility0" class="btn-group w-100" role="group">
+                                                            <input id="item0_accessibility0_btn1" type="radio" class="btn-check" name="btnradio0_accessibility0" autocomplete="off"><label for="item0_accessibility0_btn1" class="btn btn-outline-primary">Oui</label>
+                                                            <input id="item0_accessibility0_btn2" type="radio" class="btn-check" name="btnradio0_accessibility0" autocomplete="off"><label for="item0_accessibility0_btn2" class="btn btn-outline-primary">Non</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <hr class="bg-dark border-top border-dark" />
+                                                <div class="row">
+                                                    <label for="item1_accessibility0" class="col-sm-4 col-form-label">Logement entièrement situé au rez-de-chaussée</label>
+                                                    <div class="col-sm-4">
+                                                        <div id="item1_accessibility0" class="btn-group w-100" role="group">
+                                                            <input id="item1_accessibility0_btn1" type="radio" class="btn-check" name="btnradio1_accessibility0" autocomplete="off"><label for="item1_accessibility0_btn1" class="btn btn-outline-primary">Oui</label>
+                                                            <input id="item1_accessibility0_btn2" type="radio" class="btn-check" name="btnradio1_accessibility0" autocomplete="off"><label for="item1_accessibility0_btn2" class="btn btn-outline-primary">Non</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <hr class="bg-dark border-top border-dark" />
+                                                <div class="row">
+                                                    <label for="item2_accessibility0" class="col-sm-4 col-form-label">Logement entièrement accessible en fauteuil roulant</label>
+                                                    <div class="col-sm-4">
+                                                        <div id="item2_accessibility0" class="btn-group w-100" role="group">
+                                                            <input id="item2_accessibility0_btn1" type="radio" class="btn-check" name="btnradio2_accessibility0" autocomplete="off"><label for="item2_accessibility0_btn1" class="btn btn-outline-primary">Oui</label>
+                                                            <input id="item2_accessibility0_btn2" type="radio" class="btn-check" name="btnradio2_accessibility0" autocomplete="off"><label for="item2_accessibility0_btn2" class="btn btn-outline-primary">Non</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <hr class="bg-dark border-top border-dark" />
+                                                <div class="row">
+                                                    <label for="item3_accessibility0" class="col-sm-4 col-form-label">Adapté aux personnes malentendantes</label>
+                                                    <div class="col-sm-4">
+                                                        <div id="item3_accessibility0" class="btn-group w-100" role="group">
+                                                            <input id="item3_accessibility0_btn1" type="radio" class="btn-check" name="btnradio3_accessibility0" autocomplete="off"><label for="item3_accessibility0_btn1" class="btn btn-outline-primary">Oui</label>
+                                                            <input id="item3_accessibility0_btn2" type="radio" class="btn-check" name="btnradio3_accessibility0" autocomplete="off"><label for="item3_accessibility0_btn2" class="btn btn-outline-primary">Non</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <hr class="bg-dark border-top border-dark" />
+                                                <div class="row">
+                                                    <label for="item4_accessibility0" class="col-sm-4 col-form-label">Étages supérieurs accessibles par ascenseur</label>
+                                                    <div class="col-sm-4">
+                                                        <div id="item4_accessibility0" class="btn-group w-100" role="group">
+                                                            <input id="item4_accessibility0_btn1" type="radio" class="btn-check" name="btnradio4_accessibility0" autocomplete="off"><label for="item4_accessibility0_btn1" class="btn btn-outline-primary">Oui</label>
+                                                            <input id="item4_accessibility0_btn2" type="radio" class="btn-check" name="btnradio4_accessibility0" autocomplete="off"><label for="item4_accessibility0_btn2" class="btn btn-outline-primary">Non</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <hr class="bg-dark border-top border-dark" />
+                                                <div class="row">
+                                                    <label for="item5_accessibility0" class="col-sm-4 col-form-label">Baignoire avec barres d'appui</label>
+                                                    <div class="col-sm-4">
+                                                        <div id="item5_accessibility0" class="btn-group w-100" role="group">
+                                                            <input id="item5_accessibility0_btn1" type="radio" class="btn-check" name="btnradio5_accessibility0" autocomplete="off"><label for="item5_accessibility0_btn1" class="btn btn-outline-primary">Oui</label>
+                                                            <input id="item5_accessibility0_btn2" type="radio" class="btn-check" name="btnradio5_accessibility0" autocomplete="off"><label for="item5_accessibility0_btn2" class="btn btn-outline-primary">Non</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <hr class="bg-dark border-top border-dark" />
+                                                <div class="row">
+                                                    <label for="item6_accessibility0" class="col-sm-4 col-form-label">Cordon d'alarme dans la salle de bains</label>
+                                                    <div class="col-sm-4">
+                                                        <div id="item6_accessibility0" class="btn-group w-100" role="group">
+                                                            <input id="item6_accessibility0_btn1" type="radio" class="btn-check" name="btnradio6_accessibility0" autocomplete="off"><label for="item6_accessibility0_btn1" class="btn btn-outline-primary">Oui</label>
+                                                            <input id="item6_accessibility0_btn2" type="radio" class="btn-check" name="btnradio6_accessibility0" autocomplete="off"><label for="item6_accessibility0_btn2" class="btn btn-outline-primary">Non</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <hr class="bg-dark border-top border-dark" />
+                                                <div class="row">
+                                                    <label for="item7_accessibility0" class="col-sm-4 col-form-label">WC surélevés</label>
+                                                    <div class="col-sm-4">
+                                                        <div id="item7_accessibility0" class="btn-group w-100" role="group">
+                                                            <input id="item7_accessibility0_btn1" type="radio" class="btn-check" name="btnradio7_accessibility0" autocomplete="off"><label for="item7_accessibility0_btn1" class="btn btn-outline-primary">Oui</label>
+                                                            <input id="item7_accessibility0_btn2" type="radio" class="btn-check" name="btnradio7_accessibility0" autocomplete="off"><label for="item7_accessibility0_btn2" class="btn btn-outline-primary">Non</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <hr class="bg-dark border-top border-dark" />
+                                                <div class="row">
+                                                    <label for="item8_accessibility0" class="col-sm-4 col-form-label">Lavabo bas adapté aux personnes à mobilité réduite</label>
+                                                    <div class="col-sm-4">
+                                                        <div id="item8_accessibility0" class="btn-group w-100" role="group">
+                                                            <input id="item8_accessibility0_btn1" type="radio" class="btn-check" name="btnradio8_accessibility0" autocomplete="off"><label for="item8_accessibility0_btn1" class="btn btn-outline-primary">Oui</label>
+                                                            <input id="item8_accessibility0_btn2" type="radio" class="btn-check" name="btnradio8_accessibility0" autocomplete="off"><label for="item8_accessibility0_btn2" class="btn btn-outline-primary">Non</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <hr class="bg-dark border-top border-dark" />
+                                                <div class="row">
+                                                    <label for="item9_accessibility0" class="col-sm-4 col-form-label">Douche accessible en fauteuil roulant</label>
+                                                    <div class="col-sm-4">
+                                                        <div id="item9_accessibility0" class="btn-group w-100" role="group">
+                                                            <input id="item9_accessibility0_btn1" type="radio" class="btn-check" name="btnradio9_accessibility0" autocomplete="off"><label for="item9_accessibility0_btn1" class="btn btn-outline-primary">Oui</label>
+                                                            <input id="item9_accessibility0_btn2" type="radio" class="btn-check" name="btnradio9_accessibility0" autocomplete="off"><label for="item9_accessibility0_btn2" class="btn btn-outline-primary">Non</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <hr class="bg-dark border-top border-dark" />
+                                                <div class="row">
+                                                    <label for="item10_accessibility0" class="col-sm-4 col-form-label">Chaise de douche</label>
+                                                    <div class="col-sm-4">
+                                                        <div id="item10_accessibility0" class="btn-group w-100" role="group">
+                                                            <input id="item10_accessibility0_btn1" type="radio" class="btn-check" name="btnradio10_accessibility0" autocomplete="off"><label for="item10_accessibility0_btn1" class="btn btn-outline-primary">Oui</label>
+                                                            <input id="item10_accessibility0_btn2" type="radio" class="btn-check" name="btnradio10_accessibility0" autocomplete="off"><label for="item10_accessibility0_btn2" class="btn btn-outline-primary">Non</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <hr class="bg-dark border-top border-dark" />
+                                                <div class="row">
+                                                    <label for="item11_accessibility0" class="col-sm-4 col-form-label">Toilettes avec barres d'appui</label>
+                                                    <div class="col-sm-4">
+                                                        <div id="item11_accessibility0" class="btn-group w-100" role="group">
+                                                            <input id="item11_accessibility0_btn1" type="radio" class="btn-check" name="btnradio11_accessibility0" autocomplete="off"><label for="item11_accessibility0_btn1" class="btn btn-outline-primary">Oui</label>
+                                                            <input id="item11_accessibility0_btn2" type="radio" class="btn-check" name="btnradio11_accessibility0" autocomplete="off"><label for="item11_accessibility0_btn2" class="btn btn-outline-primary">Non</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div id="safety_accordion" class="accordion mx-lg-5 mt-5 mb-3">
+                                    <div class="accordion-item">
+                                        <p class="accordion-header">
+                                            <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapse_safety0" aria-expanded="true" aria-controls="collapse_safety0" disabled>
+                                                <strong class="fs-5">Sécurité</strong>
+                                            </button>
+                                        </p>
+                                        <div id="collapse_safety0" class="accordion-collapse collapse show">
+                                            <div class="accordion-body mx-lg-5 mb-4">
+                                                <div class="row">
+                                                    <label for="item0_safety0" class="col-sm-4 col-form-label">Détecteur de monoxyde de carbone</label>
+                                                    <div class="col-sm-4">
+                                                        <div id="item0_safety0" class="btn-group w-100" role="group">
+                                                            <input id="item0_safety0_btn1" type="radio" class="btn-check" name="btnradio0_safety0" autocomplete="off"><label for="item0_safety0_btn1" class="btn btn-outline-primary">Oui</label>
+                                                            <input id="item0_safety0_btn2" type="radio" class="btn-check" name="btnradio0_safety0" autocomplete="off"><label for="item0_safety0_btn2" class="btn btn-outline-primary">Non</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <hr class="bg-dark border-top border-dark" />
+                                                <div class="row">
+                                                    <label for="item1_safety0" class="col-sm-4 col-form-label">Détecteur de fumée</label>
+                                                    <div class="col-sm-4">
+                                                        <div id="item1_safety0" class="btn-group w-100" role="group">
+                                                            <input id="item1_safety0_btn1" type="radio" class="btn-check" name="btnradio1_safety0" autocomplete="off"><label for="item1_safety0_btn1" class="btn btn-outline-primary">Oui</label>
+                                                            <input id="item1_safety0_btn2" type="radio" class="btn-check" name="btnradio1_safety0" autocomplete="off"><label for="item1_safety0_btn2" class="btn btn-outline-primary">Non</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <hr class="bg-dark border-top border-dark" />
+                                                <div class="row">
+                                                    <label for="item2_safety0" class="col-sm-4 col-form-label">Extincteur</label>
+                                                    <div class="col-sm-4">
+                                                        <div id="item2_safety0" class="btn-group w-100" role="group">
+                                                            <input id="item2_safety0_btn1" type="radio" class="btn-check" name="btnradio2_safety0" autocomplete="off"><label for="item2_safety0_btn1" class="btn btn-outline-primary">Oui</label>
+                                                            <input id="item2_safety0_btn2" type="radio" class="btn-check" name="btnradio2_safety0" autocomplete="off"><label for="item2_safety0_btn2" class="btn btn-outline-primary">Non</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                            </div>
                         </div>
                             
-                        <div id="newinput"></div>
+                        <!--<div id="newinput"></div>
 
                         <button onclick="add_row('')" type="button" id="add_row_btn" class="btn btn-dark">
                             <span class="bi bi-plus-square" style="position: relative; top: -2px;"></span> Ajouter (<span id="nb_fields"></span>/12)
-                        </button>
+                        </button>-->
 
                     </div>
 
@@ -1360,7 +5740,7 @@
             
                     <!-- Modal Header -->
                     <div class="modal-header">
-                        <h4 class="modal-title">Sélection Image</h4>
+                        <h4 class="modal-title">Mes images</h4>
                         <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                     </div>
                 
@@ -1608,7 +5988,7 @@
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
                     <div class="modal-body my-2 text-center">
-                        <p>Votre site est publié ici :</p>
+                        <p>Votre site est publié à cette adresse :</p>
                         <div class="alert alert-primary" role="alert">
                             <a href="#" target="_blank" id="published_modal_link" class="alert-link"></a>
                         </div>
