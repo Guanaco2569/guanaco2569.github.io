@@ -6090,11 +6090,11 @@
                                     </div>
                                 </div>
                             </div>
-                            <button id="carousel-control-prev" class="carousel-control-prev" type="button" data-bs-target="#myCarousel" data-bs-slide="prev">
+                            <button id="carousel-control-prev" class="carousel-control-prev d-none" type="button" data-bs-target="#myCarousel" data-bs-slide="prev">
                                 <span class="carousel-control-prev-icon" aria-hidden="true"></span>
                                 <span class="visually-hidden">Previous</span>
                             </button>
-                            <button id="carousel-control-next" class="carousel-control-next" type="button" data-bs-target="#myCarousel" data-bs-slide="next">
+                            <button id="carousel-control-next" class="carousel-control-next d-none" type="button" data-bs-target="#myCarousel" data-bs-slide="next">
                                 <span class="carousel-control-next-icon" aria-hidden="true"></span>
                                 <span class="visually-hidden">Next</span>
                             </button>
@@ -6104,7 +6104,20 @@
                         </div>
                         <p id="no_slide" class="d-none">Aucune image à afficher.</p>
                         <br>
-                        <p>Naviguez entre les images avec les flèches droite/gauche.</p>
+                        <!--<small>
+                            Naviguez entre les images avec les flèches droite/gauche.<br>
+                            Choisissez votre image avec le le bouton "Sélectionner image".
+                        </small>-->
+                        <button type="button" class="btn btn-secondary" data-bs-target="#myCarousel" data-bs-slide="prev">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-arrow-left" viewBox="0 0 16 16">
+                                <path fill-rule="evenodd" d="M15 8a.5.5 0 0 0-.5-.5H2.707l3.147-3.146a.5.5 0 1 0-.708-.708l-4 4a.5.5 0 0 0 0 .708l4 4a.5.5 0 0 0 .708-.708L2.707 8.5H14.5A.5.5 0 0 0 15 8"></path>
+                            </svg>
+                        </button>
+                        <button type="button" class="btn btn-secondary" data-bs-target="#myCarousel" data-bs-slide="next">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-arrow-right" viewBox="0 0 16 16">
+                                <path fill-rule="evenodd" d="M1 8a.5.5 0 0 1 .5-.5h11.793l-3.147-3.146a.5.5 0 0 1 .708-.708l4 4a.5.5 0 0 1 0 .708l-4 4a.5.5 0 0 1-.708-.708L13.293 8.5H1.5A.5.5 0 0 1 1 8"></path>
+                            </svg>
+                        </button>
                         <input type="range" class="form-range slider d-none" min="0" max="0" id="customRange1" onchange="move_carousel_to(this.value)">
                     </div>
                 
