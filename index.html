@@ -14,8 +14,8 @@
                 background-color: rgba(0, 0, 0, 0.8);
             }
 
-            .carousel-inner {
-                
+            .carousel-item {
+                padding: 6px;
             }
 
             .modal-footer {
@@ -5888,9 +5888,9 @@
                 
                     <!-- Modal body -->
                     <div class="modal-body text-center">
-                        <div id="myCarousel" class="carousel slide" data-bs-interval="false">
+                        <div id="myCarousel" class="carousel slide mb-2" data-bs-interval="false">
                             <div id="carousel_inner" class="carousel-inner">
-                                <div id="item_0" class="carousel-item active" style="padding: 6px; background-color: #0d6efd;">
+                                <div id="item_0" class="carousel-item active" style="background-color: #0d6efd;">
                                     <span class="delete_tooltip" tabindex="0" data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-title="Suppression impossible : vous utilisez cette image sur votre site.">
                                         <button onclick="delete_img(0)" type="button" class="btn btn-danger delete_btn">Supprimer <i class="bi bi-trash"></i></button>
                                     </span>
@@ -5901,7 +5901,7 @@
                                         <div id="select_alert_0" class="alert alert-success d-none" role="alert">Image sélectionnée <i class="bi bi-check"></i></div>
                                     </div>
                                 </div>
-                                <div id="item_1" class="carousel-item" style="padding: 6px;">
+                                <div id="item_1" class="carousel-item">
                                     <span class="delete_tooltip" tabindex="0" data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-title="Suppression impossible : vous utilisez cette image sur votre site.">
                                         <button onclick="delete_img(1)" type="button" class="btn btn-danger delete_btn">Supprimer <i class="bi bi-trash"></i></button>
                                     </span>
@@ -6105,7 +6105,6 @@
                             </div>
                         </div>
                         <p id="no_slide" class="d-none">Aucune image à afficher.</p>
-                        <br>
                         <small>
                             Naviguez entre les images avec les flèches droite/gauche.<br>
                             Cliquez sur l'image que vous souhaitez sélectionner.
