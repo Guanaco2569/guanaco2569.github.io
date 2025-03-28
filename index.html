@@ -16,6 +16,7 @@
 
             .carousel-item {
                 padding: 6px;
+                cursor: pointer;
             }
 
             .modal-footer {
@@ -393,6 +394,8 @@
                     //remove selected image indication
                     //document.getElementById("select_btn_"+selected_images[current_img_field_id].toString()).classList.remove("d-none");
                     document.getElementById("select_alert_"+selected_images[current_img_field_id].toString()).classList.add("d-none");
+                    document.getElementById("item_"+selected_images[current_img_field_id].toString()).style.backgroundColor = "transparent";
+                    document.getElementById("item_"+selected_images[current_img_field_id].toString()).style.cursor = "pointer";
                 });
 
 
@@ -799,6 +802,8 @@
                 //show select button on previous selected image and enable delete button if necessary
                 //document.getElementById("select_btn_"+selected_images[current_img_field_id].toString()).classList.remove("d-none");
                 document.getElementById("select_alert_"+selected_images[current_img_field_id].toString()).classList.add("d-none");
+                document.getElementById("item_"+selected_images[current_img_field_id].toString()).style.backgroundColor = "transparent";
+                document.getElementById("item_"+selected_images[current_img_field_id].toString()).style.cursor = "pointer";
                 if (countOccurrences(selected_images, selected_images[current_img_field_id]) == 1) {
                     //delete_buttons[selected_images[current_img_field_id]].disabled = false;
                     delete_buttons[selected_images[current_img_field_id]].classList.remove("d-none");
@@ -810,6 +815,8 @@
                 //remove select button on new selected image and disable delete button
                 //document.getElementById("select_btn_"+selected_images[current_img_field_id].toString()).classList.add("d-none");
                 document.getElementById("select_alert_"+selected_images[current_img_field_id].toString()).classList.remove("d-none");
+                document.getElementById("item_"+selected_images[current_img_field_id].toString()).style.backgroundColor = "#0d6efd";
+                document.getElementById("item_"+selected_images[current_img_field_id].toString()).style.cursor = "auto";
                 //delete_buttons[selected_images[current_img_field_id]].disabled = true;
                 delete_buttons[selected_images[current_img_field_id]].classList.add("d-none");
                 tooltipList[selected_images[current_img_field_id]].enable();
@@ -853,6 +860,8 @@
                 //indicate selected image
                 //document.getElementById("select_btn_"+selected_images[current_img_field_id].toString()).classList.add("d-none");
                 document.getElementById("select_alert_"+selected_images[current_img_field_id].toString()).classList.remove("d-none");
+                document.getElementById("item_"+selected_images[current_img_field_id].toString()).style.backgroundColor = "#0d6efd";
+                document.getElementById("item_"+selected_images[current_img_field_id].toString()).style.cursor = "auto";
 
                 //put carousel focus on selected image
                 new bootstrap.Carousel(carousel).to(selected_images[current_img_field_id]);
@@ -5890,25 +5899,26 @@
                     <div class="modal-body text-center">
                         <div id="myCarousel" class="carousel slide mb-2" data-bs-interval="false">
                             <div id="carousel_inner" class="carousel-inner">
-                                <div id="item_0" class="carousel-item active" style="background-color: #0d6efd;">
+                                <div id="item_0" class="carousel-item active">
                                     <span class="delete_tooltip" tabindex="0" data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-title="Suppression impossible : vous utilisez cette image sur votre site.">
                                         <button onclick="delete_img(0)" type="button" class="btn btn-danger delete_btn">Supprimer <i class="bi bi-trash"></i></button>
                                     </span>
                                     <img id="img_slide_0" onclick="select_img(0)" src="" class="d-block w-100" alt="Image 1">
                                     <div class="carousel-caption d-block">
-                                        <h5><span class="badge text-bg-primary">Image sélectionnée <i class="bi bi-check"></i></span></h5>
+                                        <h5 id="select_alert_0" class="d-none"><span class="badge text-bg-primary">Image sélectionnée <i class="bi bi-check"></i></span></h5>
                                         <!--<button onclick="select_img(0)" id="select_btn_0" type="button" class="btn btn-primary select_btn">Sélectionner image</button>-->
-                                        <div id="select_alert_0" class="alert alert-success d-none" role="alert">Image sélectionnée <i class="bi bi-check"></i></div>
+                                        <!--<div id="select_alert_0" class="alert alert-success d-none" role="alert">Image sélectionnée <i class="bi bi-check"></i></div>-->
                                     </div>
                                 </div>
                                 <div id="item_1" class="carousel-item">
                                     <span class="delete_tooltip" tabindex="0" data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-title="Suppression impossible : vous utilisez cette image sur votre site.">
                                         <button onclick="delete_img(1)" type="button" class="btn btn-danger delete_btn">Supprimer <i class="bi bi-trash"></i></button>
                                     </span>
-                                    <img id="img_slide_1" src="" class="d-block w-100" alt="Image 2">
+                                    <img id="img_slide_1" onclick="select_img(1)" src="" class="d-block w-100" alt="Image 2">
                                     <div class="carousel-caption d-block">
+                                        <h5 id="select_alert_1" class="d-none"><span class="badge text-bg-primary">Image sélectionnée <i class="bi bi-check"></i></span></h5>
                                         <!--<button onclick="select_img(1)" id="select_btn_1" type="button" class="btn btn-primary select_btn">Sélectionner image</button>-->
-                                        <div id="select_alert_1" class="alert alert-success d-none" role="alert">Image sélectionnée <i class="bi bi-check"></i></div>
+                                        <!--<div id="select_alert_1" class="alert alert-success d-none" role="alert">Image sélectionnée <i class="bi bi-check"></i></div>-->
                                     </div>
                                 </div>
                                 <div id="item_2" class="carousel-item">
@@ -5917,8 +5927,9 @@
                                     </span>
                                     <img id="img_slide_2" src="" class="d-block w-100" alt="Image 3">
                                     <div class="carousel-caption d-block">
+                                        <h5 id="select_alert_2" class="d-none"><span class="badge text-bg-primary">Image sélectionnée <i class="bi bi-check"></i></span></h5>
                                         <!--<button onclick="select_img(2)" id="select_btn_2" type="button" class="btn btn-primary select_btn">Sélectionner image</button>-->
-                                        <div id="select_alert_2" class="alert alert-success d-none" role="alert">Image sélectionnée <i class="bi bi-check"></i></div>
+                                        <!--<div id="select_alert_2" class="alert alert-success d-none" role="alert">Image sélectionnée <i class="bi bi-check"></i></div>-->
                                     </div>
                                 </div>
                                 <div id="item_3" class="carousel-item">
@@ -5927,8 +5938,9 @@
                                     </span>
                                     <img id="img_slide_3" src="" class="d-block w-100" alt="Image 4">
                                     <div class="carousel-caption d-block">
+                                        <h5 id="select_alert_3" class="d-none"><span class="badge text-bg-primary">Image sélectionnée <i class="bi bi-check"></i></span></h5>
                                         <!--<button onclick="select_img(3)" id="select_btn_3" type="button" class="btn btn-primary select_btn">Sélectionner image</button>-->
-                                        <div id="select_alert_3" class="alert alert-success d-none" role="alert">Image sélectionnée <i class="bi bi-check"></i></div>
+                                        <!--<div id="select_alert_3" class="alert alert-success d-none" role="alert">Image sélectionnée <i class="bi bi-check"></i></div>-->
                                     </div>
                                 </div>
                                 <div id="item_4" class="carousel-item">
@@ -5937,8 +5949,9 @@
                                     </span>
                                     <img id="img_slide_4" src="" class="d-block w-100" alt="Image 5">
                                     <div class="carousel-caption d-block">
+                                        <h5 id="select_alert_4" class="d-none"><span class="badge text-bg-primary">Image sélectionnée <i class="bi bi-check"></i></span></h5>
                                         <!--<button onclick="select_img(4)" id="select_btn_4" type="button" class="btn btn-primary select_btn">Sélectionner image</button>-->
-                                        <div id="select_alert_4" class="alert alert-success d-none" role="alert">Image sélectionnée <i class="bi bi-check"></i></div>
+                                        <!--<div id="select_alert_4" class="alert alert-success d-none" role="alert">Image sélectionnée <i class="bi bi-check"></i></div>-->
                                     </div>
                                 </div>
                                 <div id="item_5" class="carousel-item">
@@ -5947,8 +5960,9 @@
                                     </span>
                                     <img id="img_slide_5" src="" class="d-block w-100" alt="Image 6">
                                     <div class="carousel-caption d-block">
+                                        <h5 id="select_alert_5" class="d-none"><span class="badge text-bg-primary">Image sélectionnée <i class="bi bi-check"></i></span></h5>
                                         <!--<button onclick="select_img(5)" id="select_btn_5" type="button" class="btn btn-primary select_btn">Sélectionner image</button>-->
-                                        <div id="select_alert_5" class="alert alert-success d-none" role="alert">Image sélectionnée <i class="bi bi-check"></i></div>
+                                        <!--<div id="select_alert_5" class="alert alert-success d-none" role="alert">Image sélectionnée <i class="bi bi-check"></i></div>-->
                                     </div>
                                 </div>
                                 <div id="item_6" class="carousel-item">
@@ -5957,8 +5971,9 @@
                                     </span>
                                     <img id="img_slide_6" src="" class="d-block w-100" alt="Image 7">
                                     <div class="carousel-caption d-block">
+                                        <h5 id="select_alert_6" class="d-none"><span class="badge text-bg-primary">Image sélectionnée <i class="bi bi-check"></i></span></h5>
                                         <!--<button onclick="select_img(6)" id="select_btn_6" type="button" class="btn btn-primary select_btn">Sélectionner image</button>-->
-                                        <div id="select_alert_6" class="alert alert-success d-none" role="alert">Image sélectionnée <i class="bi bi-check"></i></div>
+                                        <!--<div id="select_alert_6" class="alert alert-success d-none" role="alert">Image sélectionnée <i class="bi bi-check"></i></div>-->
                                     </div>
                                 </div>
                                 <div id="item_7" class="carousel-item">
@@ -5967,8 +5982,9 @@
                                     </span>
                                     <img id="img_slide_7" src="" class="d-block w-100" alt="Image 8">
                                     <div class="carousel-caption d-block">
+                                        <h5 id="select_alert_7" class="d-none"><span class="badge text-bg-primary">Image sélectionnée <i class="bi bi-check"></i></span></h5>
                                         <!--<button onclick="select_img(7)" id="select_btn_7" type="button" class="btn btn-primary select_btn">Sélectionner image</button>-->
-                                        <div id="select_alert_7" class="alert alert-success d-none" role="alert">Image sélectionnée <i class="bi bi-check"></i></div>
+                                        <!--<div id="select_alert_7" class="alert alert-success d-none" role="alert">Image sélectionnée <i class="bi bi-check"></i></div>-->
                                     </div>
                                 </div>
                                 <div id="item_8" class="carousel-item">
@@ -5977,8 +5993,9 @@
                                     </span>
                                     <img id="img_slide_8" src="" class="d-block w-100" alt="Image 9">
                                     <div class="carousel-caption d-block">
+                                        <h5 id="select_alert_8" class="d-none"><span class="badge text-bg-primary">Image sélectionnée <i class="bi bi-check"></i></span></h5>
                                         <!--<button onclick="select_img(8)" id="select_btn_8" type="button" class="btn btn-primary select_btn">Sélectionner image</button>-->
-                                        <div id="select_alert_8" class="alert alert-success d-none" role="alert">Image sélectionnée <i class="bi bi-check"></i></div>
+                                        <!--<div id="select_alert_8" class="alert alert-success d-none" role="alert">Image sélectionnée <i class="bi bi-check"></i></div>-->
                                     </div>
                                 </div>
                                 <div id="item_9" class="carousel-item">
@@ -5987,8 +6004,9 @@
                                     </span>
                                     <img id="img_slide_9" src="" class="d-block w-100" alt="Image 10">
                                     <div class="carousel-caption d-block">
+                                        <h5 id="select_alert_9" class="d-none"><span class="badge text-bg-primary">Image sélectionnée <i class="bi bi-check"></i></span></h5>
                                         <!--<button onclick="select_img(9)" id="select_btn_9" type="button" class="btn btn-primary select_btn">Sélectionner image</button>-->
-                                        <div id="select_alert_9" class="alert alert-success d-none" role="alert">Image sélectionnée <i class="bi bi-check"></i></div>
+                                        <!--<div id="select_alert_9" class="alert alert-success d-none" role="alert">Image sélectionnée <i class="bi bi-check"></i></div>-->
                                     </div>
                                 </div>
                                 <div id="item_10" class="carousel-item">
@@ -5997,8 +6015,9 @@
                                     </span>
                                     <img id="img_slide_10" src="" class="d-block w-100" alt="Image 11">
                                     <div class="carousel-caption d-block">
+                                        <h5 id="select_alert_10" class="d-none"><span class="badge text-bg-primary">Image sélectionnée <i class="bi bi-check"></i></span></h5>
                                         <!--<button onclick="select_img(10)" id="select_btn_10" type="button" class="btn btn-primary select_btn">Sélectionner image</button>-->
-                                        <div id="select_alert_10" class="alert alert-success d-none" role="alert">Image sélectionnée <i class="bi bi-check"></i></div>
+                                        <!--<div id="select_alert_10" class="alert alert-success d-none" role="alert">Image sélectionnée <i class="bi bi-check"></i></div>-->
                                     </div>
                                 </div>
                                 <div id="item_11" class="carousel-item">
@@ -6007,8 +6026,9 @@
                                     </span>
                                     <img id="img_slide_11" src="" class="d-block w-100" alt="Image 12">
                                     <div class="carousel-caption d-block">
+                                        <h5 id="select_alert_11" class="d-none"><span class="badge text-bg-primary">Image sélectionnée <i class="bi bi-check"></i></span></h5>
                                         <!--<button onclick="select_img(11)" id="select_btn_11" type="button" class="btn btn-primary select_btn">Sélectionner image</button>-->
-                                        <div id="select_alert_11" class="alert alert-success d-none" role="alert">Image sélectionnée <i class="bi bi-check"></i></div>
+                                        <!--<div id="select_alert_11" class="alert alert-success d-none" role="alert">Image sélectionnée <i class="bi bi-check"></i></div>-->
                                     </div>
                                 </div>
                                 <div id="item_12" class="carousel-item">
@@ -6017,8 +6037,9 @@
                                     </span>
                                     <img id="img_slide_12" src="" class="d-block w-100" alt="Image 13">
                                     <div class="carousel-caption d-block">
+                                        <h5 id="select_alert_12" class="d-none"><span class="badge text-bg-primary">Image sélectionnée <i class="bi bi-check"></i></span></h5>
                                         <!--<button onclick="select_img(12)" id="select_btn_12" type="button" class="btn btn-primary select_btn">Sélectionner image</button>-->
-                                        <div id="select_alert_12" class="alert alert-success d-none" role="alert">Image sélectionnée <i class="bi bi-check"></i></div>
+                                        <!--<div id="select_alert_12" class="alert alert-success d-none" role="alert">Image sélectionnée <i class="bi bi-check"></i></div>-->
                                     </div>
                                 </div>
                                 <div id="item_13" class="carousel-item">
@@ -6027,8 +6048,9 @@
                                     </span>
                                     <img id="img_slide_13" src="" class="d-block w-100" alt="Image 14">
                                     <div class="carousel-caption d-block">
+                                        <h5 id="select_alert_13" class="d-none"><span class="badge text-bg-primary">Image sélectionnée <i class="bi bi-check"></i></span></h5>
                                         <!--<button onclick="select_img(13)" id="select_btn_13" type="button" class="btn btn-primary select_btn">Sélectionner image</button>-->
-                                        <div id="select_alert_13" class="alert alert-success d-none" role="alert">Image sélectionnée <i class="bi bi-check"></i></div>
+                                        <!--<div id="select_alert_13" class="alert alert-success d-none" role="alert">Image sélectionnée <i class="bi bi-check"></i></div>-->
                                     </div>
                                 </div>
                                 <div id="item_14" class="carousel-item">
@@ -6037,8 +6059,9 @@
                                     </span>
                                     <img id="img_slide_14" src="" class="d-block w-100" alt="Image 15">
                                     <div class="carousel-caption d-block">
+                                        <h5 id="select_alert_14" class="d-none"><span class="badge text-bg-primary">Image sélectionnée <i class="bi bi-check"></i></span></h5>
                                         <!--<button onclick="select_img(14)" id="select_btn_14" type="button" class="btn btn-primary select_btn">Sélectionner image</button>-->
-                                        <div id="select_alert_14" class="alert alert-success d-none" role="alert">Image sélectionnée <i class="bi bi-check"></i></div>
+                                        <!--<div id="select_alert_14" class="alert alert-success d-none" role="alert">Image sélectionnée <i class="bi bi-check"></i></div>-->
                                     </div>
                                 </div>
                                 <div id="item_15" class="carousel-item">
@@ -6047,8 +6070,9 @@
                                     </span>
                                     <img id="img_slide_15" src="" class="d-block w-100" alt="Image 16">
                                     <div class="carousel-caption d-block">
+                                        <h5 id="select_alert_15" class="d-none"><span class="badge text-bg-primary">Image sélectionnée <i class="bi bi-check"></i></span></h5>
                                         <!--<button onclick="select_img(15)" id="select_btn_15" type="button" class="btn btn-primary select_btn">Sélectionner image</button>-->
-                                        <div id="select_alert_15" class="alert alert-success d-none" role="alert">Image sélectionnée <i class="bi bi-check"></i></div>
+                                        <!--<div id="select_alert_15" class="alert alert-success d-none" role="alert">Image sélectionnée <i class="bi bi-check"></i></div>-->
                                     </div>
                                 </div>
                                 <div id="item_16" class="carousel-item">
@@ -6057,8 +6081,9 @@
                                     </span>
                                     <img id="img_slide_16" src="" class="d-block w-100" alt="Image 17">
                                     <div class="carousel-caption d-block">
+                                        <h5 id="select_alert_16" class="d-none"><span class="badge text-bg-primary">Image sélectionnée <i class="bi bi-check"></i></span></h5>
                                         <!--<button onclick="select_img(16)" id="select_btn_16" type="button" class="btn btn-primary select_btn">Sélectionner image</button>-->
-                                        <div id="select_alert_16" class="alert alert-success d-none" role="alert">Image sélectionnée <i class="bi bi-check"></i></div>
+                                        <!--<div id="select_alert_16" class="alert alert-success d-none" role="alert">Image sélectionnée <i class="bi bi-check"></i></div>-->
                                     </div>
                                 </div>
                                 <div id="item_17" class="carousel-item">
@@ -6067,8 +6092,9 @@
                                     </span>
                                     <img id="img_slide_17" src="" class="d-block w-100" alt="Image 18">
                                     <div class="carousel-caption d-block">
+                                        <h5 id="select_alert_17" class="d-none"><span class="badge text-bg-primary">Image sélectionnée <i class="bi bi-check"></i></span></h5>
                                         <!--<button onclick="select_img(17)" id="select_btn_17" type="button" class="btn btn-primary select_btn">Sélectionner image</button>-->
-                                        <div id="select_alert_17" class="alert alert-success d-none" role="alert">Image sélectionnée <i class="bi bi-check"></i></div>
+                                        <!--<div id="select_alert_17" class="alert alert-success d-none" role="alert">Image sélectionnée <i class="bi bi-check"></i></div>-->
                                     </div>
                                 </div>
                                 <div id="item_18" class="carousel-item">
@@ -6077,8 +6103,9 @@
                                     </span>
                                     <img id="img_slide_18" src="" class="d-block w-100" alt="Image 19">
                                     <div class="carousel-caption d-block">
+                                        <h5 id="select_alert_18" class="d-none"><span class="badge text-bg-primary">Image sélectionnée <i class="bi bi-check"></i></span></h5>
                                         <!--<button onclick="select_img(18)" id="select_btn_18" type="button" class="btn btn-primary select_btn">Sélectionner image</button>-->
-                                        <div id="select_alert_18" class="alert alert-success d-none" role="alert">Image sélectionnée <i class="bi bi-check"></i></div>
+                                        <!--<div id="select_alert_18" class="alert alert-success d-none" role="alert">Image sélectionnée <i class="bi bi-check"></i></div>-->
                                     </div>
                                 </div>
                                 <div id="item_19" class="carousel-item">
@@ -6087,8 +6114,9 @@
                                     </span>
                                     <img id="img_slide_19" src="" class="d-block w-100" alt="Image 20">
                                     <div class="carousel-caption d-block">
+                                        <h5 id="select_alert_19" class="d-none"><span class="badge text-bg-primary">Image sélectionnée <i class="bi bi-check"></i></span></h5>
                                         <!--<button onclick="select_img(19)" id="select_btn_19" type="button" class="btn btn-primary select_btn">Sélectionner image</button>-->
-                                        <div id="select_alert_19" class="alert alert-success d-none" role="alert">Image sélectionnée <i class="bi bi-check"></i></div>
+                                        <!--<div id="select_alert_19" class="alert alert-success d-none" role="alert">Image sélectionnée <i class="bi bi-check"></i></div>-->
                                     </div>
                                 </div>
                             </div>
