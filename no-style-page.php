@@ -13,10 +13,12 @@
                 width: 640px;
                 height: 360px;
                 object-fit: contain;
+                background-color: rgba(0, 0, 0, 0.8);
             }
 
-            .carousel-inner {
-                background-color: black;
+            .carousel-item {
+                padding: 6px;
+                cursor: pointer;
             }
 
             .modal-footer {
@@ -140,6 +142,27 @@
             .accordion-button::after {
                 display: none;
             }
+
+            .carousel-control-prev, .carousel-control-next {
+                opacity: 0.7;
+                background-color: rgba(255,255,255,0.9);
+                width: 11%;
+                aspect-ratio: 1 / 1;
+                border-radius: 50%;
+                margin: auto;
+                margin-left: 12px;
+                margin-right: 12px;
+            }
+
+            .carousel-control-prev-icon {
+                background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='none' stroke='%23000' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3e%3cpath d='M11 2L5 8l6 6'/%3e%3c/svg%3e");
+                background-size: 20px 20px;
+            }
+
+            .carousel-control-next-icon {
+                background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='none' stroke='%23000' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3e%3cpath d='M5 2L11 8L5 14'/%3e%3c/svg%3e");
+                background-size: 20px 20px;
+            }
         </style>
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
         <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.3.0/font/bootstrap-icons.css">
@@ -164,7 +187,7 @@
             let carousel;
             let nb_slides_spans;
             let delete_buttons;
-            let select_buttons;
+            //let select_buttons;
             let upload_span;
             let tooltipTriggerList;
             let tooltipList;
@@ -199,9 +222,9 @@
             let theme_modal;
 
             document.addEventListener("DOMContentLoaded", (event) => {
-                nb_slides_spans = document.getElementsByClassName("nb_slides");
+                //nb_slides_spans = document.getElementsByClassName("nb_slides");
                 delete_buttons = document.getElementsByClassName("delete_btn");
-                select_buttons = document.getElementsByClassName("select_btn");
+                //select_buttons = document.getElementsByClassName("select_btn");
                 upload_span = document.getElementById("upload_span");
                 nb_fields_span = document.getElementById("nb_fields");
                 copy_link_btn = document.getElementById("copy_link_btn");
@@ -222,7 +245,7 @@
                     upload_span.classList.add("disabled");
                 }
                 
-                update_nb_slides_spans();
+                //update_nb_slides_spans();
                 update_img_on_slides();
                 update_selected_images(max_images);
 
@@ -254,8 +277,10 @@
                     }
 
                     //remove selected image indication
-                    document.getElementById("select_btn_"+selected_images[current_img_field_id].toString()).classList.remove("d-none");
+                    //document.getElementById("select_btn_"+selected_images[current_img_field_id].toString()).classList.remove("d-none");
                     document.getElementById("select_alert_"+selected_images[current_img_field_id].toString()).classList.add("d-none");
+                    document.getElementById("item_"+selected_images[current_img_field_id].toString()).style.backgroundColor = "transparent";
+                    document.getElementById("item_"+selected_images[current_img_field_id].toString()).style.cursor = "pointer";
                 });
 
 
@@ -474,36 +499,39 @@
 
                 //COUNTERS OF ALL SECTIONS
 
-                let text_max = 200;
-                document.getElementById("countHelpSection1").innerText = document.getElementById("welcomeTextSection1").value.length + " / " + text_max;
+                document.getElementById("countHelpSection1").innerText = document.getElementById("welcomeTextSection1").value.length + " / " + 300;
                 document.getElementById("welcomeTextSection1").addEventListener("input", (event) => {
-                    document.getElementById("countHelpSection1").innerText = document.getElementById("welcomeTextSection1").value.length + " / " + text_max;
+                    document.getElementById("countHelpSection1").innerText = document.getElementById("welcomeTextSection1").value.length + " / " + 300;
                 });
-                document.getElementById("countHelp1Section2").innerText = document.getElementById("textQualifier1Section2").value.length + " / " + text_max;
+                document.getElementById("countHelp1Section2").innerText = document.getElementById("textQualifier1Section2").value.length + " / " + 300;
                 document.getElementById("textQualifier1Section2").addEventListener("input", (event) => {
-                    document.getElementById("countHelp1Section2").innerText = document.getElementById("textQualifier1Section2").value.length + " / " + text_max;
+                    document.getElementById("countHelp1Section2").innerText = document.getElementById("textQualifier1Section2").value.length + " / " + 300;
                 });
-                document.getElementById("countHelp2Section2").innerText = document.getElementById("textQualifier2Section2").value.length + " / " + text_max;
+                document.getElementById("countHelp2Section2").innerText = document.getElementById("textQualifier2Section2").value.length + " / " + 300;
                 document.getElementById("textQualifier2Section2").addEventListener("input", (event) => {
-                    document.getElementById("countHelp2Section2").innerText = document.getElementById("textQualifier2Section2").value.length + " / " + text_max;
+                    document.getElementById("countHelp2Section2").innerText = document.getElementById("textQualifier2Section2").value.length + " / " + 300;
                 });
             };
 
+            function capitalizeFirstLetter(val) {
+                return String(val).charAt(0).toUpperCase() + String(val).slice(1);
+            }
+
             function update_params() {
-                params.nom = document.getElementById("nameSection1").value;
-                params.type_et_localisation = document.getElementById("typeAndLocationSection1").value;
-                params.adresse[0] = document.getElementById("addressSection1").value;
-                params.adresse[1] = document.getElementById("citySection1").value;
-                params.adresse[2] = document.getElementById("zipSection1").value;
-                params.texte_bienvenue = document.getElementById("welcomeTextSection1").value;
+                params.nom = document.getElementById("nameSection1").value.replace(/[\n\r\t]/gm, " ").trim();
+                params.type_et_localisation = capitalizeFirstLetter(document.getElementById("typeAndLocationSection1").value.replace(/[\n\r\t]/gm, " ").trim());
+                params.adresse[0] = document.getElementById("addressSection1").value.replace(/[\n\r\t]/gm, " ").trim();
+                params.adresse[1] = document.getElementById("citySection1").value.replace(/[\n\r\t]/gm, " ").trim();
+                params.adresse[2] = document.getElementById("zipSection1").value.replace(/[\n\r\t]/gm, " ").trim();
+                params.texte_bienvenue = document.getElementById("welcomeTextSection1").value.replace(/[\n\r\t]/gm, " ").trim();
                 params.accessibilite = document.getElementById("switchPrmAccessible").checked;
                 params.image_accueil = images_list[selected_images[0]];
 
-                params.esprit[0].Qual = document.getElementById("qualifier1Section2").value;
-                params.esprit[0].Desc = document.getElementById("textQualifier1Section2").value;
+                params.esprit[0].Qual = capitalizeFirstLetter(document.getElementById("qualifier1Section2").value.replace(/[\n\r\t]/gm, " ").trim());
+                params.esprit[0].Desc = document.getElementById("textQualifier1Section2").value.replace(/[\n\r\t]/gm, " ").trim();
                 params.esprit[0].Img = images_list[selected_images[1]];
-                params.esprit[1].Qual = document.getElementById("qualifier2Section2").value;
-                params.esprit[1].Desc = document.getElementById("textQualifier2Section2").value;
+                params.esprit[1].Qual = capitalizeFirstLetter(document.getElementById("qualifier2Section2").value.replace(/[\n\r\t]/gm, " ").trim());
+                params.esprit[1].Desc = document.getElementById("textQualifier2Section2").value.replace(/[\n\r\t]/gm, " ").trim();
                 params.esprit[1].Img = images_list[selected_images[2]];
 
                 for (const room_type in params.caracteristiques[0]) {
@@ -538,27 +566,27 @@
                     }
                 }
 
-                console.log(params.caracteristiques[1]);
-
                 for (let i = 0; i < params.galerie_images.length; i++) {
                     params.galerie_images[i] = images_list[selected_images[i+3]];
                 }
 
-                params.email = document.getElementById("emailSection5").value;
-                params.telephone = document.getElementById("phoneSection5").value;
+                params.email = document.getElementById("emailSection5").value.replace(/[\n\r\t]/gm, " ").trim();
+                params.telephone = document.getElementById("phoneSection5").value.replace(/[\n\r\t]/gm, " ").trim();
                 params.contact_image = images_list[selected_images[9]];
 
                 params.contact_proprio[0] = document.getElementById("switchPhoneDisplay").checked ? params.telephone : "";
                 params.contact_proprio[1] = document.getElementById("switchEmailDisplay").checked ? params.email : "";
-                params.contact_proprio[2] = document.getElementById("instaSection6").value;
-                params.contact_proprio[3] = document.getElementById("fbSection6").value;
+                params.contact_proprio[2] = document.getElementById("instaSection6").value.replace(/[\n\r\t]/gm, " ").trim();
+                params.contact_proprio[3] = document.getElementById("fbSection6").value.replace(/[\n\r\t]/gm, " ").trim();
 
-                params.liens_plateformes[0] = document.getElementById("bookingSection6").value;
-                params.liens_plateformes[1] = document.getElementById("airbnbSection6").value;
-                params.liens_plateformes[2] = document.getElementById("gitesfrSection6").value;
-                params.liens_plateformes[3] = document.getElementById("chambreshotesfrSection6").value;
+                params.liens_plateformes[0] = document.getElementById("bookingSection6").value.replace(/[\n\r\t]/gm, " ").trim();
+                params.liens_plateformes[1] = document.getElementById("airbnbSection6").value.replace(/[\n\r\t]/gm, " ").trim();
+                params.liens_plateformes[2] = document.getElementById("gitesfrSection6").value.replace(/[\n\r\t]/gm, " ").trim();
+                params.liens_plateformes[3] = document.getElementById("chambreshotesfrSection6").value.replace(/[\n\r\t]/gm, " ").trim();
 
                 params.bibliotheque = images_list;
+
+                console.log(params);
             };
 
             const SendRequestToMake = (data) => {
@@ -607,7 +635,7 @@
             function delete_img(img_nb) {
                 images_list.splice(img_nb, 1);
                 images_list_up_to_date_in_db = false;
-                update_nb_slides_spans();
+                //update_nb_slides_spans();
                 range_elt.setAttribute("max", images_list.length-1);
                 update_img_on_slides();
                 update_selected_images(img_nb); //update selected images whose ids need to change following image deletion
@@ -636,7 +664,7 @@
             function add_img(img_url) {
                 images_list.push(img_url);
                 images_list_up_to_date_in_db = false;
-                update_nb_slides_spans();
+                //update_nb_slides_spans();
                 range_elt.setAttribute("max", images_list.length-1);
 
                 //if 0 to 1 image
@@ -660,19 +688,25 @@
 
             function select_img(img_nb) {
                 //show select button on previous selected image and enable delete button if necessary
-                document.getElementById("select_btn_"+selected_images[current_img_field_id].toString()).classList.remove("d-none");
+                //document.getElementById("select_btn_"+selected_images[current_img_field_id].toString()).classList.remove("d-none");
                 document.getElementById("select_alert_"+selected_images[current_img_field_id].toString()).classList.add("d-none");
+                document.getElementById("item_"+selected_images[current_img_field_id].toString()).style.backgroundColor = "transparent";
+                document.getElementById("item_"+selected_images[current_img_field_id].toString()).style.cursor = "pointer";
                 if (countOccurrences(selected_images, selected_images[current_img_field_id]) == 1) {
-                    delete_buttons[selected_images[current_img_field_id]].disabled = false;
+                    //delete_buttons[selected_images[current_img_field_id]].disabled = false;
+                    delete_buttons[selected_images[current_img_field_id]].classList.remove("d-none");
                     tooltipList[selected_images[current_img_field_id]].disable();
                 }
                 
                 selected_images[current_img_field_id] = img_nb;
 
                 //remove select button on new selected image and disable delete button
-                document.getElementById("select_btn_"+selected_images[current_img_field_id].toString()).classList.add("d-none");
+                //document.getElementById("select_btn_"+selected_images[current_img_field_id].toString()).classList.add("d-none");
                 document.getElementById("select_alert_"+selected_images[current_img_field_id].toString()).classList.remove("d-none");
-                delete_buttons[selected_images[current_img_field_id]].disabled = true;
+                document.getElementById("item_"+selected_images[current_img_field_id].toString()).style.backgroundColor = "#0d6efd";
+                document.getElementById("item_"+selected_images[current_img_field_id].toString()).style.cursor = "auto";
+                //delete_buttons[selected_images[current_img_field_id]].disabled = true;
+                delete_buttons[selected_images[current_img_field_id]].classList.add("d-none");
                 tooltipList[selected_images[current_img_field_id]].enable();
 
                 //apply new image thumbnail
@@ -695,12 +729,14 @@
                 for (let i = 0; i < delete_buttons.length; i++) {
                     //disable delete button and enable tooltip for selected images
                     if (selected_images.includes(i)) {
-                        delete_buttons[i].disabled = true;
+                        //delete_buttons[i].disabled = true;
+                        delete_buttons[i].classList.add("d-none");
                         tooltipList[i].enable();
                     }
                     //enable delete button and disable tooltip for other images
                     else {
-                        delete_buttons[i].disabled = false;
+                        //delete_buttons[i].disabled = false;
+                        delete_buttons[i].classList.remove("d-none");
                         tooltipList[i].disable();
                     }
                 }
@@ -710,8 +746,10 @@
                 current_img_field_id = img_field_id;
                 
                 //indicate selected image
-                document.getElementById("select_btn_"+selected_images[current_img_field_id].toString()).classList.add("d-none");
+                //document.getElementById("select_btn_"+selected_images[current_img_field_id].toString()).classList.add("d-none");
                 document.getElementById("select_alert_"+selected_images[current_img_field_id].toString()).classList.remove("d-none");
+                document.getElementById("item_"+selected_images[current_img_field_id].toString()).style.backgroundColor = "#0d6efd";
+                document.getElementById("item_"+selected_images[current_img_field_id].toString()).style.cursor = "auto";
 
                 //put carousel focus on selected image
                 new bootstrap.Carousel(carousel).to(selected_images[current_img_field_id]);
@@ -763,7 +801,7 @@
                     
                     for (let i = 0; i < images_list.length; i++) {
                         delete_buttons[i].disabled = true;
-                        select_buttons[i].disabled = true;
+                        //select_buttons[i].disabled = true;
                     }
 
                     document.getElementById("carousel-control-prev").disabled = true;
@@ -788,7 +826,7 @@
                     console.error('Error uploading file:', err);
                 }
                 
-                //ungrey slide + hide loading icon + enable buttons
+                //ungrey slide + hide loading icon + enable buttons + select uploaded image
                 if (images_list.length > 0) {
                     document.getElementById("carousel_inner").style.webkitFilter = "none"; /* Safari 6.0 - 9.0 */
                     document.getElementById("carousel_inner").style.filter = "none";
@@ -796,15 +834,18 @@
                     document.getElementById("loading_image_icon").style.visibility = "hidden";
 
                     for (let i = 0; i < images_list.length; i++) {
-                        if (!selected_images.includes(i)) {
+                        /*if (!selected_images.includes(i)) {
                             delete_buttons[i].disabled = false;
-                        }
-                        select_buttons[i].disabled = false;
+                        }*/
+                        delete_buttons[i].disabled = false;
+                        //select_buttons[i].disabled = false;
                     }
 
                     document.getElementById("carousel-control-prev").disabled = false;
                     document.getElementById("carousel-control-next").disabled = false;
                     document.getElementById("customRange1").disabled = false;
+
+                    select_img(images_list.length-1);
                 }
                 else {
                     document.getElementById("no_slide").innerHTML = "Aucune image à afficher.";
@@ -1040,7 +1081,7 @@
                     </ul>
                 </div>
 
-                <form class="needs-validation" novalidate>
+                <form class="needs-validation" autocomplete="off" novalidate>
                     <!--Section 1 : Présentation du logement-->
                     <div id="section1" class="card-body">
 
@@ -1055,8 +1096,11 @@
                         </div>
 
                         <div class="mb-3">
-                            <label for="welcomeTextSection1" class="form-label">Texte de présentation</label>
-                            <textarea class="form-control" id="welcomeTextSection1" name="text" maxlength="200" 
+                            <label for="welcomeTextSection1" class="form-label">
+                                Texte de présentation<br>
+                                <small class="form-text">2-3 phrases max.</small>
+                            </label>
+                            <textarea class="form-control" id="welcomeTextSection1" name="text" maxlength="300" 
                             placeholder="ex : Nous vous accueillons pour vos séjours à Aix-les-Bains dans cette villa située à proximité de l'Esplanade du Lac." 
                             rows="4" aria-describedby="countHelpSection1" data-section="1" required></textarea>
                             <div id="countHelpSection1" class="form-text"></div>
@@ -1122,12 +1166,13 @@
 
                         <div class="mb-3">
                             <label for="qualifier1Section2" class="form-label">Votre logement est :</label>
-                            <input class="form-control" type="text" id="qualifier1Section2" placeholder="ex : Moderne" data-section="2" required>              
+                            <div id="adjectiveHelp1" class="form-text">Indiquez un adjectif</div>
+                            <input class="form-control" type="text" id="qualifier1Section2" placeholder="ex : Moderne" aria-describedby="adjectiveHelp1" data-section="2" required>
                         </div>
 
                         <div class="mb-3">
                             <label for="textQualifier1Section2" class="form-label">Développez en 2-3 phrases max. :</label>
-                            <textarea class="form-control" id="textQualifier1Section2" name="text" maxlength="200" 
+                            <textarea class="form-control" id="textQualifier1Section2" name="text" maxlength="300" 
                             placeholder="ex : La Villa Florentine a été entièrement rénovée l'année dernière. Elle possède les équipements les plus récents dans chacune de ses pièces." 
                             rows="4" aria-describedby="countHelp1Section2" data-section="2" required></textarea>
                             <div id="countHelp1Section2" class="form-text"></div>
@@ -1154,12 +1199,13 @@
 
                         <div class="mb-3">
                             <label for="qualifier2Section2" class="form-label">Votre logement est :</label>
-                            <input class="form-control" type="text" id="qualifier2Section2" placeholder="ex : Convivial" data-section="2" required>
+                            <div id="adjectiveHelp2" class="form-text">Indiquez un adjectif</div>
+                            <input class="form-control" type="text" id="qualifier2Section2" placeholder="ex : Convivial" aria-describedby="adjectiveHelp2" data-section="2" required>
                         </div>
 
                         <div class="mb-3">
                             <label for="textQualifier2Section2" class="form-label">Développez en 2-3 phrases max. :</label>
-                            <textarea class="form-control" id="textQualifier2Section2" name="text" maxlength="200" 
+                            <textarea class="form-control" id="textQualifier2Section2" name="text" maxlength="300" 
                             placeholder="ex : La Villa Florentine offre des espaces ouverts et lumineux, créant ainsi une atmosphère chaleureuse et propice aux moments de partage." 
                             rows="4" aria-describedby="countHelp2Section2" data-section="2" required></textarea>
                             <div id="countHelp2Section2" class="form-text"></div>
@@ -5565,8 +5611,8 @@
                         <div class="mb-3">
                             <div class="alert alert-primary" role="alert">
                                 <div class="col">
-                                    <i class="bi bi-info-circle-fill" style="position: relative; top: -2px;"></i> Les demandes de réservation et questions posées via le formulaire de votre site vous sont transférées par e-mail.<br>
-                                    Assurez-vous qu'elles n'atterrissent pas dans vos spams.
+                                    <i class="bi bi-info-circle-fill" style="position: relative; top: -2px;"></i> L'e-mail/numéro de téléphone doivent être renseignés pour assurer le fonctionnement du formulaire de contact.<br>
+                                    Si vous décochez les options "Faire figurer sur le site", ces informations resteront privées.
                                 </div>
                             </div>                              
                         </div>
@@ -5598,7 +5644,10 @@
                         </div>
 
                         <div class="mb-3">
-                            <label for="contactPictureSection5" class="form-label">Photo de la section "Nous contacter"</label>
+                            <label for="contactPictureSection5" class="form-label">
+                                Photo de la section "Nous contacter"<br>
+                                <small class="form-text">Cette photo de votre logement est située au niveau du formulaire de contact.</small>
+                            </label>
                             <div class="card picture_card" style="width: 18rem; height: 12rem;">
                                 <img id="contactPictureSection5" src="" class="card-img" alt="..." style="width: 18rem; height: 12rem; object-fit: contain; background-color: rgba(0, 0, 0, 0.8);">
                                 <div class="card-img-overlay d-flex" style="visibility: hidden;">
@@ -5746,206 +5795,186 @@
                 
                     <!-- Modal body -->
                     <div class="modal-body text-center">
-                        <div id="myCarousel" class="carousel slide" data-bs-interval="false">
+                        <div id="myCarousel" class="carousel slide mb-2" data-bs-interval="false">
                             <div id="carousel_inner" class="carousel-inner">
                                 <div id="item_0" class="carousel-item active">
                                     <span class="delete_tooltip" tabindex="0" data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-title="Suppression impossible : vous utilisez cette image sur votre site.">
                                         <button onclick="delete_img(0)" type="button" class="btn btn-danger delete_btn">Supprimer <i class="bi bi-trash"></i></button>
                                     </span>
-                                    <img id="img_slide_0" src="" class="d-block w-100" alt="Image 1">
+                                    <img id="img_slide_0" onclick="select_img(0)" src="" class="d-block w-100" alt="Image 1">
                                     <div class="carousel-caption d-block">
-                                        <button onclick="select_img(0)" id="select_btn_0" type="button" class="btn btn-primary select_btn">Sélectionner image 1/<span class="nb_slides"></span></button>
-                                        <div id="select_alert_0" class="alert alert-success d-none" role="alert">Image sélectionnée (1/<span class="nb_slides"></span>) <i class="bi bi-check"></i></div>
+                                        <h5 id="select_alert_0" class="d-none"><span class="badge text-bg-primary">Image sélectionnée <i class="bi bi-check"></i></span></h5>
                                     </div>
                                 </div>
                                 <div id="item_1" class="carousel-item">
                                     <span class="delete_tooltip" tabindex="0" data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-title="Suppression impossible : vous utilisez cette image sur votre site.">
                                         <button onclick="delete_img(1)" type="button" class="btn btn-danger delete_btn">Supprimer <i class="bi bi-trash"></i></button>
                                     </span>
-                                    <img id="img_slide_1" src="" class="d-block w-100" alt="Image 2">
+                                    <img id="img_slide_1" onclick="select_img(1)" src="" class="d-block w-100" alt="Image 2">
                                     <div class="carousel-caption d-block">
-                                        <button onclick="select_img(1)" id="select_btn_1" type="button" class="btn btn-primary select_btn">Sélectionner image 2/<span class="nb_slides"></span></button>
-                                        <div id="select_alert_1" class="alert alert-success d-none" role="alert">Image sélectionnée (2/<span class="nb_slides"></span>) <i class="bi bi-check"></i></div>
+                                        <h5 id="select_alert_1" class="d-none"><span class="badge text-bg-primary">Image sélectionnée <i class="bi bi-check"></i></span></h5>
                                     </div>
                                 </div>
                                 <div id="item_2" class="carousel-item">
                                     <span class="delete_tooltip" tabindex="0" data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-title="Suppression impossible : vous utilisez cette image sur votre site.">
                                         <button onclick="delete_img(2)" type="button" class="btn btn-danger delete_btn">Supprimer <i class="bi bi-trash"></i></button>
                                     </span>
-                                    <img id="img_slide_2" src="" class="d-block w-100" alt="Image 3">
+                                    <img id="img_slide_2" onclick="select_img(2)" src="" class="d-block w-100" alt="Image 3">
                                     <div class="carousel-caption d-block">
-                                        <button onclick="select_img(2)" id="select_btn_2" type="button" class="btn btn-primary select_btn">Sélectionner image 3/<span class="nb_slides"></span></button>
-                                        <div id="select_alert_2" class="alert alert-success d-none" role="alert">Image sélectionnée (3/<span class="nb_slides"></span>) <i class="bi bi-check"></i></div>
+                                        <h5 id="select_alert_2" class="d-none"><span class="badge text-bg-primary">Image sélectionnée <i class="bi bi-check"></i></span></h5>
                                     </div>
                                 </div>
                                 <div id="item_3" class="carousel-item">
                                     <span class="delete_tooltip" tabindex="0" data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-title="Suppression impossible : vous utilisez cette image sur votre site.">
                                         <button onclick="delete_img(3)" type="button" class="btn btn-danger delete_btn">Supprimer <i class="bi bi-trash"></i></button>
                                     </span>
-                                    <img id="img_slide_3" src="" class="d-block w-100" alt="Image 4">
+                                    <img id="img_slide_3" onclick="select_img(3)" src="" class="d-block w-100" alt="Image 4">
                                     <div class="carousel-caption d-block">
-                                        <button onclick="select_img(3)" id="select_btn_3" type="button" class="btn btn-primary select_btn">Sélectionner image 4/<span class="nb_slides"></span></button>
-                                        <div id="select_alert_3" class="alert alert-success d-none" role="alert">Image sélectionnée (4/<span class="nb_slides"></span>) <i class="bi bi-check"></i></div>
+                                        <h5 id="select_alert_3" class="d-none"><span class="badge text-bg-primary">Image sélectionnée <i class="bi bi-check"></i></span></h5>
                                     </div>
                                 </div>
                                 <div id="item_4" class="carousel-item">
                                     <span class="delete_tooltip" tabindex="0" data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-title="Suppression impossible : vous utilisez cette image sur votre site.">
                                         <button onclick="delete_img(4)" type="button" class="btn btn-danger delete_btn">Supprimer <i class="bi bi-trash"></i></button>
                                     </span>
-                                    <img id="img_slide_4" src="" class="d-block w-100" alt="Image 5">
+                                    <img id="img_slide_4" onclick="select_img(4)" src="" class="d-block w-100" alt="Image 5">
                                     <div class="carousel-caption d-block">
-                                        <button onclick="select_img(4)" id="select_btn_4" type="button" class="btn btn-primary select_btn">Sélectionner image 5/<span class="nb_slides"></span></button>
-                                        <div id="select_alert_4" class="alert alert-success d-none" role="alert">Image sélectionnée (5/<span class="nb_slides"></span>) <i class="bi bi-check"></i></div>
+                                        <h5 id="select_alert_4" class="d-none"><span class="badge text-bg-primary">Image sélectionnée <i class="bi bi-check"></i></span></h5>
                                     </div>
                                 </div>
                                 <div id="item_5" class="carousel-item">
                                     <span class="delete_tooltip" tabindex="0" data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-title="Suppression impossible : vous utilisez cette image sur votre site.">
                                         <button onclick="delete_img(5)" type="button" class="btn btn-danger delete_btn">Supprimer <i class="bi bi-trash"></i></button>
                                     </span>
-                                    <img id="img_slide_5" src="" class="d-block w-100" alt="Image 6">
+                                    <img id="img_slide_5" onclick="select_img(5)" src="" class="d-block w-100" alt="Image 6">
                                     <div class="carousel-caption d-block">
-                                        <button onclick="select_img(5)" id="select_btn_5" type="button" class="btn btn-primary select_btn">Sélectionner image 6/<span class="nb_slides"></span></button>
-                                        <div id="select_alert_5" class="alert alert-success d-none" role="alert">Image sélectionnée (6/<span class="nb_slides"></span>) <i class="bi bi-check"></i></div>
+                                        <h5 id="select_alert_5" class="d-none"><span class="badge text-bg-primary">Image sélectionnée <i class="bi bi-check"></i></span></h5>
                                     </div>
                                 </div>
                                 <div id="item_6" class="carousel-item">
                                     <span class="delete_tooltip" tabindex="0" data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-title="Suppression impossible : vous utilisez cette image sur votre site.">
                                         <button onclick="delete_img(6)" type="button" class="btn btn-danger delete_btn">Supprimer <i class="bi bi-trash"></i></button>
                                     </span>
-                                    <img id="img_slide_6" src="" class="d-block w-100" alt="Image 7">
+                                    <img id="img_slide_6" onclick="select_img(6)" src="" class="d-block w-100" alt="Image 7">
                                     <div class="carousel-caption d-block">
-                                        <button onclick="select_img(6)" id="select_btn_6" type="button" class="btn btn-primary select_btn">Sélectionner image 7/<span class="nb_slides"></span></button>
-                                        <div id="select_alert_6" class="alert alert-success d-none" role="alert">Image sélectionnée (7/<span class="nb_slides"></span>) <i class="bi bi-check"></i></div>
+                                        <h5 id="select_alert_6" class="d-none"><span class="badge text-bg-primary">Image sélectionnée <i class="bi bi-check"></i></span></h5>
                                     </div>
                                 </div>
                                 <div id="item_7" class="carousel-item">
                                     <span class="delete_tooltip" tabindex="0" data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-title="Suppression impossible : vous utilisez cette image sur votre site.">
                                         <button onclick="delete_img(7)" type="button" class="btn btn-danger delete_btn">Supprimer <i class="bi bi-trash"></i></button>
                                     </span>
-                                    <img id="img_slide_7" src="" class="d-block w-100" alt="Image 8">
+                                    <img id="img_slide_7" onclick="select_img(7)" src="" class="d-block w-100" alt="Image 8">
                                     <div class="carousel-caption d-block">
-                                        <button onclick="select_img(7)" id="select_btn_7" type="button" class="btn btn-primary select_btn">Sélectionner image 8/<span class="nb_slides"></span></button>
-                                        <div id="select_alert_7" class="alert alert-success d-none" role="alert">Image sélectionnée (8/<span class="nb_slides"></span>) <i class="bi bi-check"></i></div>
+                                        <h5 id="select_alert_7" class="d-none"><span class="badge text-bg-primary">Image sélectionnée <i class="bi bi-check"></i></span></h5>
                                     </div>
                                 </div>
                                 <div id="item_8" class="carousel-item">
                                     <span class="delete_tooltip" tabindex="0" data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-title="Suppression impossible : vous utilisez cette image sur votre site.">
                                         <button onclick="delete_img(8)" type="button" class="btn btn-danger delete_btn">Supprimer <i class="bi bi-trash"></i></button>
                                     </span>
-                                    <img id="img_slide_8" src="" class="d-block w-100" alt="Image 9">
+                                    <img id="img_slide_8" onclick="select_img(8)" src="" class="d-block w-100" alt="Image 9">
                                     <div class="carousel-caption d-block">
-                                        <button onclick="select_img(8)" id="select_btn_8" type="button" class="btn btn-primary select_btn">Sélectionner image 9/<span class="nb_slides"></span></button>
-                                        <div id="select_alert_8" class="alert alert-success d-none" role="alert">Image sélectionnée (9/<span class="nb_slides"></span>) <i class="bi bi-check"></i></div>
+                                        <h5 id="select_alert_8" class="d-none"><span class="badge text-bg-primary">Image sélectionnée <i class="bi bi-check"></i></span></h5>
                                     </div>
                                 </div>
                                 <div id="item_9" class="carousel-item">
                                     <span class="delete_tooltip" tabindex="0" data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-title="Suppression impossible : vous utilisez cette image sur votre site.">
                                         <button onclick="delete_img(9)" type="button" class="btn btn-danger delete_btn">Supprimer <i class="bi bi-trash"></i></button>
                                     </span>
-                                    <img id="img_slide_9" src="" class="d-block w-100" alt="Image 10">
+                                    <img id="img_slide_9" onclick="select_img(9)" src="" class="d-block w-100" alt="Image 10">
                                     <div class="carousel-caption d-block">
-                                        <button onclick="select_img(9)" id="select_btn_9" type="button" class="btn btn-primary select_btn">Sélectionner image 10/<span class="nb_slides"></span></button>
-                                        <div id="select_alert_9" class="alert alert-success d-none" role="alert">Image sélectionnée (10/<span class="nb_slides"></span>) <i class="bi bi-check"></i></div>
+                                        <h5 id="select_alert_9" class="d-none"><span class="badge text-bg-primary">Image sélectionnée <i class="bi bi-check"></i></span></h5>
                                     </div>
                                 </div>
                                 <div id="item_10" class="carousel-item">
                                     <span class="delete_tooltip" tabindex="0" data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-title="Suppression impossible : vous utilisez cette image sur votre site.">
                                         <button onclick="delete_img(10)" type="button" class="btn btn-danger delete_btn">Supprimer <i class="bi bi-trash"></i></button>
                                     </span>
-                                    <img id="img_slide_10" src="" class="d-block w-100" alt="Image 11">
+                                    <img id="img_slide_10" onclick="select_img(10)" src="" class="d-block w-100" alt="Image 11">
                                     <div class="carousel-caption d-block">
-                                        <button onclick="select_img(10)" id="select_btn_10" type="button" class="btn btn-primary select_btn">Sélectionner image 11/<span class="nb_slides"></span></button>
-                                        <div id="select_alert_10" class="alert alert-success d-none" role="alert">Image sélectionnée (11/<span class="nb_slides"></span>) <i class="bi bi-check"></i></div>
+                                        <h5 id="select_alert_10" class="d-none"><span class="badge text-bg-primary">Image sélectionnée <i class="bi bi-check"></i></span></h5>
                                     </div>
                                 </div>
                                 <div id="item_11" class="carousel-item">
                                     <span class="delete_tooltip" tabindex="0" data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-title="Suppression impossible : vous utilisez cette image sur votre site.">
                                         <button onclick="delete_img(11)" type="button" class="btn btn-danger delete_btn">Supprimer <i class="bi bi-trash"></i></button>
                                     </span>
-                                    <img id="img_slide_11" src="" class="d-block w-100" alt="Image 12">
+                                    <img id="img_slide_11" onclick="select_img(11)" src="" class="d-block w-100" alt="Image 12">
                                     <div class="carousel-caption d-block">
-                                        <button onclick="select_img(11)" id="select_btn_11" type="button" class="btn btn-primary select_btn">Sélectionner image 12/<span class="nb_slides"></span></button>
-                                        <div id="select_alert_11" class="alert alert-success d-none" role="alert">Image sélectionnée (12/<span class="nb_slides"></span>) <i class="bi bi-check"></i></div>
+                                        <h5 id="select_alert_11" class="d-none"><span class="badge text-bg-primary">Image sélectionnée <i class="bi bi-check"></i></span></h5>
                                     </div>
                                 </div>
                                 <div id="item_12" class="carousel-item">
                                     <span class="delete_tooltip" tabindex="0" data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-title="Suppression impossible : vous utilisez cette image sur votre site.">
                                         <button onclick="delete_img(12)" type="button" class="btn btn-danger delete_btn">Supprimer <i class="bi bi-trash"></i></button>
                                     </span>
-                                    <img id="img_slide_12" src="" class="d-block w-100" alt="Image 13">
+                                    <img id="img_slide_12" onclick="select_img(12)" src="" class="d-block w-100" alt="Image 13">
                                     <div class="carousel-caption d-block">
-                                        <button onclick="select_img(12)" id="select_btn_12" type="button" class="btn btn-primary select_btn">Sélectionner image 13/<span class="nb_slides"></span></button>
-                                        <div id="select_alert_12" class="alert alert-success d-none" role="alert">Image sélectionnée (13/<span class="nb_slides"></span>) <i class="bi bi-check"></i></div>
+                                        <h5 id="select_alert_12" class="d-none"><span class="badge text-bg-primary">Image sélectionnée <i class="bi bi-check"></i></span></h5>
                                     </div>
                                 </div>
                                 <div id="item_13" class="carousel-item">
                                     <span class="delete_tooltip" tabindex="0" data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-title="Suppression impossible : vous utilisez cette image sur votre site.">
                                         <button onclick="delete_img(13)" type="button" class="btn btn-danger delete_btn">Supprimer <i class="bi bi-trash"></i></button>
                                     </span>
-                                    <img id="img_slide_13" src="" class="d-block w-100" alt="Image 14">
+                                    <img id="img_slide_13" onclick="select_img(13)" src="" class="d-block w-100" alt="Image 14">
                                     <div class="carousel-caption d-block">
-                                        <button onclick="select_img(13)" id="select_btn_13" type="button" class="btn btn-primary select_btn">Sélectionner image 14/<span class="nb_slides"></span></button>
-                                        <div id="select_alert_13" class="alert alert-success d-none" role="alert">Image sélectionnée (14/<span class="nb_slides"></span>) <i class="bi bi-check"></i></div>
+                                        <h5 id="select_alert_13" class="d-none"><span class="badge text-bg-primary">Image sélectionnée <i class="bi bi-check"></i></span></h5>
                                     </div>
                                 </div>
                                 <div id="item_14" class="carousel-item">
                                     <span class="delete_tooltip" tabindex="0" data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-title="Suppression impossible : vous utilisez cette image sur votre site.">
                                         <button onclick="delete_img(14)" type="button" class="btn btn-danger delete_btn">Supprimer <i class="bi bi-trash"></i></button>
                                     </span>
-                                    <img id="img_slide_14" src="" class="d-block w-100" alt="Image 15">
+                                    <img id="img_slide_14" onclick="select_img(14)" src="" class="d-block w-100" alt="Image 15">
                                     <div class="carousel-caption d-block">
-                                        <button onclick="select_img(14)" id="select_btn_14" type="button" class="btn btn-primary select_btn">Sélectionner image 15/<span class="nb_slides"></span></button>
-                                        <div id="select_alert_14" class="alert alert-success d-none" role="alert">Image sélectionnée (15/<span class="nb_slides"></span>) <i class="bi bi-check"></i></div>
+                                        <h5 id="select_alert_14" class="d-none"><span class="badge text-bg-primary">Image sélectionnée <i class="bi bi-check"></i></span></h5>
                                     </div>
                                 </div>
                                 <div id="item_15" class="carousel-item">
                                     <span class="delete_tooltip" tabindex="0" data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-title="Suppression impossible : vous utilisez cette image sur votre site.">
                                         <button onclick="delete_img(15)" type="button" class="btn btn-danger delete_btn">Supprimer <i class="bi bi-trash"></i></button>
                                     </span>
-                                    <img id="img_slide_15" src="" class="d-block w-100" alt="Image 16">
+                                    <img id="img_slide_15" onclick="select_img(15)" src="" class="d-block w-100" alt="Image 16">
                                     <div class="carousel-caption d-block">
-                                        <button onclick="select_img(15)" id="select_btn_15" type="button" class="btn btn-primary select_btn">Sélectionner image 16/<span class="nb_slides"></span></button>
-                                        <div id="select_alert_15" class="alert alert-success d-none" role="alert">Image sélectionnée (16/<span class="nb_slides"></span>) <i class="bi bi-check"></i></div>
+                                        <h5 id="select_alert_15" class="d-none"><span class="badge text-bg-primary">Image sélectionnée <i class="bi bi-check"></i></span></h5>
                                     </div>
                                 </div>
                                 <div id="item_16" class="carousel-item">
                                     <span class="delete_tooltip" tabindex="0" data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-title="Suppression impossible : vous utilisez cette image sur votre site.">
                                         <button onclick="delete_img(16)" type="button" class="btn btn-danger delete_btn">Supprimer <i class="bi bi-trash"></i></button>
                                     </span>
-                                    <img id="img_slide_16" src="" class="d-block w-100" alt="Image 17">
+                                    <img id="img_slide_16" onclick="select_img(16)" src="" class="d-block w-100" alt="Image 17">
                                     <div class="carousel-caption d-block">
-                                        <button onclick="select_img(16)" id="select_btn_16" type="button" class="btn btn-primary select_btn">Sélectionner image 17/<span class="nb_slides"></span></button>
-                                        <div id="select_alert_16" class="alert alert-success d-none" role="alert">Image sélectionnée (17/<span class="nb_slides"></span>) <i class="bi bi-check"></i></div>
+                                        <h5 id="select_alert_16" class="d-none"><span class="badge text-bg-primary">Image sélectionnée <i class="bi bi-check"></i></span></h5>
                                     </div>
                                 </div>
                                 <div id="item_17" class="carousel-item">
                                     <span class="delete_tooltip" tabindex="0" data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-title="Suppression impossible : vous utilisez cette image sur votre site.">
                                         <button onclick="delete_img(17)" type="button" class="btn btn-danger delete_btn">Supprimer <i class="bi bi-trash"></i></button>
                                     </span>
-                                    <img id="img_slide_17" src="" class="d-block w-100" alt="Image 18">
+                                    <img id="img_slide_17" onclick="select_img(17)" src="" class="d-block w-100" alt="Image 18">
                                     <div class="carousel-caption d-block">
-                                        <button onclick="select_img(17)" id="select_btn_17" type="button" class="btn btn-primary select_btn">Sélectionner image 18/<span class="nb_slides"></span></button>
-                                        <div id="select_alert_17" class="alert alert-success d-none" role="alert">Image sélectionnée (18/<span class="nb_slides"></span>) <i class="bi bi-check"></i></div>
+                                        <h5 id="select_alert_17" class="d-none"><span class="badge text-bg-primary">Image sélectionnée <i class="bi bi-check"></i></span></h5>
                                     </div>
                                 </div>
                                 <div id="item_18" class="carousel-item">
                                     <span class="delete_tooltip" tabindex="0" data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-title="Suppression impossible : vous utilisez cette image sur votre site.">
                                         <button onclick="delete_img(18)" type="button" class="btn btn-danger delete_btn">Supprimer <i class="bi bi-trash"></i></button>
                                     </span>
-                                    <img id="img_slide_18" src="" class="d-block w-100" alt="Image 19">
+                                    <img id="img_slide_18" onclick="select_img(18)" src="" class="d-block w-100" alt="Image 19">
                                     <div class="carousel-caption d-block">
-                                        <button onclick="select_img(18)" id="select_btn_18" type="button" class="btn btn-primary select_btn">Sélectionner image 19/<span class="nb_slides"></span></button>
-                                        <div id="select_alert_18" class="alert alert-success d-none" role="alert">Image sélectionnée (19/<span class="nb_slides"></span>) <i class="bi bi-check"></i></div>
+                                        <h5 id="select_alert_18" class="d-none"><span class="badge text-bg-primary">Image sélectionnée <i class="bi bi-check"></i></span></h5>
                                     </div>
                                 </div>
                                 <div id="item_19" class="carousel-item">
                                     <span class="delete_tooltip" tabindex="0" data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-title="Suppression impossible : vous utilisez cette image sur votre site.">
                                         <button onclick="delete_img(19)" type="button" class="btn btn-danger delete_btn">Supprimer <i class="bi bi-trash"></i></button>
                                     </span>
-                                    <img id="img_slide_19" src="" class="d-block w-100" alt="Image 20">
+                                    <img id="img_slide_19" onclick="select_img(19)" src="" class="d-block w-100" alt="Image 20">
                                     <div class="carousel-caption d-block">
-                                        <button onclick="select_img(19)" id="select_btn_19" type="button" class="btn btn-primary select_btn">Sélectionner image 20/<span class="nb_slides"></span></button>
-                                        <div id="select_alert_19" class="alert alert-success d-none" role="alert">Image sélectionnée (20/<span class="nb_slides"></span>) <i class="bi bi-check"></i></div>
+                                        <h5 id="select_alert_19" class="d-none"><span class="badge text-bg-primary">Image sélectionnée <i class="bi bi-check"></i></span></h5>
                                     </div>
                                 </div>
                             </div>
@@ -5962,18 +5991,31 @@
                             </div>
                         </div>
                         <p id="no_slide" class="d-none">Aucune image à afficher.</p>
-                        <br>
-                        <input type="range" class="form-range slider" min="0" max="0" id="customRange1" onchange="move_carousel_to(this.value)">
+                        <small>
+                            Naviguez entre les images avec les flèches droite/gauche.<br>
+                            Cliquez sur l'image que vous souhaitez sélectionner.
+                        </small>
+                        <!--<button type="button" class="btn btn-secondary" data-bs-target="#myCarousel" data-bs-slide="prev">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-arrow-left" viewBox="0 0 16 16">
+                                <path fill-rule="evenodd" d="M15 8a.5.5 0 0 0-.5-.5H2.707l3.147-3.146a.5.5 0 1 0-.708-.708l-4 4a.5.5 0 0 0 0 .708l4 4a.5.5 0 0 0 .708-.708L2.707 8.5H14.5A.5.5 0 0 0 15 8"></path>
+                            </svg>
+                        </button>
+                        <button type="button" class="btn btn-secondary" data-bs-target="#myCarousel" data-bs-slide="next">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-arrow-right" viewBox="0 0 16 16">
+                                <path fill-rule="evenodd" d="M1 8a.5.5 0 0 1 .5-.5h11.793l-3.147-3.146a.5.5 0 0 1 .708-.708l4 4a.5.5 0 0 1 0 .708l-4 4a.5.5 0 0 1-.708-.708L13.293 8.5H1.5A.5.5 0 0 1 1 8"></path>
+                            </svg>
+                        </button>-->
+                        <input type="range" class="form-range slider d-none" min="0" max="0" id="customRange1" onchange="move_carousel_to(this.value)">
                     </div>
                 
                     <!-- Modal footer -->
                     <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
                         <span id="upload_tooltip" tabindex="0" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title=".">
-                            <span id="upload_span" class="btn btn-primary btn-file">
+                            <span id="upload_span" class="btn btn-dark btn-file">
                                 Charger image <i class="bi bi-upload"></i><input id="upload_image" type="file" accept="image/png, image/jpeg, image/webp">
                             </span>
                         </span>
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
                     </div>
 
                 </div>
@@ -5992,7 +6034,7 @@
                         <div class="alert alert-primary" role="alert">
                             <a href="#" target="_blank" id="published_modal_link" class="alert-link"></a>
                         </div>
-                        <small>Vous souhaitez changer l'adresse de votre site ? <u style="color: #0d6efd;">S'abonner</u></small>
+                        <small>Vous souhaitez changer l'adresse web de votre site ? <u style="color: #0d6efd;">S'abonner</u></small>
                     </div>
                 </div>
             </div>

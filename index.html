@@ -2,7 +2,7 @@
 <html class="h-100" lang="en">
     <head>
         <title>Mon site | Akobo</title>
-        <link rel="icon" type="image/png" href="https://akoboblog.wpcomstaging.com/wp-content/uploads/2025/02/favicon.png">
+        <link rel="icon" type="image/png" href="https://akobo.fr/wp-content/uploads/2025/03/big_favicon.png">
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -614,36 +614,39 @@
 
                 //COUNTERS OF ALL SECTIONS
 
-                let text_max = 200;
-                document.getElementById("countHelpSection1").innerText = document.getElementById("welcomeTextSection1").value.length + " / " + text_max;
+                document.getElementById("countHelpSection1").innerText = document.getElementById("welcomeTextSection1").value.length + " / " + 300;
                 document.getElementById("welcomeTextSection1").addEventListener("input", (event) => {
-                    document.getElementById("countHelpSection1").innerText = document.getElementById("welcomeTextSection1").value.length + " / " + text_max;
+                    document.getElementById("countHelpSection1").innerText = document.getElementById("welcomeTextSection1").value.length + " / " + 300;
                 });
-                document.getElementById("countHelp1Section2").innerText = document.getElementById("textQualifier1Section2").value.length + " / " + text_max;
+                document.getElementById("countHelp1Section2").innerText = document.getElementById("textQualifier1Section2").value.length + " / " + 300;
                 document.getElementById("textQualifier1Section2").addEventListener("input", (event) => {
-                    document.getElementById("countHelp1Section2").innerText = document.getElementById("textQualifier1Section2").value.length + " / " + text_max;
+                    document.getElementById("countHelp1Section2").innerText = document.getElementById("textQualifier1Section2").value.length + " / " + 300;
                 });
-                document.getElementById("countHelp2Section2").innerText = document.getElementById("textQualifier2Section2").value.length + " / " + text_max;
+                document.getElementById("countHelp2Section2").innerText = document.getElementById("textQualifier2Section2").value.length + " / " + 300;
                 document.getElementById("textQualifier2Section2").addEventListener("input", (event) => {
-                    document.getElementById("countHelp2Section2").innerText = document.getElementById("textQualifier2Section2").value.length + " / " + text_max;
+                    document.getElementById("countHelp2Section2").innerText = document.getElementById("textQualifier2Section2").value.length + " / " + 300;
                 });
             };
 
+            function capitalizeFirstLetter(val) {
+                return String(val).charAt(0).toUpperCase() + String(val).slice(1);
+            }
+
             function update_params() {
-                params.nom = document.getElementById("nameSection1").value;
-                params.type_et_localisation = document.getElementById("typeAndLocationSection1").value;
-                params.adresse[0] = document.getElementById("addressSection1").value;
-                params.adresse[1] = document.getElementById("citySection1").value;
-                params.adresse[2] = document.getElementById("zipSection1").value;
-                params.texte_bienvenue = document.getElementById("welcomeTextSection1").value;
+                params.nom = document.getElementById("nameSection1").value.replace(/[\n\r\t]/gm, " ").trim();
+                params.type_et_localisation = capitalizeFirstLetter(document.getElementById("typeAndLocationSection1").value.replace(/[\n\r\t]/gm, " ").trim());
+                params.adresse[0] = document.getElementById("addressSection1").value.replace(/[\n\r\t]/gm, " ").trim();
+                params.adresse[1] = document.getElementById("citySection1").value.replace(/[\n\r\t]/gm, " ").trim();
+                params.adresse[2] = document.getElementById("zipSection1").value.replace(/[\n\r\t]/gm, " ").trim();
+                params.texte_bienvenue = document.getElementById("welcomeTextSection1").value.replace(/[\n\r\t]/gm, " ").trim();
                 params.accessibilite = document.getElementById("switchPrmAccessible").checked;
                 params.image_accueil = images_list[selected_images[0]];
 
-                params.esprit[0].Qual = document.getElementById("qualifier1Section2").value;
-                params.esprit[0].Desc = document.getElementById("textQualifier1Section2").value;
+                params.esprit[0].Qual = capitalizeFirstLetter(document.getElementById("qualifier1Section2").value.replace(/[\n\r\t]/gm, " ").trim());
+                params.esprit[0].Desc = document.getElementById("textQualifier1Section2").value.replace(/[\n\r\t]/gm, " ").trim();
                 params.esprit[0].Img = images_list[selected_images[1]];
-                params.esprit[1].Qual = document.getElementById("qualifier2Section2").value;
-                params.esprit[1].Desc = document.getElementById("textQualifier2Section2").value;
+                params.esprit[1].Qual = capitalizeFirstLetter(document.getElementById("qualifier2Section2").value.replace(/[\n\r\t]/gm, " ").trim());
+                params.esprit[1].Desc = document.getElementById("textQualifier2Section2").value.replace(/[\n\r\t]/gm, " ").trim();
                 params.esprit[1].Img = images_list[selected_images[2]];
 
                 for (const room_type in params.caracteristiques[0]) {
@@ -678,27 +681,27 @@
                     }
                 }
 
-                console.log(params.caracteristiques[1]);
-
                 for (let i = 0; i < params.galerie_images.length; i++) {
                     params.galerie_images[i] = images_list[selected_images[i+3]];
                 }
 
-                params.email = document.getElementById("emailSection5").value;
-                params.telephone = document.getElementById("phoneSection5").value;
+                params.email = document.getElementById("emailSection5").value.replace(/[\n\r\t]/gm, " ").trim();
+                params.telephone = document.getElementById("phoneSection5").value.replace(/[\n\r\t]/gm, " ").trim();
                 params.contact_image = images_list[selected_images[9]];
 
                 params.contact_proprio[0] = document.getElementById("switchPhoneDisplay").checked ? params.telephone : "";
                 params.contact_proprio[1] = document.getElementById("switchEmailDisplay").checked ? params.email : "";
-                params.contact_proprio[2] = document.getElementById("instaSection6").value;
-                params.contact_proprio[3] = document.getElementById("fbSection6").value;
+                params.contact_proprio[2] = document.getElementById("instaSection6").value.replace(/[\n\r\t]/gm, " ").trim();
+                params.contact_proprio[3] = document.getElementById("fbSection6").value.replace(/[\n\r\t]/gm, " ").trim();
 
-                params.liens_plateformes[0] = document.getElementById("bookingSection6").value;
-                params.liens_plateformes[1] = document.getElementById("airbnbSection6").value;
-                params.liens_plateformes[2] = document.getElementById("gitesfrSection6").value;
-                params.liens_plateformes[3] = document.getElementById("chambreshotesfrSection6").value;
+                params.liens_plateformes[0] = document.getElementById("bookingSection6").value.replace(/[\n\r\t]/gm, " ").trim();
+                params.liens_plateformes[1] = document.getElementById("airbnbSection6").value.replace(/[\n\r\t]/gm, " ").trim();
+                params.liens_plateformes[2] = document.getElementById("gitesfrSection6").value.replace(/[\n\r\t]/gm, " ").trim();
+                params.liens_plateformes[3] = document.getElementById("chambreshotesfrSection6").value.replace(/[\n\r\t]/gm, " ").trim();
 
                 params.bibliotheque = images_list;
+
+                console.log(params);
             };
 
             const SendRequestToMake = (data) => {
@@ -1193,7 +1196,7 @@
                     </ul>
                 </div>
 
-                <form class="needs-validation" novalidate>
+                <form class="needs-validation" autocomplete="off" novalidate>
                     <!--Section 1 : Présentation du logement-->
                     <div id="section1" class="card-body">
 
@@ -1208,8 +1211,11 @@
                         </div>
 
                         <div class="mb-3">
-                            <label for="welcomeTextSection1" class="form-label">Texte de présentation</label>
-                            <textarea class="form-control" id="welcomeTextSection1" name="text" maxlength="200" 
+                            <label for="welcomeTextSection1" class="form-label">
+                                Texte de présentation<br>
+                                <small class="form-text">2-3 phrases max.</small>
+                            </label>
+                            <textarea class="form-control" id="welcomeTextSection1" name="text" maxlength="300" 
                             placeholder="ex : Nous vous accueillons pour vos séjours à Aix-les-Bains dans cette villa située à proximité de l'Esplanade du Lac." 
                             rows="4" aria-describedby="countHelpSection1" data-section="1" required></textarea>
                             <div id="countHelpSection1" class="form-text"></div>
@@ -1275,13 +1281,13 @@
 
                         <div class="mb-3">
                             <label for="qualifier1Section2" class="form-label">Votre logement est :</label>
-                            <div id="adjectiveHelp1" class="form-text">Choisissez un adjectif</div>
+                            <div id="adjectiveHelp1" class="form-text">Indiquez un adjectif</div>
                             <input class="form-control" type="text" id="qualifier1Section2" placeholder="ex : Moderne" aria-describedby="adjectiveHelp1" data-section="2" required>
                         </div>
 
                         <div class="mb-3">
                             <label for="textQualifier1Section2" class="form-label">Développez en 2-3 phrases max. :</label>
-                            <textarea class="form-control" id="textQualifier1Section2" name="text" maxlength="200" 
+                            <textarea class="form-control" id="textQualifier1Section2" name="text" maxlength="300" 
                             placeholder="ex : La Villa Florentine a été entièrement rénovée l'année dernière. Elle possède les équipements les plus récents dans chacune de ses pièces." 
                             rows="4" aria-describedby="countHelp1Section2" data-section="2" required></textarea>
                             <div id="countHelp1Section2" class="form-text"></div>
@@ -1308,13 +1314,13 @@
 
                         <div class="mb-3">
                             <label for="qualifier2Section2" class="form-label">Votre logement est :</label>
-                            <div id="adjectiveHelp2" class="form-text">Choisissez un adjectif</div>
+                            <div id="adjectiveHelp2" class="form-text">Indiquez un adjectif</div>
                             <input class="form-control" type="text" id="qualifier2Section2" placeholder="ex : Convivial" aria-describedby="adjectiveHelp2" data-section="2" required>
                         </div>
 
                         <div class="mb-3">
                             <label for="textQualifier2Section2" class="form-label">Développez en 2-3 phrases max. :</label>
-                            <textarea class="form-control" id="textQualifier2Section2" name="text" maxlength="200" 
+                            <textarea class="form-control" id="textQualifier2Section2" name="text" maxlength="300" 
                             placeholder="ex : La Villa Florentine offre des espaces ouverts et lumineux, créant ainsi une atmosphère chaleureuse et propice aux moments de partage." 
                             rows="4" aria-describedby="countHelp2Section2" data-section="2" required></textarea>
                             <div id="countHelp2Section2" class="form-text"></div>
@@ -5720,8 +5726,8 @@
                         <div class="mb-3">
                             <div class="alert alert-primary" role="alert">
                                 <div class="col">
-                                    <i class="bi bi-info-circle-fill" style="position: relative; top: -2px;"></i> Les demandes de réservation et questions posées via le formulaire de votre site vous sont transférées par e-mail.<br>
-                                    Assurez-vous qu'elles n'atterrissent pas dans vos spams.
+                                    <i class="bi bi-info-circle-fill" style="position: relative; top: -2px;"></i> L'e-mail/numéro de téléphone doivent être renseignés pour assurer le fonctionnement du formulaire de contact.<br>
+                                    Si vous décochez les options "Faire figurer sur le site", ces informations resteront privées.
                                 </div>
                             </div>                              
                         </div>
@@ -5753,7 +5759,10 @@
                         </div>
 
                         <div class="mb-3">
-                            <label for="contactPictureSection5" class="form-label">Photo de la section "Nous contacter"</label>
+                            <label for="contactPictureSection5" class="form-label">
+                                Photo de la section "Nous contacter"<br>
+                                <small class="form-text">Cette photo de votre logement est située au niveau du formulaire de contact.</small>
+                            </label>
                             <div class="card picture_card" style="width: 18rem; height: 12rem;">
                                 <img id="contactPictureSection5" src="" class="card-img" alt="..." style="width: 18rem; height: 12rem; object-fit: contain; background-color: rgba(0, 0, 0, 0.8);">
                                 <div class="card-img-overlay d-flex" style="visibility: hidden;">
